@@ -476,7 +476,7 @@
         </div>
     </div>
 
-    <!-- Modals (فقط التي نحتاجها هنا) -->
+    <!-- Modals -->
     <div id="leaveModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden">
             <div class="bg-pink-600 text-white p-4 flex justify-between items-center">
@@ -560,7 +560,7 @@
         import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         // ----------------------------------------------------
-        // 1. قاعدة البيانات الأساسية للمستخدمين، والاجتماعات، والحضور، والإشعارات
+        // 1. قاعدة البيانات الأساسية 
         // ----------------------------------------------------
         const firebaseConfig = {
             apiKey: "AIzaSyCfoP0rgX8WZthQVP_AeZcxDHHCllgu3TM",
@@ -577,7 +577,7 @@
         const appId = 'quill-world-system';
 
         // ----------------------------------------------------
-        // 2. قاعدة البيانات الثانوية المخصصة للـ Drive والمستندات فقط
+        // 2. قاعدة البيانات الثانوية المخصصة للـ Drive 
         // ----------------------------------------------------
         const firebaseConfigStorage = {
             apiKey: "AIzaSyBjPerebbHAtkKWJV_LFkoaL-15oTNHRdg",
@@ -683,6 +683,7 @@
         let globalAttendance = [];
         let globalLeaves = [];
         let globalGroups = []; 
+        let groupReadTimestamps = {}; // تم إضافة التعريف الذي كان يوقف النظام!
 
         let currentMeetingId = null;
         const MAX_GLOBAL_STORAGE = 15 * 1024 * 1024; 
@@ -725,6 +726,20 @@
         // الحصول على مراجع من قواعد البيانات
         function getColRef(colName) { return collection(db, 'artifacts', appId, 'public', 'data', colName); }
         function getStorageColRef(colName) { return collection(dbStorage, 'artifacts', appId, 'public', 'data', colName); }
+
+        // تم إضافة دالة التسجيل للسجل العام (Logs) حتى لا تتسبب بتعليق المتصفح
+        window.logAction = async (action, details) => {
+            if(!currentUserData) return;
+            try {
+                await addDoc(getColRef('logs'), {
+                    action: action,
+                    details: details,
+                    userName: currentUserData.name,
+                    uid: currentUserData.uid,
+                    timestamp: Date.now()
+                });
+            } catch(e) { console.error("Error logging action", e); }
+        };
 
         // ===============================================
         // 1. نظام المستندات (من قاعدة البيانات الثانية)
@@ -800,7 +815,7 @@
                 else if(f.type.includes('word')) iconClass = 'fa-file-word text-blue-600';
 
                 const isOwner = f.uploaderId === currentUserData.uid;
-                const deleteBtn = isOwner || isCEO ? `<button onclick="window.deleteDriveFile('${f.id}', '${f.name}')" class="text-red-400 hover:text-red-600 p-1" title="حذف"><i class="fa-solid fa-trash"></i></button>` : '';
+                const deleteBtn = isOwner || isCEO ? `<button onclick="window.deleteDriveFile('${f.id}', '${f.name.replace(/'/g, "\\'")}')" class="text-red-400 hover:text-red-600 p-1" title="حذف"><i class="fa-solid fa-trash"></i></button>` : '';
 
                 const cardHtml = `
                     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm hover:shadow-md transition group flex flex-col h-full">
@@ -972,19 +987,21 @@
             filteredLeaves.forEach(l => {
                 const fromStr = new Date(l.from).toLocaleString('ar-EG', {month: 'short', day: 'numeric', hour:'2-digit', minute:'2-digit'});
                 const toStr = new Date(l.to).toLocaleString('ar-EG', {month: 'short', day: 'numeric', hour:'2-digit', minute:'2-digit'});
-                let statusHtml = l.status === 'pending' ? '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs">انتظار</span>' : (l.status === 'approved' ? '<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">مقبول</span>' : '<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs">مرفوض</span>');
+                let statusHtml = l.status === 'pending' ? '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold shadow-sm">قيد الانتظار</span>' : (l.status === 'approved' ? '<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold shadow-sm">مقبول</span>' : '<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold shadow-sm">مرفوض</span>');
 
                 let actionHtml = '';
                 if(isCEO) {
                     if(l.status === 'pending') {
-                        actionHtml = `<td class="p-3"><button onclick="window.updateLeaveStatus('${l.id}', 'approved')" class="bg-green-500 text-white p-1.5 rounded mr-1"><i class="fa-solid fa-check"></i></button><button onclick="window.updateLeaveStatus('${l.id}', 'rejected')" class="bg-red-500 text-white p-1.5 rounded"><i class="fa-solid fa-xmark"></i></button></td>`;
-                    } else actionHtml = `<td class="p-3 text-xs text-gray-400">تم الإجراء</td>`;
+                        actionHtml = `<td class="p-3"><button onclick="window.updateLeaveStatus('${l.id}', 'approved')" class="bg-green-500 hover:bg-green-600 text-white p-1.5 rounded mr-1 shadow"><i class="fa-solid fa-check"></i></button><button onclick="window.updateLeaveStatus('${l.id}', 'rejected')" class="bg-red-500 hover:bg-red-600 text-white p-1.5 rounded shadow"><i class="fa-solid fa-xmark"></i></button></td>`;
+                    } else actionHtml = `<td class="p-3 text-xs text-gray-400 font-bold">تم الإجراء</td>`;
                 }
 
                 list.innerHTML += `
-                    <tr class="border-b dark:border-gray-700">
-                        <td class="p-3 font-bold text-sm">${l.name}</td><td class="p-3 text-sm">${l.type}</td>
-                        <td class="p-3 text-xs" dir="ltr">${fromStr}</td><td class="p-3 text-xs" dir="ltr">${toStr}</td>
+                    <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                        <td class="p-3 font-bold text-sm text-primary dark:text-secondary">${l.name}</td>
+                        <td class="p-3 text-sm font-bold text-gray-700 dark:text-gray-300">${l.type}</td>
+                        <td class="p-3 text-xs font-semibold" dir="ltr">${fromStr}</td>
+                        <td class="p-3 text-xs font-semibold" dir="ltr">${toStr}</td>
                         <td class="p-3">${statusHtml}</td>${actionHtml}
                     </tr>
                 `;
@@ -1000,9 +1017,9 @@
             globalUsers.forEach(emp => {
                 if(emp.id !== currentUserData.uid) {
                     container.innerHTML += `
-                        <label class="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded cursor-pointer transition">
+                        <label class="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded cursor-pointer transition border border-transparent hover:border-gray-200">
                             <input type="checkbox" value="${emp.id}" class="meeting-member-checkbox w-4 h-4 text-green-600 rounded">
-                            <img src="${emp.photoURL}" class="w-6 h-6 rounded-full"><span class="text-sm font-medium">${emp.name}</span>
+                            <img src="${emp.photoURL}" class="w-6 h-6 rounded-full"><span class="text-sm font-bold text-gray-700 dark:text-gray-200">${emp.name}</span>
                         </label>
                     `;
                 }
@@ -1046,6 +1063,7 @@
                         }, EMAILJS_PUBLIC_KEY_2).catch(e => console.error(e));
                     }
                 });
+                window.logAction('إجتماع', `تم إنشاء اجتماع جديد بعنوان: ${title}`);
             } catch(e) { console.error(e); }
         });
 
@@ -1084,7 +1102,7 @@
 
         window.endMeetingForEveryone = async (meetingId) => {
             if(currentUserData.role !== 'CEO') return;
-            if(confirm('إنهاء الاجتماع للجميع؟')) {
+            if(confirm('إنهاء الاجتماع للجميع ونقله للسجل؟')) {
                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'meetings', meetingId), { status: 'ended', endedAt: Date.now() });
             }
         };
@@ -1123,18 +1141,18 @@
                 
                 if (meeting.status === 'scheduled' || meeting.status === 'active') {
                     hasActive = true;
-                    let statusBadge = meeting.status === 'active' ? `<span class="bg-red-100 text-red-600 text-[10px] px-2 py-1 rounded">جاري الآن</span>` : `<span class="bg-blue-100 text-blue-600 text-[10px] px-2 py-1 rounded">مجدول</span>`;
-                    let actionsHtml = `<button onclick="window.joinMeeting('${meeting.id}', '${meeting.title.replace(/'/g, "\\'")}')" class="flex-1 bg-green-500 hover:bg-green-600 text-white text-xs py-2 rounded font-bold"><i class="fa-solid fa-video mx-1"></i> انضمام</button>`;
+                    let statusBadge = meeting.status === 'active' ? `<span class="bg-red-100 text-red-600 font-bold text-[10px] px-2 py-1 rounded shadow-sm"><i class="fa-solid fa-circle text-[8px] animate-pulse"></i> جاري الآن</span>` : `<span class="bg-blue-100 text-blue-600 font-bold text-[10px] px-2 py-1 rounded shadow-sm">مجدول</span>`;
+                    let actionsHtml = `<button onclick="window.joinMeeting('${meeting.id}', '${meeting.title.replace(/'/g, "\\'")}')" class="flex-1 bg-green-500 hover:bg-green-600 text-white text-xs py-2 rounded font-bold shadow"><i class="fa-solid fa-video mx-1"></i> انضمام</button>`;
                     
                     if (isCEO) {
-                        actionsHtml += `<button onclick="window.shareMeetingWhatsApp('${meeting.title.replace(/'/g, "\\'")}')" class="bg-green-100 text-green-700 w-8 h-8 rounded"><i class="fa-brands fa-whatsapp"></i></button>
-                                        <button onclick="window.endMeetingForEveryone('${meeting.id}')" class="bg-red-100 text-red-600 w-8 h-8 rounded"><i class="fa-solid fa-power-off"></i></button>`;
+                        actionsHtml += `<button onclick="window.shareMeetingWhatsApp('${meeting.title.replace(/'/g, "\\'")}')" class="bg-green-100 hover:bg-green-200 text-green-700 w-8 h-8 rounded transition"><i class="fa-brands fa-whatsapp"></i></button>
+                                        <button onclick="window.endMeetingForEveryone('${meeting.id}')" class="bg-red-100 hover:bg-red-200 text-red-600 w-8 h-8 rounded transition" title="إنهاء للجميع"><i class="fa-solid fa-power-off"></i></button>`;
                     }
 
                     activeList.innerHTML += `
-                        <div class="bg-white dark:bg-gray-800 border p-4 rounded-xl shadow-sm">
-                            <div class="flex justify-between mb-2"><h4 class="font-bold">${meeting.title}</h4>${statusBadge}</div>
-                            <p class="text-xs text-gray-500 mb-4"><i class="fa-regular fa-clock ml-1"></i> ${timeStr}</p>
+                        <div class="bg-white dark:bg-gray-800 border dark:border-gray-700 p-4 rounded-xl shadow-sm hover:shadow-md transition">
+                            <div class="flex justify-between mb-2"><h4 class="font-bold text-gray-800 dark:text-gray-100">${meeting.title}</h4>${statusBadge}</div>
+                            <p class="text-xs text-gray-500 font-bold mb-4"><i class="fa-regular fa-clock ml-1"></i> الموعد: ${timeStr}</p>
                             <div class="flex gap-2">${actionsHtml}</div>
                         </div>
                     `;
@@ -1143,15 +1161,15 @@
                     if (!isCEO && myEvents.length === 0) return;
                     hasPast = true;
                     pastList.innerHTML += `
-                        <div class="bg-white dark:bg-gray-800 border p-3 rounded-xl flex justify-between items-center">
-                            <div><h4 class="font-bold text-sm">${meeting.title}</h4></div>
-                            <span class="text-[10px] bg-gray-100 px-2 py-1 rounded">منتهي</span>
+                        <div class="bg-white dark:bg-gray-800 border dark:border-gray-700 p-3 rounded-xl flex justify-between items-center shadow-sm">
+                            <div><h4 class="font-bold text-sm text-gray-700 dark:text-gray-300">${meeting.title}</h4></div>
+                            <span class="text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-500 font-bold px-2 py-1 rounded">منتهي</span>
                         </div>
                     `;
                 }
             });
-            if(!hasActive) activeList.innerHTML = '<p class="text-sm text-gray-400">لا يوجد اجتماعات حالياً.</p>';
-            if(!hasPast) pastList.innerHTML = '<p class="text-sm text-gray-400">لا يوجد سجلات.</p>';
+            if(!hasActive) activeList.innerHTML = '<p class="text-sm text-gray-400 text-center col-span-full p-4">لا يوجد اجتماعات حالياً.</p>';
+            if(!hasPast) pastList.innerHTML = '<p class="text-sm text-gray-400 text-center p-4">لا يوجد سجلات سابقة.</p>';
         }
 
         // ===============================================
@@ -1204,7 +1222,6 @@
 
         // 🔴 مستمع الإشعارات للروابط الخارجية (مهام وشات من الدومين الأول)
         function listenForExternalBadges() {
-            // الاستماع للمهام (إظهار الرقم إذا كانت المهمة قيد الانتظار ومسندة لي)
             onSnapshot(getColRef('tasks'), (snapshot) => {
                 if(!currentUserData) return;
                 let pendingTasks = 0;
@@ -1219,7 +1236,6 @@
                 });
             }, (error) => console.error(error));
 
-            // الاستماع للدردشة والمجموعات
             onSnapshot(getColRef('groups'), (gSnap) => {
                 if(!currentUserData) return;
                 globalGroups = [{ id: 'global', members: [] }];
@@ -1254,7 +1270,9 @@
         // تهيئة النظام والمصادقة
         // ===============================================
         onAuthStateChanged(auth, async (user) => {
+            // إخفاء شاشة التحميل مجرد أن يستجيب الفايربيس (Firebase)
             document.getElementById('loadingScreen').classList.add('hidden');
+            
             if (user) {
                 document.getElementById('systemPasswordScreen').classList.add('hidden');
                 document.getElementById('loginScreen').classList.add('hidden');
@@ -1263,11 +1281,18 @@
                     const docSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid));
                     if (docSnap.exists()) {
                         currentUserData = docSnap.data();
+                        // أخذ قيم الإشعارات المقروءة السابقة أو إنشاء مصفوفة فارغة
                         groupReadTimestamps = currentUserData.readReceipts || {};
+                        
                         document.getElementById('setupProfileScreen').classList.add('hidden');
                         finishLoginSetup();
-                    } else document.getElementById('setupProfileScreen').classList.remove('hidden');
-                } catch(e) { console.error(e); }
+                    } else {
+                        document.getElementById('setupProfileScreen').classList.remove('hidden');
+                    }
+                } catch(e) { 
+                    console.error("Error fetching user data:", e); 
+                    showToast('حدث خطأ في قراءة بياناتك، يرجى تحديث الصفحة', 'error');
+                }
             } else {
                 document.getElementById('systemPasswordScreen').classList.remove('hidden');
             }
@@ -1289,6 +1314,8 @@
                 };
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUserAuth.uid), newUserData);
                 currentUserData = newUserData;
+                groupReadTimestamps = {};
+                
                 document.getElementById('setupProfileScreen').classList.add('hidden');
                 finishLoginSetup();
             } catch(e) { console.error(e); }
