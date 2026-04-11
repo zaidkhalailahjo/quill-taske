@@ -89,6 +89,9 @@
 
     <div id="systemPasswordScreen" class="fixed inset-0 bg-primary z-[45] hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-md text-center">
+            <img src="https://quill.world/wp-content/uploads/2022/01/New-Project-9-1-1.png" alt="Logo" class="h-12 md:h-16 mx-auto mb-6 object-contain block dark:hidden">
+            <img src="https://quill.world/wp-content/uploads/2022/01/New-Project-10-1.png" alt="Logo" class="h-12 md:h-16 mx-auto mb-6 object-contain hidden dark:block">
+
             <h2 class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-4">رمز الدخول للنظام</h2>
             <p class="text-gray-500 dark:text-gray-400 mb-6 text-sm">يرجى إدخال رمز المرور الخاص بالشركة للمتابعة</p>
             <input type="password" id="sysPasswordInput" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-3 focus:outline-none focus:border-secondary mb-4 text-center" placeholder="اكتب كلمة السر">
@@ -99,6 +102,9 @@
 
     <div id="loginScreen" class="fixed inset-0 bg-primary z-40 hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-md text-center">
+            <img src="https://quill.world/wp-content/uploads/2022/01/New-Project-9-1-1.png" alt="Logo" class="h-12 md:h-16 mx-auto mb-6 object-contain block dark:hidden">
+            <img src="https://quill.world/wp-content/uploads/2022/01/New-Project-10-1.png" alt="Logo" class="h-12 md:h-16 mx-auto mb-6 object-contain hidden dark:block">
+
             <h2 class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-4" data-i18n="مرحباً بك">مرحباً بك في نظام شركة quill</h2>
             <p class="text-gray-500 dark:text-gray-400 mb-8 text-sm" data-i18n="يجب تسجيل الدخول">يجب تسجيل الدخول للوصول إلى النظام وإدارة مهامك</p>
             <button id="googleLoginBtn" class="w-full flex items-center justify-center gap-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-bold py-3 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors shadow-sm">
@@ -110,6 +116,9 @@
 
     <div id="setupProfileScreen" class="fixed inset-0 bg-primary z-40 hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-md">
+            <img src="https://quill.world/wp-content/uploads/2022/01/New-Project-9-1-1.png" alt="Logo" class="h-12 md:h-16 mx-auto mb-6 object-contain block dark:hidden">
+            <img src="https://quill.world/wp-content/uploads/2022/01/New-Project-10-1.png" alt="Logo" class="h-12 md:h-16 mx-auto mb-6 object-contain hidden dark:block">
+
             <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-2 text-center" data-i18n="إكمال بيانات الملف الشخصي">إكمال بيانات الملف الشخصي</h2>
             <p class="text-gray-500 dark:text-gray-400 mb-6 text-sm text-center">مرحباً بك! يرجى إدخال اسمك وتحديد وظيفتك في الشركة للبدء</p>
             
@@ -171,15 +180,20 @@
                 <h2 id="page-title" class="text-lg md:text-xl font-bold text-primary dark:text-secondary hidden md:block" data-i18n="الرئيسية">الرئيسية - التطبيقات</h2>
             </div>
 
-            <div class="flex items-center flex-row-reverse z-10 font-bold text-2xl text-primary dark:text-white">
-                QUILL <span class="text-xs text-gray-400 ml-2">Services</span>
+            <div class="flex items-center flex-row-reverse z-10">
+                <img src="https://quill.world/wp-content/uploads/2022/01/New-Project-9-1-1.png" alt="Logo" class="h-8 md:h-10 object-contain block dark:hidden">
+                <img src="https://quill.world/wp-content/uploads/2022/01/New-Project-10-1.png" alt="Logo" class="h-8 md:h-10 object-contain hidden dark:block">
+                <span class="text-xs text-gray-400 ml-2 font-bold mt-2">Services</span>
             </div>
         </header>
 
         <div id="mobileOverlay" class="fixed inset-0 bg-black/50 z-20 hidden md:hidden transition-opacity" onclick="window.toggleSidebar()"></div>
         <aside id="sidebar" class="fixed inset-y-0 right-0 transform translate-x-full transition duration-300 ease-in-out w-64 bg-primary dark:bg-gray-800 text-white flex flex-col shadow-xl z-30 flex-shrink-0 md:hidden">
             <div class="p-6 flex items-center justify-between border-b border-white/10 dark:border-gray-700">
-                <span class="font-bold text-xl">QUILL Services</span>
+                <div class="flex items-center gap-2">
+                    <img src="https://quill.world/wp-content/uploads/2022/01/New-Project-10-1.png" alt="Logo" class="h-8 object-contain">
+                    <span class="text-xs text-gray-400 font-bold mt-2">Services</span>
+                </div>
                 <button onclick="window.toggleSidebar()" class="text-white hover:text-gray-300">
                     <i class="fa-solid fa-xmark text-2xl"></i>
                 </button>
@@ -673,8 +687,7 @@
                 if (icon) icon.className = 'fa-solid fa-sun';
             });
         }
-        document.addEventListener("DOMContentLoaded", applyLanguageToDOM);
-
+        
         let currentUserAuth = null;
         let currentUserData = null; 
         let globalUsers = []; 
@@ -683,7 +696,32 @@
         let globalAttendance = [];
         let globalLeaves = [];
         let globalGroups = []; 
-        let groupReadTimestamps = {}; // تم إضافة التعريف الذي كان يوقف النظام!
+        let groupReadTimestamps = {};
+
+        // التحميل السريع (Fast Load) من الـ Cache 
+        document.addEventListener("DOMContentLoaded", () => {
+            applyLanguageToDOM();
+            const cachedUser = localStorage.getItem('quill_user_cache_services');
+            if (cachedUser) {
+                try {
+                    currentUserData = JSON.parse(cachedUser);
+                    groupReadTimestamps = currentUserData.readReceipts || {};
+                    
+                    document.getElementById('loadingScreen').classList.add('hidden');
+                    document.getElementById('systemPasswordScreen').classList.add('hidden');
+                    document.getElementById('loginScreen').classList.add('hidden');
+                    
+                    document.getElementById('userName').innerText = currentUserData.name;
+                    document.getElementById('userRole').innerText = currentUserData.role;
+                    document.getElementById('userAvatar').src = currentUserData.photoURL;
+                    
+                    if(currentUserData.role === 'CEO') {
+                        document.getElementById('createMeetingBtn').classList.remove('hidden');
+                        document.getElementById('ceoAttendanceView').classList.remove('hidden');
+                    }
+                } catch(e) { console.error("Cache parsing error", e); }
+            }
+        });
 
         let currentMeetingId = null;
         const MAX_GLOBAL_STORAGE = 15 * 1024 * 1024; 
@@ -727,7 +765,6 @@
         function getColRef(colName) { return collection(db, 'artifacts', appId, 'public', 'data', colName); }
         function getStorageColRef(colName) { return collection(dbStorage, 'artifacts', appId, 'public', 'data', colName); }
 
-        // تم إضافة دالة التسجيل للسجل العام (Logs) حتى لا تتسبب بتعليق المتصفح
         window.logAction = async (action, details) => {
             if(!currentUserData) return;
             try {
@@ -1246,7 +1283,7 @@
 
             onSnapshot(getColRef('chat'), (cSnap) => {
                 if(!currentUserData) return;
-                let hasUnreadOrMention = false;
+                let unreadCount = 0;
                 
                 cSnap.forEach(doc => {
                     const msg = doc.data();
@@ -1255,12 +1292,16 @@
                     
                     if (msg.uid !== currentUserData.uid && msg.timestamp > lastRead) {
                         const inMyGroup = globalGroups.some(g => g.id === groupId);
-                        if (inMyGroup) hasUnreadOrMention = true;
+                        if (inMyGroup) unreadCount++;
                     }
                 });
 
                 document.querySelectorAll('.external-chat-badge').forEach(badge => {
-                    if(hasUnreadOrMention) { badge.innerText = '!'; badge.classList.remove('hidden'); }
+                    if(unreadCount > 0) { 
+                        badge.innerText = unreadCount > 99 ? '+99' : unreadCount; 
+                        badge.classList.remove('hidden'); 
+                        badge.classList.replace('bg-red-500', 'bg-blue-500'); // تغيير اللون ليكون متوافقاً مع الأرقام
+                    }
                     else { badge.classList.add('hidden'); }
                 });
             }, (error) => console.error(error));
@@ -1271,6 +1312,7 @@
         // ===============================================
         onAuthStateChanged(auth, async (user) => {
             // إخفاء شاشة التحميل مجرد أن يستجيب الفايربيس (Firebase)
+            // إذا كان التخزين المؤقت قد أخفاها مسبقاً، فهذا لن يؤثر.
             document.getElementById('loadingScreen').classList.add('hidden');
             
             if (user) {
@@ -1281,7 +1323,6 @@
                     const docSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid));
                     if (docSnap.exists()) {
                         currentUserData = docSnap.data();
-                        // أخذ قيم الإشعارات المقروءة السابقة أو إنشاء مصفوفة فارغة
                         groupReadTimestamps = currentUserData.readReceipts || {};
                         
                         document.getElementById('setupProfileScreen').classList.add('hidden');
@@ -1294,6 +1335,7 @@
                     showToast('حدث خطأ في قراءة بياناتك، يرجى تحديث الصفحة', 'error');
                 }
             } else {
+                localStorage.removeItem('quill_user_cache_services'); // مسح التخزين المؤقت عند الخروج
                 document.getElementById('systemPasswordScreen').classList.remove('hidden');
             }
         });
@@ -1322,6 +1364,9 @@
         });
 
         function finishLoginSetup() {
+            // حفظ بيانات المستخدم في التخزين المؤقت للتحميل السريع في المرة القادمة
+            localStorage.setItem('quill_user_cache_services', JSON.stringify(currentUserData));
+
             document.getElementById('userName').innerText = currentUserData.name;
             document.getElementById('userRole').innerText = currentUserData.role;
             document.getElementById('userAvatar').src = currentUserData.photoURL;
