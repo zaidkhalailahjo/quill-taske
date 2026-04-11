@@ -3,18 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام شركة Quill - البوابة الرئيسية</title>
+    <title>نظام إدارة الشركة - الخدمات والمستندات</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="https://meet.jit.si/external_api.js"></script>
     
     <script>
         tailwind.config = {
             darkMode: 'class', 
             theme: {
                 extend: {
-                    colors: { primary: '#002d74', secondary: '#00839b' },
+                    colors: {
+                        primary: '#002d74',
+                        secondary: '#00839b',
+                        light: '#f3f4f6',
+                        dark: '#1f2937'
+                    },
                     fontFamily: { sans: ['Cairo', 'sans-serif'] }
                 }
             }
@@ -23,146 +30,689 @@
     <style>
         body { font-family: 'Cairo', sans-serif; }
         ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #00839b; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #002d74; }
+        
         .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .toast-enter { animation: slideIn 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
+        .toast-leave { animation: slideOut 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
+        @keyframes slideIn { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(-100%); opacity: 0; } }
+        
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #00839b; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* تنسيق الشبكة الجديد */
+        .app-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            padding: 2rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #f3f4f6;
+            position: relative;
+        }
+        .dark .app-card {
+            background-color: #1f2937;
+            border-color: #374151;
+        }
+        .app-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+        .app-icon-container {
+            width: 60px;
+            height: 60px;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 h-screen overflow-hidden flex relative transition-colors duration-300">
 
     <div id="loadingScreen" class="fixed inset-0 bg-white dark:bg-gray-900 z-50 flex flex-col items-center justify-center">
         <div class="loader mb-4"></div>
-        <p class="text-primary font-bold text-lg">جاري تحميل النظام...</p>
+        <p class="text-primary dark:text-secondary font-bold text-lg" data-i18n="جاري التحميل...">جاري تحميل النظام والاتصال بقاعدة البيانات...</p>
     </div>
 
     <div id="systemPasswordScreen" class="fixed inset-0 bg-primary z-[45] hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-md text-center">
-            <h2 class="text-2xl font-bold mb-4">رمز الدخول للنظام</h2>
-            <input type="password" id="sysPasswordInput" class="w-full border rounded-lg px-4 py-3 mb-4 text-center dark:bg-gray-700 dark:text-white" placeholder="اكتب كلمة السر">
-            <button onclick="window.checkSystemPassword()" class="w-full bg-secondary text-white font-bold py-3 rounded-lg">متابعة</button>
+        <div class="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-md text-center">
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-4">رمز الدخول للنظام</h2>
+            <p class="text-gray-500 dark:text-gray-400 mb-6 text-sm">يرجى إدخال رمز المرور الخاص بالشركة للمتابعة</p>
+            <input type="password" id="sysPasswordInput" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-3 focus:outline-none focus:border-secondary mb-4 text-center" placeholder="اكتب كلمة السر">
+            <button onclick="window.checkSystemPassword()" class="w-full bg-secondary hover:bg-primary text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-sm">متابعة</button>
             <p id="sysPassError" class="text-red-500 text-sm mt-3 hidden font-bold">رمز الدخول غير صحيح!</p>
         </div>
     </div>
 
     <div id="loginScreen" class="fixed inset-0 bg-primary z-40 hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-md text-center">
-            <h2 class="text-2xl font-bold mb-4">مرحباً بك في نظام شركة Quill</h2>
-            <p class="text-gray-500 mb-8">يجب تسجيل الدخول للوصول إلى النظام</p>
-            <button id="googleLoginBtn" class="w-full flex items-center justify-center gap-3 border-2 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-600 font-bold">
-                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-6 h-6"> تسجيل الدخول باستخدام Google
+        <div class="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-md text-center">
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-4" data-i18n="مرحباً بك">مرحباً بك في نظام شركة quill</h2>
+            <p class="text-gray-500 dark:text-gray-400 mb-8 text-sm" data-i18n="يجب تسجيل الدخول">يجب تسجيل الدخول للوصول إلى النظام وإدارة مهامك</p>
+            <button id="googleLoginBtn" class="w-full flex items-center justify-center gap-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-bold py-3 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors shadow-sm">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-6 h-6" alt="Google">
+                <span data-i18n="تسجيل الدخول باستخدام Google">تسجيل الدخول باستخدام Google</span>
             </button>
         </div>
     </div>
 
-    <aside id="sidebar" class="fixed inset-y-0 right-0 w-64 bg-primary text-white flex flex-col shadow-xl z-30 transform translate-x-full md:translate-x-0 transition-transform md:relative">
-        <div class="p-6 text-center text-xl font-bold border-b border-white/10">Quill Portal</div>
-        <nav class="flex-1 mt-4 px-4 space-y-2 overflow-y-auto">
-            <button onclick="window.location.hash='home-grid'" class="w-full flex items-center py-3 px-4 rounded-lg bg-secondary text-white"><i class="fa-solid fa-house w-6 ml-3"></i> الرئيسية</button>
+    <div id="setupProfileScreen" class="fixed inset-0 bg-primary z-40 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-md">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-2 text-center" data-i18n="إكمال بيانات الملف الشخصي">إكمال بيانات الملف الشخصي</h2>
+            <p class="text-gray-500 dark:text-gray-400 mb-6 text-sm text-center">مرحباً بك! يرجى إدخال اسمك وتحديد وظيفتك في الشركة للبدء</p>
             
-            <button onclick="window.location.hash='chat'" class="w-full flex items-center py-3 px-4 rounded-lg hover:bg-white/10"><i class="fa-solid fa-comments w-6 ml-3"></i> المناقشة</button>
-            <button onclick="window.location.hash='tasks'" class="w-full flex items-center py-3 px-4 rounded-lg hover:bg-white/10"><i class="fa-solid fa-list-check w-6 ml-3"></i> المهام</button>
-            <button onclick="window.location.hash='crm'" class="w-full flex items-center py-3 px-4 rounded-lg hover:bg-white/10"><i class="fa-solid fa-address-book w-6 ml-3"></i> العملاء</button>
-            <button id="nav-employees-btn" onclick="window.location.hash='employees'" class="hidden w-full flex items-center py-3 px-4 rounded-lg hover:bg-white/10"><i class="fa-solid fa-users w-6 ml-3"></i> الموظفون (للمدير)</button>
-            
-            <hr class="border-white/20 my-4">
-            <p class="text-xs text-gray-400 px-4 mb-2">تطبيقات خارجية</p>
-            <a href="https://meetings.quill.com" class="w-full flex items-center py-3 px-4 rounded-lg hover:bg-white/10 text-gray-300"><i class="fa-solid fa-video w-6 ml-3"></i> الاجتماعات</a>
-            <a href="https://files.quill.com" class="w-full flex items-center py-3 px-4 rounded-lg hover:bg-white/10 text-gray-300"><i class="fa-solid fa-folder-open w-6 ml-3"></i> المستندات</a>
-            <a href="https://notices.quill.com" class="w-full flex items-center py-3 px-4 rounded-lg hover:bg-white/10 text-gray-300"><i class="fa-solid fa-bullhorn w-6 ml-3"></i> التعميمات</a>
-            <a href="https://hr.quill.com" class="w-full flex items-center py-3 px-4 rounded-lg hover:bg-white/10 text-gray-300"><i class="fa-solid fa-clock w-6 ml-3"></i> الحضور والمغادرات</a>
-        </nav>
-    </aside>
-
-    <div class="flex-1 flex flex-col h-screen overflow-hidden">
-        <header class="bg-white dark:bg-gray-800 shadow-sm p-4 flex justify-between items-center">
-            <div class="flex items-center gap-4">
-                <img id="userAvatar" src="" class="w-10 h-10 rounded-full border-2 border-secondary object-cover">
+            <form id="setupProfileForm" class="space-y-4">
                 <div>
-                    <p id="userName" class="text-sm font-bold dark:text-white">جاري التحميل...</p>
-                    <p id="userRole" class="text-xs text-secondary"></p>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1" data-i18n="الاسم الكامل">الاسم الكامل</label>
+                    <input type="text" id="setupName" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2 focus:outline-none focus:border-secondary">
                 </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1" data-i18n="الوظيفة (الدور)">الوظيفة (الدور)</label>
+                    <select id="setupRole" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2 focus:outline-none focus:border-secondary">
+                        <option value="" disabled selected>-- اختر وظيفتك --</option>
+                        <option value="technical team supervisor">Technical Team Supervisor</option>
+                        <option value="Technical Engineer">Technical Engineer</option>
+                        <option value="accountant">Accountant</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-secondary text-white font-bold py-3 px-4 rounded-lg hover:bg-primary transition-colors mt-4" data-i18n="الدخول للنظام">
+                    الدخول للنظام
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="toastContainer" class="fixed bottom-6 left-6 z-50 flex flex-col gap-3"></div>
+
+    <div class="flex-1 flex flex-col h-screen overflow-hidden w-full relative">
+        
+        <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 p-4 flex justify-between items-center z-10 flex-shrink-0 relative transition-colors">
+            <div class="flex items-center space-x-2 md:space-x-4 space-x-reverse z-10">
+                <button onclick="window.toggleSidebar()" class="md:hidden text-gray-500 hover:text-primary ml-2">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+                <div class="flex items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded transition" onclick="window.location.hash='settings'">
+                    <img id="userAvatar" src="https://ui-avatars.com/api/?name=مستخدم&background=00839b&color=fff" class="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-secondary object-cover">
+                    <div class="mr-2 md:mr-3 hidden sm:block text-right">
+                        <p id="userName" class="text-xs md:text-sm font-semibold text-gray-800 dark:text-white">جاري التحميل...</p>
+                        <p id="userRole" class="text-[10px] md:text-xs text-secondary font-bold"></p>
+                    </div>
+                </div>
+                
+                <button onclick="window.toggleLanguage()" class="text-gray-400 hover:text-secondary p-2 rounded transition font-bold" title="تبديل اللغة">
+                    <span id="langIconTxt">EN</span>
+                </button>
+                
+                <button onclick="window.toggleTheme()" class="text-gray-400 hover:text-secondary p-2 rounded transition" title="الوضع الليلي/النهاري">
+                    <i id="themeToggleIcon" class="fa-solid fa-moon"></i>
+                </button>
+
+                <button onclick="window.showLatestNotification()" class="text-gray-400 hover:text-secondary p-2 rounded transition" title="آخر إشعار">
+                    <i class="fa-solid fa-bell"></i>
+                </button>
             </div>
-            <button onclick="window.logout()" class="text-red-500 hover:bg-red-50 px-3 py-1 rounded font-bold text-sm"><i class="fa-solid fa-right-from-bracket"></i> خروج</button>
+            
+            <div class="absolute inset-x-0 top-0 h-full flex items-center justify-center pointer-events-none w-full z-0">
+                <button id="backToHomeBtn" onclick="window.location.hash='home-grid'" class="hidden pointer-events-auto text-white bg-secondary hover:bg-primary px-4 py-2 rounded-xl flex items-center gap-2 font-bold transition-colors text-sm shadow-md">
+                    <span class="hidden sm:inline" data-i18n="الرئيسية">خروج للرئيسية</span> <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <h2 id="page-title" class="text-lg md:text-xl font-bold text-primary dark:text-secondary hidden md:block" data-i18n="الرئيسية">الرئيسية - التطبيقات</h2>
+            </div>
+
+            <div class="flex items-center flex-row-reverse z-10 font-bold text-2xl text-primary dark:text-white">
+                QUILL <span class="text-xs text-gray-400 ml-2">Services</span>
+            </div>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-gray-900 relative">
+        <div id="mobileOverlay" class="fixed inset-0 bg-black/50 z-20 hidden md:hidden transition-opacity" onclick="window.toggleSidebar()"></div>
+        <aside id="sidebar" class="fixed inset-y-0 right-0 transform translate-x-full transition duration-300 ease-in-out w-64 bg-primary dark:bg-gray-800 text-white flex flex-col shadow-xl z-30 flex-shrink-0 md:hidden">
+            <div class="p-6 flex items-center justify-between border-b border-white/10 dark:border-gray-700">
+                <span class="font-bold text-xl">QUILL Services</span>
+                <button onclick="window.toggleSidebar()" class="text-white hover:text-gray-300">
+                    <i class="fa-solid fa-xmark text-2xl"></i>
+                </button>
+            </div>
             
-            <section id="home-grid" class="section-content animate-fade-in">
-                <h2 class="text-2xl font-bold mb-6 dark:text-white">تطبيقات Quill</h2>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <div onclick="window.location.hash='chat'" class="cursor-pointer bg-white dark:bg-gray-800 p-6 rounded-xl shadow border border-gray-100 dark:border-gray-700 flex flex-col items-center hover:border-secondary transition">
-                        <i class="fa-solid fa-comments text-4xl text-orange-500 mb-3"></i><span class="font-bold dark:text-white">المناقشات</span>
-                    </div>
-                    <div onclick="window.location.hash='tasks'" class="cursor-pointer bg-white dark:bg-gray-800 p-6 rounded-xl shadow border border-gray-100 dark:border-gray-700 flex flex-col items-center hover:border-secondary transition">
-                        <i class="fa-solid fa-list-check text-4xl text-emerald-500 mb-3"></i><span class="font-bold dark:text-white">المهام</span>
-                    </div>
-                    <div onclick="window.location.hash='crm'" class="cursor-pointer bg-white dark:bg-gray-800 p-6 rounded-xl shadow border border-gray-100 dark:border-gray-700 flex flex-col items-center hover:border-secondary transition">
-                        <i class="fa-solid fa-address-book text-4xl text-lime-500 mb-3"></i><span class="font-bold dark:text-white">العملاء</span>
+            <nav class="flex-1 mt-6 px-4 space-y-2 overflow-y-auto">
+                <button id="nav-home-grid-btn" onclick="window.location.hash='home-grid'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg bg-secondary text-white transition-colors" data-section="home-grid">
+                    <i class="fa-solid fa-house w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="الرئيسية">الرئيسية</span>
+                </button>
+                
+                <!-- تطبيقات النطاق الحالي -->
+                <button onclick="window.location.hash='attendance'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors" data-section="attendance">
+                    <i class="fa-solid fa-clock w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="الحضور والانصراف">الحضور والانصراف</span>
+                </button>
+                <button onclick="window.location.hash='leaves'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors" data-section="leaves">
+                    <i class="fa-solid fa-plane-departure w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="الإجازات">الإجازات</span>
+                </button>
+                <button onclick="window.location.hash='drive'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors" data-section="drive">
+                    <i class="fa-solid fa-folder-open w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="المستندات">المستندات</span>
+                </button>
+                <button onclick="window.location.hash='meetings'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative" data-section="meetings">
+                    <i class="fa-solid fa-video w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="الاجتماعات">الاجتماعات</span>
+                </button>
+
+                <!-- قسم الروابط الخارجية للنطاق الأول -->
+                <div class="mt-4 pt-4 border-t border-white/10 dark:border-gray-700">
+                    <p class="text-[10px] text-gray-400 mb-2 px-2" data-i18n="تطبيقات خارجية">تطبيقات النظام الرئيسية</p>
+                    
+                    <a href="https://quill.farah-snacks.store/#tasks" class="w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative">
+                        <i class="fa-solid fa-list-check w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="المهام">المهام</span>
+                        <span class="external-task-badge absolute left-4 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden"></span>
+                    </a>
+                    
+                    <a href="https://quill.farah-snacks.store/#chat" class="w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative">
+                        <i class="fa-solid fa-comments w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="المناقشة">المناقشة</span>
+                        <span class="external-chat-badge absolute left-4 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden"></span>
+                    </a>
+
+                    <a href="https://quill.farah-snacks.store/#crm" class="w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors">
+                        <i class="fa-solid fa-address-book w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="العملاء">العملاء</span>
+                    </a>
+                    
+                    <a href="https://quill.farah-snacks.store/#notices" class="w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors">
+                        <i class="fa-solid fa-bullhorn w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="التعميمات">التعميمات</span>
+                    </a>
+                </div>
+                
+                <button onclick="window.location.hash='settings'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors mt-4 border-t border-white/10 pt-4" data-section="settings">
+                    <i class="fa-solid fa-gear w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="الإعدادات">الإعدادات</span>
+                </button>
+            </nav>
+        </aside>
+
+        <div class="flex-1 overflow-y-auto p-0 md:p-6 bg-gray-50 dark:bg-gray-900 relative">
+            
+            <section id="home-grid" class="section-content animate-fade-in p-4 md:p-10 max-w-6xl mx-auto">
+                <div class="mb-10 text-right">
+                    <h2 class="text-3xl font-bold text-gray-800 dark:text-white" data-i18n="الخدمات والمستندات">الخدمات والمستندات</h2>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mt-2" data-i18n="اختر التطبيق الذي تود العمل عليه">اختر التطبيق الذي تود العمل عليه</p>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    
+                    <!-- تطبيقات الدومين الحالي (الداخلية) -->
+                    <div onclick="window.location.hash='attendance'" class="app-card hover:border-indigo-200 group">
+                        <div class="app-icon-container bg-indigo-50 text-indigo-500 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-user-clock"></i>
+                        </div>
+                        <span class="font-bold text-gray-800 dark:text-gray-200" data-i18n="الحضور والانصراف">الحضور والانصراف</span>
                     </div>
 
-                    <a href="https://meetings.quill.com" class="cursor-pointer bg-white dark:bg-gray-800 p-6 rounded-xl shadow border border-gray-100 dark:border-gray-700 flex flex-col items-center hover:border-blue-500 transition">
-                        <i class="fa-solid fa-video text-4xl text-blue-500 mb-3"></i><span class="font-bold dark:text-white">الاجتماعات <i class="fa-solid fa-external-link-alt text-xs ml-1"></i></span>
+                    <div onclick="window.location.hash='leaves'" class="app-card hover:border-pink-200 group">
+                        <div class="app-icon-container bg-pink-50 text-pink-500 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-plane-departure"></i>
+                        </div>
+                        <span class="font-bold text-gray-800 dark:text-gray-200" data-i18n="الإجازات">الإجازات</span>
+                    </div>
+
+                    <div onclick="window.location.hash='drive'" class="app-card hover:border-cyan-200 group">
+                        <div class="app-icon-container bg-cyan-50 text-cyan-500 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-folder-open"></i>
+                        </div>
+                        <span class="font-bold text-gray-800 dark:text-gray-200" data-i18n="المستندات">المستندات</span>
+                    </div>
+
+                    <div onclick="window.location.hash='meetings'" class="app-card hover:border-blue-200 group relative">
+                        <div class="app-icon-container bg-blue-50 text-blue-500 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-video"></i>
+                        </div>
+                        <span class="font-bold text-gray-800 dark:text-gray-200" data-i18n="الاجتماعات">الاجتماعات</span>
+                    </div>
+
+                    <!-- روابط لتطبيقات خارجية (الدومين الرئيسي) -->
+                    <a href="https://quill.farah-snacks.store/#tasks" class="app-card hover:border-emerald-200 group relative">
+                        <div class="app-icon-container bg-emerald-50 text-emerald-500 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-list-check"></i>
+                        </div>
+                        <span class="font-bold text-gray-800 dark:text-gray-200" data-i18n="المهام">المهام <i class="fa-solid fa-external-link-alt text-xs ml-1"></i></span>
+                        <span class="external-task-badge absolute top-4 left-4 hidden bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md"></span>
                     </a>
-                    <a href="https://files.quill.com" class="cursor-pointer bg-white dark:bg-gray-800 p-6 rounded-xl shadow border border-gray-100 dark:border-gray-700 flex flex-col items-center hover:border-cyan-500 transition">
-                        <i class="fa-solid fa-folder-open text-4xl text-cyan-500 mb-3"></i><span class="font-bold dark:text-white">المستندات <i class="fa-solid fa-external-link-alt text-xs ml-1"></i></span>
+
+                    <a href="https://quill.farah-snacks.store/#chat" class="app-card hover:border-orange-200 group relative">
+                        <div class="app-icon-container bg-orange-50 text-orange-500 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-comments"></i>
+                        </div>
+                        <span class="font-bold text-gray-800 dark:text-gray-200" data-i18n="المناقشة">المناقشة <i class="fa-solid fa-external-link-alt text-xs ml-1"></i></span>
+                        <span class="external-chat-badge absolute top-4 left-4 hidden bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md"></span>
+                    </a>
+
+                    <a href="https://quill.farah-snacks.store/#crm" class="app-card hover:border-lime-200 group">
+                        <div class="app-icon-container bg-lime-50 text-lime-500 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-address-book"></i>
+                        </div>
+                        <span class="font-bold text-gray-800 dark:text-gray-200" data-i18n="العملاء">العملاء <i class="fa-solid fa-external-link-alt text-xs ml-1"></i></span>
+                    </a>
+
+                    <a href="https://quill.farah-snacks.store/#notices" class="app-card hover:border-yellow-200 group">
+                        <div class="app-icon-container bg-yellow-50 text-yellow-500 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-bullhorn"></i>
+                        </div>
+                        <span class="font-bold text-gray-800 dark:text-gray-200" data-i18n="التعميمات">التعميمات <i class="fa-solid fa-external-link-alt text-xs ml-1"></i></span>
                     </a>
                 </div>
             </section>
 
-            <section id="chat" class="section-content hidden animate-fade-in h-full">
-                <div class="flex h-[80vh] bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden relative">
-                    <div class="flex-1 flex flex-col p-4 justify-center items-center text-gray-400">
-                        <i class="fa-solid fa-comments text-4xl mb-2"></i>
-                        <p>نظام المناقشات يعمل هنا (نفس الكود السابق)</p>
+            <section id="attendance" class="section-content hidden animate-fade-in p-4 md:p-0">
+                <div class="flex justify-between items-center mb-4 md:mb-6">
+                    <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 font-bold" data-i18n="سجل الحضور والانصراف">سجل الحضور والانصراف اليومي</p>
+                </div>
+                
+                <div id="empAttendanceView" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 text-center mb-6">
+                    <h3 class="text-lg font-bold text-primary dark:text-secondary mb-2" id="currentDateStr"></h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6 text-sm" id="attendanceStatusMsg">لم تقم بتسجيل الدخول اليوم.</p>
+                    
+                    <div class="flex flex-wrap justify-center gap-4">
+                        <button onclick="window.punchIn()" id="punchInBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center gap-2">
+                            <i class="fa-solid fa-right-to-bracket"></i> تسجيل دخول
+                        </button>
+                        <button onclick="window.punchBreak()" id="punchBreakBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center gap-2 hidden">
+                            <i class="fa-solid fa-mug-hot"></i> خروج مؤقت
+                        </button>
+                        <button onclick="window.punchOut()" id="punchOutBtn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center gap-2 hidden">
+                            <i class="fa-solid fa-person-walking-arrow-right"></i> تسجيل انصراف
+                        </button>
+                    </div>
+                </div>
+
+                <div id="ceoAttendanceView" class="hidden">
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mb-6 flex flex-col md:flex-row gap-4 items-center">
+                        <label class="font-bold text-gray-700 dark:text-gray-300">اختر الموظف:</label>
+                        <select id="attendanceEmpSelect" onchange="window.renderSelectedEmpAttendance()" class="flex-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2 focus:outline-none focus:border-secondary">
+                            <option value="">-- اختر موظف لعرض سجله --</option>
+                        </select>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden overflow-x-auto">
+                        <table class="w-full text-right min-w-[600px]">
+                            <thead class="bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
+                                <tr>
+                                    <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">التاريخ</th>
+                                    <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">وقت الدخول</th>
+                                    <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">خروج مؤقت</th>
+                                    <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">وقت الانصراف</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendanceRecordsList" class="divide-y divide-gray-100 dark:divide-gray-700">
+                                <tr><td colspan="4" class="p-4 text-center text-gray-500">اختر موظفاً لعرض السجل</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
 
-            <section id="tasks" class="section-content hidden animate-fade-in h-full">
-               <div class="flex-1 flex flex-col p-4 justify-center items-center text-gray-400">
-                    <i class="fa-solid fa-list-check text-4xl mb-2"></i>
-                    <p>نظام المهام يعمل هنا (نفس الكود السابق)</p>
-               </div>
+            <section id="leaves" class="section-content hidden animate-fade-in p-4 md:p-0">
+                <div class="flex justify-between items-center mb-4 md:mb-6">
+                    <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 font-bold" data-i18n="طلبات الإجازات">طلبات الإجازات والمغادرات</p>
+                    <button id="reqLeaveBtn" onclick="window.openModal('leaveModal')" class="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm font-bold shadow-sm">
+                        <i class="fa-solid fa-plus mx-2"></i> تقديم طلب إجازة
+                    </button>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden overflow-x-auto">
+                    <table class="w-full text-right min-w-[700px]">
+                        <thead class="bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
+                            <tr>
+                                <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">الموظف</th>
+                                <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">نوع الطلب</th>
+                                <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">من تاريخ</th>
+                                <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">إلى تاريخ / الوقت</th>
+                                <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">الحالة</th>
+                                <th id="leaveActionHeader" class="p-3 font-semibold text-gray-600 dark:text-gray-200 hidden">إجراء المدير</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leavesList" class="divide-y divide-gray-100 dark:divide-gray-700">
+                        </tbody>
+                    </table>
+                </div>
             </section>
 
-            <section id="crm" class="section-content hidden animate-fade-in h-full">
-               <div class="flex-1 flex flex-col p-4 justify-center items-center text-gray-400">
-                    <i class="fa-solid fa-address-book text-4xl mb-2"></i>
-                    <p>نظام العملاء يعمل هنا (نفس الكود السابق)</p>
-               </div>
+            <section id="drive" class="section-content hidden animate-fade-in p-4 md:p-0">
+                <div class="mb-6 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <div class="flex justify-between text-sm mb-2 font-bold text-gray-700 dark:text-gray-300">
+                        <span data-i18n="المساحة المستخدمة">المساحة المستخدمة</span>
+                        <span id="storageText">0 MB / 15 MB</span>
+                    </div>
+                    <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-3 border border-gray-200 dark:border-gray-600 overflow-hidden">
+                        <div id="storageBar" class="bg-green-500 h-full transition-all duration-500 w-0"></div>
+                    </div>
+                    <p id="storageWarning" class="text-xs text-red-500 mt-2 font-bold hidden"><i class="fa-solid fa-triangle-exclamation"></i> لا يمكن رفع ملفات جديدة، المساحة ممتلئة!</p>
+                </div>
+
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
+                    <p class="text-sm md:text-base text-gray-600 dark:text-gray-300" data-i18n="مشاركة الملفات">مشاركة وتثبيت الملفات الهامة (الحد الأقصى 500KB للملف الواحد)</p>
+                    <div>
+                        <input type="file" id="driveFileInput" class="hidden" onchange="window.handleDriveFileSelect(event)">
+                        <button id="uploadFileBtn" onclick="document.getElementById('driveFileInput').click()" class="bg-secondary hover:bg-primary text-white px-4 py-2 rounded-lg transition-colors items-center text-sm md:text-base w-full md:w-auto flex justify-center shadow">
+                            <i class="fa-solid fa-cloud-arrow-up mx-2"></i> <span data-i18n="رفع ملف جديد">رفع ملف جديد</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <h3 class="font-bold text-gray-800 dark:text-gray-200 mb-3 border-b dark:border-gray-700 pb-2"><i class="fa-solid fa-thumbtack text-primary dark:text-secondary mx-2"></i><span data-i18n="الملفات المثبتة">الملفات المثبتة</span></h3>
+                <div id="pinnedFilesContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8"></div>
+
+                <h3 class="font-bold text-gray-800 dark:text-gray-200 mb-3 border-b dark:border-gray-700 pb-2"><i class="fa-regular fa-folder-open text-secondary mx-2"></i><span data-i18n="كل الملفات">كل الملفات</span></h3>
+                <div id="allFilesContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
             </section>
 
-            <section id="employees" class="section-content hidden animate-fade-in h-full">
-               <div class="flex-1 flex flex-col p-4 justify-center items-center text-gray-400">
-                    <i class="fa-solid fa-users text-4xl mb-2"></i>
-                    <p>قائمة الموظفين تعمل هنا للمدير (نفس الكود السابق)</p>
-               </div>
+            <section id="meetings" class="section-content hidden animate-fade-in p-4 md:p-0">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
+                    <p class="text-sm md:text-base text-gray-600 dark:text-gray-300" data-i18n="إدارة الاجتماعات">إدارة وجدولة مكالمات الفيديو</p>
+                    <button id="createMeetingBtn" onclick="window.openCreateMeetingModal()" class="hidden bg-secondary hover:bg-primary text-white px-4 py-2 rounded-lg transition-colors items-center text-sm md:text-base w-full md:w-auto justify-center">
+                        <i class="fa-solid fa-video mx-2"></i> <span data-i18n="بدء / جدولة اجتماع">بدء / جدولة اجتماع</span>
+                    </button>
+                </div>
+
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="font-bold text-primary dark:text-blue-400 mb-3 border-b border-gray-200 dark:border-gray-700 pb-2"><i class="fa-solid fa-calendar-check mx-2"></i><span data-i18n="الاجتماعات الحالية">الاجتماعات الحالية والمجدولة</span></h3>
+                        <div id="activeMeetingsList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                    </div>
+
+                    <div>
+                        <h3 class="font-bold text-gray-600 dark:text-gray-400 mb-3 border-b border-gray-200 dark:border-gray-700 pb-2 mt-8"><i class="fa-solid fa-clock-rotate-left mx-2"></i><span data-i18n="سجل الاجتماعات">سجل الاجتماعات السابقة</span></h3>
+                        <div id="pastMeetingsList" class="space-y-3"></div>
+                    </div>
+                </div>
             </section>
 
+            <section id="settings" class="section-content hidden animate-fade-in p-4 md:p-0">
+                <div class="flex justify-between items-center mb-4 md:mb-6">
+                    <p class="text-sm md:text-base text-gray-600 dark:text-gray-300" data-i18n="إعدادات الحساب">إعدادات الحساب والملف الشخصي</p>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 max-w-xl mx-auto md:mx-0">
+                    <h3 class="font-bold text-primary dark:text-secondary mb-6 border-b border-gray-100 dark:border-gray-700 pb-3 text-lg"><i class="fa-solid fa-user-gear mx-2"></i><span data-i18n="معلومات الحساب">معلومات الحساب الأساسية</span></h3>
+                    
+                    <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8 text-center sm:text-right">
+                        <div class="relative group">
+                            <img id="settingsAvatarPreview" src="https://ui-avatars.com/api/?name=مستخدم&background=00839b&color=fff" class="w-24 h-24 rounded-full border-4 border-gray-50 dark:border-gray-700 object-cover shadow-md">
+                            <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onclick="document.getElementById('profilePicInput').click()">
+                                <i class="fa-solid fa-camera text-white text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-gray-800 dark:text-gray-200 text-base mb-1" data-i18n="تغيير الصورة">تغيير الصورة الشخصية</h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3" data-i18n="اختر صورة تعبر عنك">اختر صورة تعبر عنك ليراها زملاؤك في العمل (الحد الأقصى 500KB).</p>
+                            <input type="file" id="profilePicInput" class="hidden" accept="image/*" onchange="window.handleProfilePicChange(event)">
+                            <button onclick="document.getElementById('profilePicInput').click()" class="bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm">
+                                <i class="fa-solid fa-upload mx-2"></i> <span data-i18n="اختيار صورة">اختيار صورة</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1"><span data-i18n="الاسم الكامل">الاسم الكامل</span></label>
+                            <div class="relative">
+                                <i class="fa-solid fa-user absolute rtl:right-3 ltr:left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <input type="text" id="settingsName" readonly class="w-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 rounded-lg rtl:pr-10 ltr:pl-10 py-3 text-gray-600 dark:text-gray-300 font-medium cursor-not-allowed outline-none">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1"><span data-i18n="الوظيفة (الدور)">الوظيفة (الدور)</span></label>
+                            <div class="relative">
+                                <i class="fa-solid fa-briefcase absolute rtl:right-3 ltr:left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <input type="text" id="settingsRole" readonly class="w-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 rounded-lg rtl:pr-10 ltr:pl-10 py-3 text-gray-600 dark:text-gray-300 font-medium cursor-not-allowed outline-none">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- Modals (فقط التي نحتاجها هنا) -->
+    <div id="leaveModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden">
+            <div class="bg-pink-600 text-white p-4 flex justify-between items-center">
+                <h3 class="font-bold text-base md:text-lg">تقديم طلب إجازة / مغادرة</h3>
+                <button onclick="window.closeModal('leaveModal')" class="hover:text-pink-200"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <form id="leaveForm" class="p-4 md:p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">نوع الطلب</label>
+                    <select id="leaveType" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-pink-500 focus:outline-none">
+                        <option value="إجازة سنوية">إجازة سنوية</option>
+                        <option value="إجازة مرضية">إجازة مرضية</option>
+                        <option value="مغادرة مبكرة">مغادرة مبكرة (ساعات)</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">من تاريخ/وقت</label><input type="datetime-local" id="leaveFrom" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-pink-500 focus:outline-none"></div>
+                    <div><label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">إلى تاريخ/وقت</label><input type="datetime-local" id="leaveTo" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-pink-500 focus:outline-none"></div>
+                </div>
+                <div><label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">السبب / ملاحظات</label><textarea id="leaveReason" rows="2" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-pink-500 focus:outline-none"></textarea></div>
+                <div class="pt-4 flex justify-end space-x-2 space-x-reverse">
+                    <button type="button" onclick="window.closeModal('leaveModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm md:text-base">إلغاء</button>
+                    <button type="submit" class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors text-sm md:text-base">إرسال الطلب</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="createMeetingModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden">
+            <div class="bg-green-600 text-white p-4 flex justify-between items-center">
+                <h3 class="font-bold text-base md:text-lg" data-i18n="جدولة اجتماع">بدء أو جدولة اجتماع فيديو</h3>
+                <button onclick="window.closeModal('createMeetingModal')" class="hover:text-gray-300"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <form id="createMeetingForm" class="p-4 md:p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1" data-i18n="عنوان الاجتماع">عنوان الاجتماع</label>
+                    <input type="text" id="newMeetingTitle" required placeholder="مثال: مناقشة المشروع الجديد" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-green-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1" data-i18n="وقت الاجتماع">وقت الاجتماع (اتركه فارغاً للبدء فوراً)</label>
+                    <input type="datetime-local" id="newMeetingTime" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-green-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2" data-i18n="المدعوين">المدعوين للاجتماع</label>
+                    <div id="meetingMembersSelection" class="border border-gray-200 dark:border-gray-600 rounded-lg p-2 max-h-40 overflow-y-auto space-y-1 bg-gray-50 dark:bg-gray-700"></div>
+                </div>
+                <div class="pt-4 flex justify-end space-x-2 space-x-reverse">
+                    <button type="button" onclick="window.closeModal('createMeetingModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm md:text-base" data-i18n="إلغاء">إلغاء</button>
+                    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm md:text-base" data-i18n="إنشاء الاجتماع">إنشاء الاجتماع</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="mediaModal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center z-[70] p-4" onclick="window.closeMediaModal()">
+        <button class="absolute top-4 right-4 md:top-6 md:right-6 text-white text-3xl hover:text-gray-300 transition-colors z-10"><i class="fa-solid fa-xmark"></i></button>
+        <div id="mediaContainer" class="max-w-5xl w-full max-h-[90vh] flex items-center justify-center pointer-events-none" onclick="event.stopPropagation()"></div>
+    </div>
+
+    <div id="videoCallModal" class="fixed inset-0 bg-black z-[60] hidden flex flex-col">
+        <div class="bg-gray-900 text-white p-4 flex justify-between items-center flex-shrink-0 shadow-md border-b border-gray-800">
+            <div class="flex items-center gap-3">
+                <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <h3 id="videoCallTitle" class="font-bold text-sm md:text-base" data-i18n="مكالمة جارية">مكالمة فيديو قيد التشغيل</h3>
+            </div>
+            <button onclick="window.endVideoCall()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold transition flex items-center gap-2 text-xs md:text-sm shadow">
+                <i class="fa-solid fa-phone-slash"></i> <span data-i18n="إنهاء/مغادرة">إنهاء / مغادرة</span>
+            </button>
+        </div>
+        <div id="jitsiContainer" class="flex-1 w-full bg-black relative">
+            <div class="absolute inset-0 flex items-center justify-center text-white">
+                <div class="loader mb-4"></div>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        // هنا قاعدة بياناتك الأساسية للـ (Users, Tasks, Chat, CRM)
+        // ----------------------------------------------------
+        // 1. قاعدة البيانات الأساسية للمستخدمين، والاجتماعات، والحضور، والإشعارات
+        // ----------------------------------------------------
         const firebaseConfig = {
             apiKey: "AIzaSyCfoP0rgX8WZthQVP_AeZcxDHHCllgu3TM",
             authDomain: "quill-world.firebaseapp.com",
             projectId: "quill-world",
             storageBucket: "quill-world.firebasestorage.app",
             messagingSenderId: "339188796023",
-            appId: "1:339188796023:web:e0a1ba750b49909220d472"
+            appId: "1:339188796023:web:e0a1ba750b49909220d472",
+            measurementId: "G-BMEZ49L6CN"
         };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const appId = 'quill-world-system';
 
-        // -- دوال الواجهة المبسطة --
+        // ----------------------------------------------------
+        // 2. قاعدة البيانات الثانوية المخصصة للـ Drive والمستندات فقط
+        // ----------------------------------------------------
+        const firebaseConfigStorage = {
+            apiKey: "AIzaSyBjPerebbHAtkKWJV_LFkoaL-15oTNHRdg",
+            authDomain: "quill-worl.firebaseapp.com",
+            projectId: "quill-worl",
+            storageBucket: "quill-worl.firebasestorage.app",
+            messagingSenderId: "192227363160",
+            appId: "1:192227363160:web:59a620429b4bfdfb7cfd2d",
+            measurementId: "G-NLY5LN0830"
+        };
+        const appStorage = initializeApp(firebaseConfigStorage, "StorageApp");
+        const dbStorage = getFirestore(appStorage);
+
+        const EMAILJS_SERVICE_ID_2 = 'service_cf5myn4'; 
+        const EMAILJS_TEMPLATE_MEETING = 'template_j95rjoh'; 
+        const EMAILJS_PUBLIC_KEY_2 = 'V9oeJRZybd-4PFBdz';
+
+        const i18nDict = {
+            "الخدمات والمستندات": "Services & Documents",
+            "اختر التطبيق الذي تود العمل عليه": "Choose an application to work on",
+            "المستندات": "Documents",
+            "الاجتماعات": "Meetings",
+            "الرئيسية": "Home",
+            "جاري التحميل...": "Loading...",
+            "مرحباً بك": "Welcome",
+            "يجب تسجيل الدخول": "Please login to access the system",
+            "تسجيل الدخول باستخدام Google": "Login with Google",
+            "إكمال بيانات الملف الشخصي": "Complete Profile Setup",
+            "الاسم الكامل": "Full Name",
+            "الوظيفة (الدور)": "Role",
+            "الدخول للنظام": "Enter System",
+            "المساحة المستخدمة": "Used Storage",
+            "مشاركة الملفات": "Share Important Files (Max 500KB)",
+            "رفع ملف جديد": "Upload New File",
+            "الملفات المثبتة": "Pinned Files",
+            "كل الملفات": "All Files",
+            "إدارة الاجتماعات": "Manage Video Calls",
+            "بدء / جدولة اجتماع": "Start/Schedule Meeting",
+            "الاجتماعات الحالية": "Active & Scheduled Meetings",
+            "سجل الاجتماعات": "Past Meetings Log",
+            "إعدادات الحساب": "Account Settings",
+            "معلومات الحساب": "Basic Info",
+            "تغيير الصورة": "Change Avatar",
+            "اختر صورة تعبر عنك": "Choose an image (Max 500KB)",
+            "اختيار صورة": "Choose Image",
+            "تطبيقات خارجية": "Other Apps",
+            "الحضور والانصراف": "Attendance",
+            "الإجازات": "Leaves",
+            "المهام": "Tasks",
+            "المناقشة": "Chat",
+            "العملاء": "CRM",
+            "التعميمات": "Notices"
+        };
+
+        window.currentLang = localStorage.getItem('appLang') || 'ar';
+        window.t = function(arString) { return (window.currentLang === 'en' && i18nDict[arString]) ? i18nDict[arString] : arString; };
+
+        function applyLanguageToDOM() {
+            document.documentElement.lang = window.currentLang;
+            document.documentElement.dir = window.currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.getElementById('langIconTxt').innerText = window.currentLang === 'ar' ? 'EN' : 'AR';
+            if (window.currentLang === 'en') {
+                document.querySelectorAll('[data-i18n]').forEach(el => {
+                    const key = el.getAttribute('data-i18n');
+                    if (i18nDict[key]) {
+                        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = i18nDict[key];
+                        else {
+                            const icon = el.querySelector('i');
+                            el.innerHTML = (icon ? icon.outerHTML + ' ' : '') + i18nDict[key];
+                        }
+                    }
+                });
+            }
+        }
+
+        window.toggleLanguage = () => {
+            window.currentLang = window.currentLang === 'ar' ? 'en' : 'ar';
+            localStorage.setItem('appLang', window.currentLang);
+            window.location.reload();
+        };
+
+        window.toggleTheme = () => {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('appTheme', isDark ? 'dark' : 'light');
+            document.getElementById('themeToggleIcon').className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+        };
+
+        if (localStorage.getItem('appTheme') === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.addEventListener("DOMContentLoaded", () => {
+                const icon = document.getElementById('themeToggleIcon');
+                if (icon) icon.className = 'fa-solid fa-sun';
+            });
+        }
+        document.addEventListener("DOMContentLoaded", applyLanguageToDOM);
+
+        let currentUserAuth = null;
+        let currentUserData = null; 
+        let globalUsers = []; 
+        let globalFiles = []; 
+        let globalMeetings = [];
+        let globalAttendance = [];
+        let globalLeaves = [];
+        let globalGroups = []; 
+
+        let currentMeetingId = null;
+        const MAX_GLOBAL_STORAGE = 15 * 1024 * 1024; 
+        let jitsiApi = null; 
+
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            let colorClass = type === 'success' ? 'bg-green-500' : (type === 'warning' ? 'bg-secondary' : 'bg-primary');
+            let icon = type === 'success' ? 'fa-check' : (type === 'warning' ? 'fa-bell' : 'fa-info-circle');
+
+            toast.className = `toast-enter ${colorClass} text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 text-sm md:text-base w-max`;
+            toast.innerHTML = `<i class="fa-solid ${icon}"></i><span class="font-bold">${message}</span>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.replace('toast-enter', 'toast-leave');
+                setTimeout(() => toast.remove(), 500);
+            }, 4000);
+        }
+
         window.checkSystemPassword = () => {
             if(document.getElementById('sysPasswordInput').value === '1112021') {
                 document.getElementById('systemPasswordScreen').classList.add('hidden');
@@ -172,52 +722,628 @@
             }
         };
 
-        document.getElementById('googleLoginBtn').addEventListener('click', async () => {
-            try { await signInWithPopup(auth, new GoogleAuthProvider()); } catch (error) {}
+        // الحصول على مراجع من قواعد البيانات
+        function getColRef(colName) { return collection(db, 'artifacts', appId, 'public', 'data', colName); }
+        function getStorageColRef(colName) { return collection(dbStorage, 'artifacts', appId, 'public', 'data', colName); }
+
+        // ===============================================
+        // 1. نظام المستندات (من قاعدة البيانات الثانية)
+        // ===============================================
+        const MAX_FILE_SIZE = 500 * 1024; 
+
+        window.handleDriveFileSelect = (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            if(file.size > MAX_FILE_SIZE) { showToast('الحد الأقصى للرفع هو 500 كيلوبايت.', 'warning'); e.target.value = ''; return; }
+
+            const currentStorage = globalFiles.reduce((acc, f) => acc + (f.size || 0), 0);
+            if(currentStorage + file.size > MAX_GLOBAL_STORAGE) { showToast('المساحة ممتلئة!', 'warning'); e.target.value = ''; return; }
+
+            const sizeStr = formatBytes(file.size);
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                try {
+                    await addDoc(getStorageColRef('files'), {
+                        name: file.name,
+                        type: file.type || 'unknown',
+                        size: file.size, 
+                        sizeStr: sizeStr,
+                        data: ev.target.result,
+                        uploaderName: currentUserData.name,
+                        uploaderId: currentUserData.uid,
+                        pinned: false,
+                        timestamp: Date.now()
+                    });
+                    showToast('تم رفع الملف بنجاح!', 'success');
+                    logAction('رفع ملف', `تم رفع ملف جديد: ${file.name}`);
+                } catch (err) {
+                    showToast('حدث خطأ أثناء الرفع.', 'warning');
+                }
+                e.target.value = '';
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.togglePinFile = async (fileId, currentPinStatus) => {
+            try { await updateDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'files', fileId), { pinned: !currentPinStatus }); } catch(e) {}
+        };
+
+        window.deleteDriveFile = async (fileId, fileName) => {
+            if(confirm('هل أنت متأكد من حذف هذا الملف؟')) {
+                try {
+                    await deleteDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'files', fileId));
+                    showToast('تم حذف الملف', 'success');
+                    logAction('حذف ملف', `تم حذف الملف: ${fileName}`);
+                } catch(e) {}
+            }
+        };
+
+        function renderDriveFiles() {
+            const allContainer = document.getElementById('allFilesContainer');
+            const pinnedContainer = document.getElementById('pinnedFilesContainer');
+            allContainer.innerHTML = '';
+            pinnedContainer.innerHTML = '';
+            
+            const isCEO = currentUserData && currentUserData.role === 'CEO';
+
+            if(globalFiles.length === 0) {
+                allContainer.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد ملفات حالياً.</p>';
+            }
+
+            globalFiles.forEach(f => {
+                let iconClass = 'fa-file text-gray-400';
+                if(f.type.startsWith('image/')) iconClass = 'fa-file-image text-blue-400';
+                else if(f.type.startsWith('video/')) iconClass = 'fa-file-video text-purple-400';
+                else if(f.type.includes('pdf')) iconClass = 'fa-file-pdf text-red-400';
+                else if(f.type.includes('excel')) iconClass = 'fa-file-excel text-green-500';
+                else if(f.type.includes('word')) iconClass = 'fa-file-word text-blue-600';
+
+                const isOwner = f.uploaderId === currentUserData.uid;
+                const deleteBtn = isOwner || isCEO ? `<button onclick="window.deleteDriveFile('${f.id}', '${f.name}')" class="text-red-400 hover:text-red-600 p-1" title="حذف"><i class="fa-solid fa-trash"></i></button>` : '';
+
+                const cardHtml = `
+                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm hover:shadow-md transition group flex flex-col h-full">
+                        <div class="flex justify-between items-start mb-2">
+                            <i class="fa-solid ${iconClass} text-2xl"></i>
+                            <button onclick="window.togglePinFile('${f.id}', ${f.pinned})" class="text-xl ${f.pinned ? 'text-primary dark:text-secondary' : 'text-gray-300 dark:text-gray-600 hover:text-primary'}"><i class="fa-solid fa-thumbtack"></i></button>
+                        </div>
+                        <h4 class="font-bold text-sm text-gray-800 dark:text-gray-200 truncate mb-1" title="${f.name}">${f.name}</h4>
+                        <p class="text-[10px] text-gray-400 mb-3">${f.sizeStr} • بواسطة ${f.uploaderName}</p>
+                        
+                        <div class="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700 flex justify-between">
+                            <a href="${f.data}" download="${f.name}" class="text-secondary hover:text-primary text-sm font-bold flex items-center gap-1"><i class="fa-solid fa-download"></i> تحميل</a>
+                            ${deleteBtn}
+                        </div>
+                    </div>
+                `;
+                if(f.pinned) pinnedContainer.innerHTML += cardHtml;
+                allContainer.innerHTML += cardHtml;
+            });
+            if(pinnedContainer.innerHTML === '') pinnedContainer.innerHTML = '<p class="col-span-full text-xs text-gray-400 italic">لا توجد ملفات مثبتة.</p>';
+        }
+
+        function updateStorageProgress() {
+            const currentStorage = globalFiles.reduce((acc, f) => acc + (f.size || 0), 0);
+            const percentage = (currentStorage / MAX_GLOBAL_STORAGE) * 100;
+            document.getElementById('storageText').innerText = `${formatBytes(currentStorage)} / ${formatBytes(MAX_GLOBAL_STORAGE)}`;
+            const bar = document.getElementById('storageBar');
+            bar.style.width = `${percentage}%`;
+            
+            if(percentage > 90) { bar.className = "bg-red-500 h-full"; document.getElementById('storageWarning').classList.remove('hidden'); } 
+            else if(percentage > 70) { bar.className = "bg-yellow-500 h-full"; document.getElementById('storageWarning').classList.add('hidden'); } 
+            else { bar.className = "bg-green-500 h-full"; document.getElementById('storageWarning').classList.add('hidden'); }
+        }
+
+        // ===============================================
+        // 2. الحضور والانصراف
+        // ===============================================
+        function getTodayDateString() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        }
+        
+        window.punchIn = async () => {
+            if(!currentUserData) return;
+            const today = getTodayDateString();
+            const docId = `${currentUserData.uid}_${today}`;
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', docId), {
+                    uid: currentUserData.uid, name: currentUserData.name, date: today, punchIn: Date.now(), breakTime: null, punchOut: null, status: 'active'
+                });
+                showToast('تم تسجيل الدخول بنجاح', 'success');
+                logAction('حضور', 'قام الموظف بتسجيل الدخول للدوام');
+            } catch(e) {}
+        };
+
+        window.punchBreak = async () => {
+            if(!currentUserData) return;
+            const today = getTodayDateString();
+            const docId = `${currentUserData.uid}_${today}`;
+            try {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', docId), { breakTime: Date.now(), status: 'break' });
+                showToast('تم تسجيل خروج مؤقت', 'warning');
+            } catch(e) {}
+        };
+
+        window.punchOut = async () => {
+            if(!currentUserData) return;
+            const today = getTodayDateString();
+            const docId = `${currentUserData.uid}_${today}`;
+            try {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', docId), { punchOut: Date.now(), status: 'completed' });
+                showToast('تم تسجيل الانصراف.', 'success');
+                logAction('انصراف', 'قام الموظف بتسجيل الانصراف');
+            } catch(e) {}
+        };
+
+        function renderEmpAttendanceView() {
+            if(!currentUserData) return;
+            document.getElementById('currentDateStr').innerText = new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            
+            const today = getTodayDateString();
+            const myTodayRecord = globalAttendance.find(a => a.uid === currentUserData.uid && a.date === today);
+            
+            const inBtn = document.getElementById('punchInBtn');
+            const breakBtn = document.getElementById('punchBreakBtn');
+            const outBtn = document.getElementById('punchOutBtn');
+            const msg = document.getElementById('attendanceStatusMsg');
+
+            if(!myTodayRecord) {
+                msg.innerText = 'لم تقم بتسجيل الدخول اليوم.';
+                inBtn.classList.remove('hidden'); breakBtn.classList.add('hidden'); outBtn.classList.add('hidden');
+            } else {
+                inBtn.classList.add('hidden');
+                if(myTodayRecord.status === 'active') {
+                    msg.innerText = 'أنت الآن على رأس عملك.';
+                    breakBtn.classList.remove('hidden'); outBtn.classList.remove('hidden');
+                } else if(myTodayRecord.status === 'break') {
+                    msg.innerText = 'أنت الآن في فترة خروج مؤقت.';
+                    breakBtn.classList.add('hidden'); outBtn.classList.remove('hidden');
+                } else if(myTodayRecord.status === 'completed') {
+                    msg.innerText = 'لقد قمت بتسجيل الانصراف لهذا اليوم.';
+                    breakBtn.classList.add('hidden'); outBtn.classList.add('hidden');
+                }
+            }
+        }
+
+        window.renderSelectedEmpAttendance = () => {
+            const select = document.getElementById('attendanceEmpSelect');
+            const empId = select.value;
+            const list = document.getElementById('attendanceRecordsList');
+            list.innerHTML = '';
+            
+            if(!empId) { list.innerHTML = '<tr><td colspan="4" class="p-4 text-center">اختر موظفاً</td></tr>'; return; }
+
+            const empRecords = globalAttendance.filter(a => a.uid === empId).sort((a, b) => b.date.localeCompare(a.date));
+            if(empRecords.length === 0) { list.innerHTML = '<tr><td colspan="4" class="p-4 text-center">لا يوجد سجل</td></tr>'; return; }
+
+            empRecords.forEach(r => {
+                const pIn = r.punchIn ? new Date(r.punchIn).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}) : '-';
+                const pBreak = r.breakTime ? new Date(r.breakTime).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}) : '-';
+                const pOut = r.punchOut ? new Date(r.punchOut).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}) : '-';
+                
+                list.innerHTML += `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <td class="p-3 text-sm font-bold">${r.date}</td>
+                        <td class="p-3 text-sm">${pIn}</td><td class="p-3 text-sm">${pBreak}</td><td class="p-3 text-sm">${pOut}</td>
+                    </tr>
+                `;
+            });
+        };
+
+        // ===============================================
+        // 3. الإجازات
+        // ===============================================
+        document.getElementById('leaveForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(!currentUserData) return;
+            try {
+                await addDoc(getColRef('leaves'), {
+                    uid: currentUserData.uid, name: currentUserData.name, type: document.getElementById('leaveType').value,
+                    from: new Date(document.getElementById('leaveFrom').value).getTime(),
+                    to: new Date(document.getElementById('leaveTo').value).getTime(),
+                    reason: document.getElementById('leaveReason').value, status: 'pending', timestamp: Date.now()
+                });
+                window.closeModal('leaveModal');
+                showToast('تم إرسال طلبك', 'success');
+                logAction('إجازات', 'تم تقديم طلب إجازة جديد');
+            } catch(err) {}
         });
 
-        window.logout = () => signOut(auth).then(() => window.location.reload());
+        window.updateLeaveStatus = async (id, newStatus) => {
+            if(currentUserData.role !== 'CEO') return;
+            try {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'leaves', id), { status: newStatus });
+                showToast('تم التحديث', 'success');
+            } catch(e) {}
+        };
 
+        function renderLeaves() {
+            const list = document.getElementById('leavesList');
+            list.innerHTML = '';
+            const isCEO = currentUserData && currentUserData.role === 'CEO';
+            if(isCEO) document.getElementById('leaveActionHeader').classList.remove('hidden');
+            else document.getElementById('leaveActionHeader').classList.add('hidden');
+
+            const filteredLeaves = isCEO ? globalLeaves : globalLeaves.filter(l => l.uid === currentUserData.uid);
+            if(filteredLeaves.length === 0) { list.innerHTML = `<tr><td colspan="${isCEO ? 6 : 5}" class="p-4 text-center">لا توجد طلبات</td></tr>`; return; }
+
+            filteredLeaves.forEach(l => {
+                const fromStr = new Date(l.from).toLocaleString('ar-EG', {month: 'short', day: 'numeric', hour:'2-digit', minute:'2-digit'});
+                const toStr = new Date(l.to).toLocaleString('ar-EG', {month: 'short', day: 'numeric', hour:'2-digit', minute:'2-digit'});
+                let statusHtml = l.status === 'pending' ? '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs">انتظار</span>' : (l.status === 'approved' ? '<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">مقبول</span>' : '<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs">مرفوض</span>');
+
+                let actionHtml = '';
+                if(isCEO) {
+                    if(l.status === 'pending') {
+                        actionHtml = `<td class="p-3"><button onclick="window.updateLeaveStatus('${l.id}', 'approved')" class="bg-green-500 text-white p-1.5 rounded mr-1"><i class="fa-solid fa-check"></i></button><button onclick="window.updateLeaveStatus('${l.id}', 'rejected')" class="bg-red-500 text-white p-1.5 rounded"><i class="fa-solid fa-xmark"></i></button></td>`;
+                    } else actionHtml = `<td class="p-3 text-xs text-gray-400">تم الإجراء</td>`;
+                }
+
+                list.innerHTML += `
+                    <tr class="border-b dark:border-gray-700">
+                        <td class="p-3 font-bold text-sm">${l.name}</td><td class="p-3 text-sm">${l.type}</td>
+                        <td class="p-3 text-xs" dir="ltr">${fromStr}</td><td class="p-3 text-xs" dir="ltr">${toStr}</td>
+                        <td class="p-3">${statusHtml}</td>${actionHtml}
+                    </tr>
+                `;
+            });
+        }
+
+        // ===============================================
+        // 4. الاجتماعات
+        // ===============================================
+        window.openCreateMeetingModal = () => {
+            const container = document.getElementById('meetingMembersSelection');
+            container.innerHTML = '';
+            globalUsers.forEach(emp => {
+                if(emp.id !== currentUserData.uid) {
+                    container.innerHTML += `
+                        <label class="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded cursor-pointer transition">
+                            <input type="checkbox" value="${emp.id}" class="meeting-member-checkbox w-4 h-4 text-green-600 rounded">
+                            <img src="${emp.photoURL}" class="w-6 h-6 rounded-full"><span class="text-sm font-medium">${emp.name}</span>
+                        </label>
+                    `;
+                }
+            });
+            window.openModal('createMeetingModal');
+        };
+
+        document.getElementById('createMeetingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(currentUserData.role !== 'CEO') return;
+            const title = document.getElementById('newMeetingTitle').value;
+            const timeVal = document.getElementById('newMeetingTime').value;
+            let scheduledTime = null;
+            let status = 'active';
+
+            if (timeVal) {
+                scheduledTime = new Date(timeVal).getTime();
+                if (scheduledTime > Date.now()) status = 'scheduled';
+            }
+
+            const checkboxes = document.querySelectorAll('.meeting-member-checkbox:checked');
+            const invited = Array.from(checkboxes).map(cb => cb.value);
+            invited.push(currentUserData.uid); 
+
+            try {
+                await addDoc(getColRef('meetings'), {
+                    title: title, scheduledFor: scheduledTime, createdBy: currentUserData.uid, creatorName: currentUserData.name,
+                    invitedUsers: invited, status: status, startedAt: status === 'active' ? Date.now() : null, endedAt: null, events: [], timestamp: Date.now()
+                });
+                window.closeModal('createMeetingModal');
+                showToast('تم الإنشاء بنجاح', 'success');
+                
+                const timeStr = scheduledTime ? new Date(scheduledTime).toLocaleString('ar-EG') : 'الآن';
+                invited.forEach(uid => {
+                    if (uid === currentUserData.uid) return; 
+                    const user = globalUsers.find(u => u.id === uid);
+                    if (user && user.email) {
+                        emailjs.send(EMAILJS_SERVICE_ID_2, EMAILJS_TEMPLATE_MEETING, {
+                            to_email: user.email, to_name: user.name, creator_name: currentUserData.name,
+                            meeting_title: title, meeting_time: timeStr, meeting_link: window.location.href, company_name: 'Quill'
+                        }, EMAILJS_PUBLIC_KEY_2);
+                    }
+                });
+            } catch(e) {}
+        });
+
+        window.joinMeeting = async (meetingId, title) => {
+            currentMeetingId = meetingId;
+            const roomName = `QuillWorldApp_${appId.substring(0,5)}_${meetingId.replace(/[^a-zA-Z0-9]/g, "")}`;
+            document.getElementById('videoCallTitle').innerText = `اجتماع: ${title}`;
+            document.getElementById('videoCallModal').classList.remove('hidden'); document.getElementById('videoCallModal').classList.add('flex');
+
+            const domain = 'meet.jit.si';
+            const options = {
+                roomName: roomName, width: '100%', height: '100%', parentNode: document.querySelector('#jitsiContainer'),
+                userInfo: { displayName: currentUserData.name }, configOverwrite: { prejoinPageEnabled: false }
+            };
+            document.querySelector('#jitsiContainer').innerHTML = '';
+            jitsiApi = new JitsiMeetExternalAPI(domain, options);
+            logMeetingEvent(meetingId, 'joined');
+
+            if (currentUserData.role === 'CEO') {
+                const meeting = globalMeetings.find(m => m.id === meetingId);
+                if (meeting && meeting.status === 'scheduled') {
+                    updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'meetings', meetingId), { status: 'active', startedAt: Date.now() });
+                }
+            }
+
+            jitsiApi.addEventListener('videoConferenceLeft', () => {
+                logMeetingEvent(meetingId, 'left'); window.endVideoCall();
+            });
+        };
+
+        window.endVideoCall = () => {
+            if(jitsiApi) { jitsiApi.dispose(); jitsiApi = null; if(currentMeetingId) logMeetingEvent(currentMeetingId, 'left'); }
+            document.getElementById('videoCallModal').classList.add('hidden'); document.getElementById('videoCallModal').classList.remove('flex');
+            document.querySelector('#jitsiContainer').innerHTML = ''; currentMeetingId = null;
+        };
+
+        window.endMeetingForEveryone = async (meetingId) => {
+            if(currentUserData.role !== 'CEO') return;
+            if(confirm('إنهاء الاجتماع للجميع؟')) {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'meetings', meetingId), { status: 'ended', endedAt: Date.now() });
+            }
+        };
+
+        window.shareMeetingWhatsApp = (title) => {
+            const text = encodeURIComponent(`مرحباً، أنت مدعو لاجتماع: "${title}". للانضمام، اضغط هنا: ${window.location.href}`);
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+        };
+
+        async function logMeetingEvent(meetingId, actionType) {
+            if(!currentUserData) return;
+            try {
+                const meetingRef = doc(db, 'artifacts', appId, 'public', 'data', 'meetings', meetingId);
+                const meetingDoc = await getDoc(meetingRef);
+                if(meetingDoc.exists()) {
+                    let events = meetingDoc.data().events || [];
+                    events.push({ uid: currentUserData.uid, name: currentUserData.name, action: actionType, timestamp: Date.now() });
+                    await updateDoc(meetingRef, { events: events });
+                }
+            } catch(e) {}
+        }
+
+        function renderMeetings() {
+            const activeList = document.getElementById('activeMeetingsList');
+            const pastList = document.getElementById('pastMeetingsList');
+            activeList.innerHTML = ''; pastList.innerHTML = '';
+            
+            let hasPast = false, hasActive = false;
+
+            globalMeetings.forEach(meeting => {
+                const isInvited = meeting.invitedUsers.includes(currentUserData.uid) || currentUserData.role === 'CEO';
+                if(!isInvited) return;
+
+                const isCEO = currentUserData.role === 'CEO';
+                let timeStr = meeting.scheduledFor ? new Date(meeting.scheduledFor).toLocaleString('ar-EG') : 'الآن';
+                
+                if (meeting.status === 'scheduled' || meeting.status === 'active') {
+                    hasActive = true;
+                    let statusBadge = meeting.status === 'active' ? `<span class="bg-red-100 text-red-600 text-[10px] px-2 py-1 rounded">جاري الآن</span>` : `<span class="bg-blue-100 text-blue-600 text-[10px] px-2 py-1 rounded">مجدول</span>`;
+                    let actionsHtml = `<button onclick="window.joinMeeting('${meeting.id}', '${meeting.title}')" class="flex-1 bg-green-500 hover:bg-green-600 text-white text-xs py-2 rounded font-bold"><i class="fa-solid fa-video mx-1"></i> انضمام</button>`;
+                    
+                    if (isCEO) {
+                        actionsHtml += `<button onclick="window.shareMeetingWhatsApp('${meeting.title}')" class="bg-green-100 text-green-700 w-8 h-8 rounded"><i class="fa-brands fa-whatsapp"></i></button>
+                                        <button onclick="window.endMeetingForEveryone('${meeting.id}')" class="bg-red-100 text-red-600 w-8 h-8 rounded"><i class="fa-solid fa-power-off"></i></button>`;
+                    }
+
+                    activeList.innerHTML += `
+                        <div class="bg-white dark:bg-gray-800 border p-4 rounded-xl shadow-sm">
+                            <div class="flex justify-between mb-2"><h4 class="font-bold">${meeting.title}</h4>${statusBadge}</div>
+                            <p class="text-xs text-gray-500 mb-4"><i class="fa-regular fa-clock ml-1"></i> ${timeStr}</p>
+                            <div class="flex gap-2">${actionsHtml}</div>
+                        </div>
+                    `;
+                } else if (meeting.status === 'ended') {
+                    const myEvents = meeting.events ? meeting.events.filter(e => e.uid === currentUserData.uid) : [];
+                    if (!isCEO && myEvents.length === 0) return;
+                    hasPast = true;
+                    pastList.innerHTML += `
+                        <div class="bg-white dark:bg-gray-800 border p-3 rounded-xl flex justify-between items-center">
+                            <div><h4 class="font-bold text-sm">${meeting.title}</h4></div>
+                            <span class="text-[10px] bg-gray-100 px-2 py-1 rounded">منتهي</span>
+                        </div>
+                    `;
+                }
+            });
+            if(!hasActive) activeList.innerHTML = '<p class="text-sm text-gray-400">لا يوجد اجتماعات حالياً.</p>';
+            if(!hasPast) pastList.innerHTML = '<p class="text-sm text-gray-400">لا يوجد سجلات.</p>';
+        }
+
+        // ===============================================
+        // 5. التوجيه (Routing) والإشعارات المتبادلة
+        // ===============================================
+
+        window.openModal = (id) => document.getElementById(id).classList.remove('hidden');
+        window.closeModal = (id) => {
+            document.getElementById(id).classList.add('hidden');
+            if(id === 'createMeetingModal') document.getElementById('createMeetingForm').reset();
+            if(id === 'leaveModal') document.getElementById('leaveForm').reset();
+        };
+
+        window.toggleSidebar = () => {
+            document.getElementById('sidebar').classList.toggle('translate-x-full');
+            document.getElementById('mobileOverlay').classList.toggle('hidden');
+        };
+
+        window.showSection = (sectionId) => {
+            if(window.location.hash !== `#${sectionId}`) window.history.pushState(null, null, `#${sectionId}`);
+            document.querySelectorAll('.section-content').forEach(s => s.classList.add('hidden'));
+            
+            const targetSection = document.getElementById(sectionId);
+            if(targetSection) targetSection.classList.remove('hidden');
+
+            if (sectionId === 'home-grid') {
+                document.getElementById('backToHomeBtn').classList.add('hidden');
+                document.getElementById('page-title').classList.remove('hidden');
+            } else {
+                document.getElementById('backToHomeBtn').classList.remove('hidden');
+                document.getElementById('page-title').classList.add('hidden');
+            }
+            
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('bg-secondary', 'text-white'); b.classList.add('text-gray-300');
+            });
+            const activeBtn = document.querySelector(`.nav-btn[data-section="${sectionId}"]`);
+            if(activeBtn) { activeBtn.classList.remove('text-gray-300'); activeBtn.classList.add('bg-secondary', 'text-white'); }
+            
+            if(window.innerWidth < 768) { document.getElementById('sidebar').classList.add('translate-x-full'); document.getElementById('mobileOverlay').classList.add('hidden'); }
+            if(sectionId === 'attendance') renderEmpAttendanceView();
+        };
+
+        window.addEventListener('hashchange', () => {
+            if(!currentUserData) return;
+            const hash = window.location.hash.replace('#', '');
+            const validSections = ['home-grid', 'attendance', 'leaves', 'drive', 'meetings', 'settings'];
+            window.showSection(validSections.includes(hash) ? hash : 'home-grid');
+        });
+
+        // 🔴 مستمع الإشعارات للروابط الخارجية (مهام وشات من الدومين الأول)
+        function listenForExternalBadges() {
+            // الاستماع للمهام (إظهار الرقم إذا كانت المهمة قيد الانتظار ومسندة لي)
+            onSnapshot(getColRef('tasks'), (snapshot) => {
+                if(!currentUserData) return;
+                let pendingTasks = 0;
+                snapshot.forEach(doc => {
+                    const task = doc.data();
+                    if(task.assigneeId === currentUserData.uid && task.status === 'pending') pendingTasks++;
+                });
+
+                document.querySelectorAll('.external-task-badge').forEach(badge => {
+                    if(pendingTasks > 0) { badge.innerText = pendingTasks; badge.classList.remove('hidden'); }
+                    else { badge.classList.add('hidden'); }
+                });
+            });
+
+            // الاستماع للدردشة والمجموعات
+            onSnapshot(getColRef('groups'), (gSnap) => {
+                if(!currentUserData) return;
+                globalGroups = [{ id: 'global', members: [] }];
+                gSnap.forEach(doc => {
+                    if(doc.data().members && doc.data().members.includes(currentUserData.uid)) globalGroups.push({ id: doc.id, ...doc.data() });
+                });
+            });
+
+            onSnapshot(getColRef('chat'), (cSnap) => {
+                if(!currentUserData) return;
+                let hasUnreadOrMention = false;
+                
+                cSnap.forEach(doc => {
+                    const msg = doc.data();
+                    const groupId = msg.groupId || 'global';
+                    const lastRead = groupReadTimestamps[groupId] || 0;
+                    
+                    if (msg.uid !== currentUserData.uid && msg.timestamp > lastRead) {
+                        const inMyGroup = globalGroups.some(g => g.id === groupId);
+                        if (inMyGroup) hasUnreadOrMention = true;
+                    }
+                });
+
+                document.querySelectorAll('.external-chat-badge').forEach(badge => {
+                    if(hasUnreadOrMention) { badge.innerText = '!'; badge.classList.remove('hidden'); }
+                    else { badge.classList.add('hidden'); }
+                });
+            });
+        }
+
+        async function logAction(action, details) {
+            if(!currentUserData) return;
+            try { await addDoc(getColRef('logs'), { action: action, details: details, userName: currentUserData.name, timestamp: Date.now() }); } catch(e) {}
+        }
+
+        // ===============================================
+        // تهيئة النظام والمصادقة
+        // ===============================================
         onAuthStateChanged(auth, async (user) => {
             document.getElementById('loadingScreen').classList.add('hidden');
             if (user) {
                 document.getElementById('systemPasswordScreen').classList.add('hidden');
                 document.getElementById('loginScreen').classList.add('hidden');
-                
-                // جلب بيانات المستخدم
-                const docSnap = await getDoc(doc(db, 'artifacts', 'quill-world-system', 'public', 'data', 'users', user.uid));
-                if (docSnap.exists()) {
-                    const userData = docSnap.data();
-                    document.getElementById('userName').innerText = userData.name;
-                    document.getElementById('userRole').innerText = userData.role;
-                    document.getElementById('userAvatar').src = userData.photoURL || '';
-                    
-                    if(userData.role === 'CEO') {
-                        document.getElementById('nav-employees-btn').classList.remove('hidden');
-                    }
-                }
+                currentUserAuth = user;
+                try {
+                    const docSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid));
+                    if (docSnap.exists()) {
+                        currentUserData = docSnap.data();
+                        groupReadTimestamps = currentUserData.readReceipts || {};
+                        document.getElementById('setupProfileScreen').classList.add('hidden');
+                        finishLoginSetup();
+                    } else document.getElementById('setupProfileScreen').classList.remove('hidden');
+                } catch(e) { console.error(e); }
             } else {
                 document.getElementById('systemPasswordScreen').classList.remove('hidden');
             }
         });
 
-        window.addEventListener('hashchange', () => {
-            const hash = window.location.hash.replace('#', '') || 'home-grid';
-            document.querySelectorAll('.section-content').forEach(el => el.classList.add('hidden'));
-            const activeSec = document.getElementById(hash);
-            if(activeSec) activeSec.classList.remove('hidden');
+        document.getElementById('googleLoginBtn').addEventListener('click', async () => {
+            try { await signInWithPopup(auth, new GoogleAuthProvider()); } catch (error) {}
         });
-        
-        // تفعيل النافذة عند التحميل
-        if(!window.location.hash) window.location.hash = 'home-grid';
-        else window.dispatchEvent(new Event('hashchange'));
 
-        // ===============================================
-        // ملاحظة لك يا مهندس:
-        // في هذا الملف ستضع دوال الجافاسكريبت المتبقية 
-        // الخاصة بـ (المهام، الدردشة، العملاء، والموظفين) فقط.
-        // أي شيء آخر (ملفات، اجتماعات، إجازات) تم مسحه من هنا!
-        // ===============================================
+        document.getElementById('setupProfileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('setupName').value;
+            const role = document.getElementById('setupRole').value;
+            try {
+                const newUserData = {
+                    name: name, role: role, uid: currentUserAuth.uid, email: currentUserAuth.email || 'no-email@company.com', 
+                    photoURL: currentUserAuth.photoURL || `https://ui-avatars.com/api/?name=${name}&background=00839b&color=fff`,
+                    readReceipts: {}, lastActive: Date.now(), timestamp: Date.now()
+                };
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUserAuth.uid), newUserData);
+                currentUserData = newUserData;
+                document.getElementById('setupProfileScreen').classList.add('hidden');
+                finishLoginSetup();
+            } catch(e) {}
+        });
+
+        function finishLoginSetup() {
+            document.getElementById('userName').innerText = currentUserData.name;
+            document.getElementById('userRole').innerText = currentUserData.role;
+            document.getElementById('userAvatar').src = currentUserData.photoURL;
+            document.getElementById('settingsAvatarPreview').src = currentUserData.photoURL;
+            document.getElementById('settingsName').value = currentUserData.name;
+            
+            if(currentUserData.role === 'CEO') {
+                document.getElementById('createMeetingBtn').classList.remove('hidden');
+                document.getElementById('ceoAttendanceView').classList.remove('hidden');
+            }
+
+            // تفعيل المستمعات المحلية والمستندات
+            onSnapshot(getColRef('users'), (snapshot) => {
+                globalUsers = []; snapshot.forEach(d => globalUsers.push({ id: d.id, ...d.data() }));
+                const select = document.getElementById('attendanceEmpSelect');
+                if(select && select.options.length <= 1) {
+                    globalUsers.forEach(u => select.innerHTML += `<option value="${u.id}">${u.name}</option>`);
+                }
+            });
+
+            onSnapshot(getColRef('attendance'), (snapshot) => {
+                globalAttendance = []; snapshot.forEach(d => globalAttendance.push({ id: d.id, ...d.data() }));
+                if(!document.getElementById('attendance').classList.contains('hidden')) renderEmpAttendanceView();
+            });
+
+            onSnapshot(getColRef('leaves'), (snapshot) => {
+                globalLeaves = []; snapshot.forEach(d => globalLeaves.push({ id: d.id, ...d.data() }));
+                globalLeaves.sort((a,b) => b.timestamp - a.timestamp); renderLeaves();
+            });
+
+            onSnapshot(getStorageColRef('files'), (snapshot) => {
+                globalFiles = []; snapshot.forEach(d => globalFiles.push({ id: d.id, ...d.data() }));
+                globalFiles.sort((a,b) => b.timestamp - a.timestamp); renderDriveFiles(); updateStorageProgress();
+            });
+
+            onSnapshot(getColRef('meetings'), (snapshot) => {
+                globalMeetings = []; snapshot.forEach(d => globalMeetings.push({ id: d.id, ...d.data() }));
+                globalMeetings.sort((a,b) => b.timestamp - a.timestamp); renderMeetings();
+            });
+
+            listenForExternalBadges(); // تفعيل إشعارات الروابط الخارجية (للدومين الأول)
+            
+            window.dispatchEvent(new Event('hashchange'));
+        }
+
     </script>
 </body>
 </html>
