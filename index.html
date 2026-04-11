@@ -45,7 +45,6 @@
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #00839b; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* تنسيق الشبكة الجديد */
         .app-card {
             display: flex;
             flex-direction: column;
@@ -197,7 +196,7 @@
                 </button>
             </div>
             
-            <nav class="flex-1 mt-6 px-4 space-y-2 overflow-y-auto">
+            <nav id="mainNavigationMenu" class="flex-1 mt-6 px-4 space-y-2 overflow-y-auto hidden">
                 <button id="nav-home-grid-btn" onclick="window.location.hash='home-grid'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg bg-secondary text-white transition-colors" data-section="home-grid">
                     <i class="fa-solid fa-house w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="الرئيسية">الرئيسية</span>
                 </button>
@@ -214,6 +213,11 @@
                 </button>
                 <button onclick="window.location.hash='meetings'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative" data-section="meetings">
                     <i class="fa-solid fa-video w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="الاجتماعات">الاجتماعات</span>
+                </button>
+                
+                <!-- زر النثريات (للمالية والمدير فقط) -->
+                <button id="nav-expenses-btn" onclick="window.location.hash='expenses'" class="nav-btn hidden w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative" data-section="expenses">
+                    <i class="fa-solid fa-file-invoice-dollar w-6 text-center ml-3"></i><span class="font-semibold text-sm">المصاريف والنثريات</span>
                 </button>
 
                 <!-- قسم الروابط الخارجية للنطاق الأول -->
@@ -251,6 +255,11 @@
                     <i class="fa-solid fa-gear w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="الإعدادات">الإعدادات</span>
                 </button>
             </nav>
+            
+            <div id="sidebarLockMessage" class="flex-1 mt-6 px-4 text-center hidden flex flex-col justify-center">
+                <i class="fa-solid fa-lock text-4xl text-gray-500 mb-3"></i>
+                <p class="text-sm text-gray-400 font-bold">يجب تسجيل الدخول (الحضور) أولاً للوصول إلى النظام.</p>
+            </div>
         </aside>
 
         <div class="flex-1 overflow-y-auto p-0 md:p-6 bg-gray-50 dark:bg-gray-900 relative">
@@ -261,7 +270,7 @@
                     <p class="text-gray-500 dark:text-gray-400 text-sm mt-2" data-i18n="اختر التطبيق الذي تود العمل عليه">اختر التطبيق الذي تود العمل عليه</p>
                 </div>
                 
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="homeGridContainer">
                     
                     <!-- تطبيقات الدومين الحالي (الداخلية) -->
                     <div onclick="window.location.hash='attendance'" class="app-card hover:border-indigo-200 group">
@@ -290,6 +299,13 @@
                             <i class="fa-solid fa-video"></i>
                         </div>
                         <span class="font-bold text-gray-800 dark:text-gray-200" data-i18n="الاجتماعات">الاجتماعات</span>
+                    </div>
+                    
+                    <div id="grid-expenses" onclick="window.location.hash='expenses'" class="app-card hover:border-teal-200 group hidden">
+                        <div class="app-icon-container bg-teal-50 text-teal-600 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-file-invoice-dollar"></i>
+                        </div>
+                        <span class="font-bold text-gray-800 dark:text-gray-200">المصاريف والنثريات</span>
                     </div>
 
                     <!-- روابط لتطبيقات خارجية (الدومين الرئيسي) -->
@@ -330,8 +346,9 @@
                     <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 font-bold" data-i18n="سجل الحضور والانصراف">سجل الحضور والانصراف اليومي</p>
                 </div>
                 
-                <div id="empAttendanceView" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 text-center mb-6">
-                    <h3 class="text-lg font-bold text-primary dark:text-secondary mb-2" id="currentDateStr"></h3>
+                <div id="empAttendanceView" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 text-center mb-6 relative overflow-hidden">
+                    <div id="attendanceLockBanner" class="absolute top-0 left-0 right-0 bg-red-500 text-white text-xs font-bold py-1 hidden">يجب تسجيل الدخول لفتح باقي أقسام النظام</div>
+                    <h3 class="text-lg font-bold text-primary dark:text-secondary mb-2 mt-2" id="currentDateStr"></h3>
                     <p class="text-gray-500 dark:text-gray-400 mb-6 text-sm" id="attendanceStatusMsg">لم تقم بتسجيل الدخول اليوم.</p>
                     
                     <div class="flex flex-wrap justify-center gap-4">
@@ -340,6 +357,9 @@
                         </button>
                         <button onclick="window.punchBreak()" id="punchBreakBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center gap-2 hidden">
                             <i class="fa-solid fa-mug-hot"></i> خروج مؤقت
+                        </button>
+                        <button onclick="window.returnFromBreak()" id="returnBreakBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center gap-2 hidden">
+                            <i class="fa-solid fa-rotate-left"></i> عودة للعمل
                         </button>
                         <button onclick="window.punchOut()" id="punchOutBtn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center gap-2 hidden">
                             <i class="fa-solid fa-person-walking-arrow-right"></i> تسجيل انصراف
@@ -356,12 +376,12 @@
                     </div>
                     
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden overflow-x-auto">
-                        <table class="w-full text-right min-w-[600px]">
+                        <table class="w-full text-right min-w-[700px]">
                             <thead class="bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
                                 <tr>
                                     <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">التاريخ</th>
                                     <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">وقت الدخول</th>
-                                    <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">خروج مؤقت</th>
+                                    <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">فترات الخروج المؤقت</th>
                                     <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">وقت الانصراف</th>
                                 </tr>
                             </thead>
@@ -446,6 +466,55 @@
                         <h3 class="font-bold text-gray-600 dark:text-gray-400 mb-3 border-b border-gray-200 dark:border-gray-700 pb-2 mt-8"><i class="fa-solid fa-clock-rotate-left mx-2"></i><span data-i18n="سجل الاجتماعات">سجل الاجتماعات السابقة</span></h3>
                         <div id="pastMeetingsList" class="space-y-3"></div>
                     </div>
+                </div>
+            </section>
+
+            <section id="expenses" class="section-content hidden animate-fade-in p-4 md:p-0">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
+                    <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 font-bold">سجل المصاريف والنثريات (خاص بالمالية والمدير)</p>
+                    <div class="flex flex-col items-end">
+                        <button onclick="window.downloadExpensesReport()" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm font-bold shadow-sm">
+                            <i class="fa-solid fa-file-excel mx-2"></i> تحميل ملف Excel
+                        </button>
+                        <span id="lastExpensesDownloadTxt" class="text-[10px] text-gray-400 mt-1">آخر سحب للملف: لم يتم السحب بعد</span>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mb-6">
+                    <h3 class="font-bold text-teal-600 dark:text-teal-400 mb-4 border-b border-gray-100 dark:border-gray-700 pb-2">إضافة مصروف جديد</h3>
+                    <form id="expensesForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">البيان / الوصف</label>
+                            <input type="text" id="expDesc" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">المبلغ</label>
+                            <input type="number" step="0.01" id="expAmount" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-500 text-left" dir="ltr">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">التاريخ</label>
+                            <input type="date" id="expDate" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-500">
+                        </div>
+                        <div class="flex items-end">
+                            <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm shadow">إضافة</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden overflow-x-auto">
+                    <table class="w-full text-right min-w-[700px]">
+                        <thead class="bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
+                            <tr>
+                                <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">التاريخ</th>
+                                <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">البيان</th>
+                                <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">المبلغ</th>
+                                <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">أُضيف بواسطة</th>
+                                <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">إجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expensesList" class="divide-y divide-gray-100 dark:divide-gray-700">
+                        </tbody>
+                    </table>
                 </div>
             </section>
 
@@ -702,8 +771,11 @@
         let globalAttendance = [];
         let globalLeaves = [];
         let globalGroups = []; 
-        let globalTasks = []; // تمت إضافة قائمة المهام من أجل تقرير المدير
+        let globalTasks = []; 
+        let globalExpenses = []; // للنثريات
         let groupReadTimestamps = {};
+        
+        let hasPunchedInToday = true; // يتم تغييرها لاحقاً حسب الداتا
 
         // التحميل السريع (Fast Load) من الـ Cache 
         document.addEventListener("DOMContentLoaded", () => {
@@ -727,12 +799,18 @@
                         document.getElementById('ceoAttendanceView').classList.remove('hidden');
                         document.getElementById('ceoReportSection').classList.remove('hidden');
                     }
+                    
+                    if(currentUserData.role === 'CEO' || currentUserData.role === 'accountant') {
+                        document.getElementById('nav-expenses-btn').classList.remove('hidden');
+                        document.getElementById('nav-expenses-btn').style.display = 'flex';
+                        document.getElementById('grid-expenses').classList.remove('hidden');
+                    }
                 } catch(e) { console.error("Cache parsing error", e); }
             }
         });
 
         // ===============================================
-        // زر تحميل التقرير الشهري الخاص بالمدير
+        // ميزة تحميل التقرير الشهري الخاص بالمدير
         // ===============================================
         window.downloadMonthlyReport = () => {
             if(!currentUserData || currentUserData.role !== 'CEO') return;
@@ -743,18 +821,16 @@
             const currentMonth = now.getMonth();
             const currentYear = now.getFullYear();
 
-            // دالة للتحقق مما إذا كان الحدث في الشهر الحالي
             const isThisMonth = (ts) => {
                 if(!ts) return false;
                 const d = new Date(ts);
                 return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
             };
 
-            // إضافة BOM لتوافق الأحرف العربية مع برنامج Excel
             let csvContent = "\uFEFF"; 
             csvContent += `تقرير شركة Quill الشامل\nشهر: ${currentMonth + 1}-${currentYear}\n\n`;
 
-            // 1. الموظفون
+            // الموظفون
             csvContent += "--- الموظفون ---\n";
             csvContent += "الاسم,الوظيفة,البريد الإلكتروني\n";
             globalUsers.forEach(u => {
@@ -762,26 +838,37 @@
             });
             csvContent += "\n";
 
-            // 2. الحضور والانصراف (الشهر الحالي)
+            // الحضور والانصراف (هذا الشهر)
             csvContent += "--- الحضور والانصراف (هذا الشهر) ---\n";
-            csvContent += "الموظف,التاريخ,تسجيل الدخول,خروج مؤقت,تسجيل الانصراف,الحالة\n";
+            csvContent += "الموظف,التاريخ,تسجيل الدخول,فترات الاستراحة,تسجيل الانصراف,الحالة\n";
             const thisMonthAttendance = globalAttendance.filter(a => {
                 const parts = a.date.split('-'); // YYYY-MM-DD
                 return parseInt(parts[0]) === currentYear && parseInt(parts[1]) === (currentMonth + 1);
             });
             thisMonthAttendance.forEach(a => {
                 const pIn = a.punchIn ? new Date(a.punchIn).toLocaleTimeString('ar-EG') : '-';
-                const pBreak = a.breakTime ? new Date(a.breakTime).toLocaleTimeString('ar-EG') : '-';
+                
+                let breakStr = '-';
+                if(a.breaks && a.breaks.length > 0) {
+                    breakStr = a.breaks.map(b => {
+                        const s = b.start ? new Date(b.start).toLocaleTimeString('ar-EG') : '';
+                        const e = b.end ? new Date(b.end).toLocaleTimeString('ar-EG') : 'لم يعد';
+                        return `(${s} الى ${e})`;
+                    }).join(' | ');
+                } else if (a.breakTime) {
+                    breakStr = new Date(a.breakTime).toLocaleTimeString('ar-EG');
+                }
+
                 const pOut = a.punchOut ? new Date(a.punchOut).toLocaleTimeString('ar-EG') : '-';
                 let statusAr = 'مكتمل';
                 if(a.status === 'active') statusAr = 'نشط';
-                else if(a.status === 'break') statusAr = 'استراحة';
+                else if(a.status === 'break') statusAr = 'في استراحة';
                 
-                csvContent += `"${a.name}","${a.date}","${pIn}","${pBreak}","${pOut}","${statusAr}"\n`;
+                csvContent += `"${a.name}","${a.date}","${pIn}","${breakStr}","${pOut}","${statusAr}"\n`;
             });
             csvContent += "\n";
 
-            // 3. الإجازات (الشهر الحالي)
+            // الإجازات (هذا الشهر)
             csvContent += "--- الإجازات والمغادرات (هذا الشهر) ---\n";
             csvContent += "الموظف,النوع,من,إلى,السبب,الحالة\n";
             const thisMonthLeaves = globalLeaves.filter(l => isThisMonth(l.timestamp));
@@ -794,7 +881,7 @@
             });
             csvContent += "\n";
 
-            // 4. المهام (الشهر الحالي)
+            // المهام (هذا الشهر)
             csvContent += "--- المهام (هذا الشهر) ---\n";
             csvContent += "العنوان,المسؤول,تاريخ الإنشاء,وقت التسليم,الحالة\n";
             const thisMonthTasks = globalTasks.filter(t => isThisMonth(t.timestamp));
@@ -806,7 +893,7 @@
             });
             csvContent += "\n";
 
-            // 5. الاجتماعات (الشهر الحالي)
+            // الاجتماعات (هذا الشهر)
             csvContent += "--- الاجتماعات (هذا الشهر) ---\n";
             csvContent += "العنوان,المنشئ,الموعد المجدول,الحالة\n";
             const thisMonthMeetings = globalMeetings.filter(m => isThisMonth(m.timestamp));
@@ -815,8 +902,18 @@
                 const statusAr = m.status === 'ended' ? 'منتهي' : (m.status === 'active' ? 'جاري' : 'مجدول');
                 csvContent += `"${m.title.replace(/"/g, '""')}","${m.creatorName}","${timeStr}","${statusAr}"\n`;
             });
+            csvContent += "\n";
 
-            // إنشاء وتحميل الملف
+            // المصاريف (هذا الشهر)
+            if(globalExpenses.length > 0) {
+                csvContent += "--- المصاريف والنثريات (هذا الشهر) ---\n";
+                csvContent += "التاريخ,البيان,المبلغ,بواسطة\n";
+                const thisMonthExps = globalExpenses.filter(e => isThisMonth(e.timestamp));
+                thisMonthExps.forEach(e => {
+                    csvContent += `"${e.date}","${e.desc.replace(/"/g, '""')}","${e.amount}","${e.addedBy}"\n`;
+                });
+            }
+
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
@@ -830,6 +927,85 @@
             showToast('تم تحميل التقرير الشامل بصيغة Excel', 'success');
         };
 
+        // ===============================================
+        // ميزة المصاريف والنثريات (للمدير والمحاسب)
+        // ===============================================
+        document.getElementById('expensesForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(!currentUserData || (currentUserData.role !== 'CEO' && currentUserData.role !== 'accountant')) return;
+            
+            const desc = document.getElementById('expDesc').value;
+            const amount = document.getElementById('expAmount').value;
+            const date = document.getElementById('expDate').value;
+            
+            try {
+                await addDoc(getColRef('expenses'), {
+                    desc: desc, amount: amount, date: date, addedBy: currentUserData.name, uid: currentUserData.uid, timestamp: Date.now()
+                });
+                document.getElementById('expensesForm').reset();
+                showToast('تم إضافة المصروف بنجاح', 'success');
+            } catch(err) { console.error(err); }
+        });
+
+        window.deleteExpense = async (id) => {
+            if(currentUserData.role !== 'CEO' && currentUserData.role !== 'accountant') return;
+            if(confirm('تأكيد حذف هذا السجل؟')) {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'expenses', id));
+            }
+        };
+
+        function renderExpenses() {
+            const list = document.getElementById('expensesList');
+            if(!list) return;
+            list.innerHTML = '';
+            
+            if(globalExpenses.length === 0) {
+                list.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">لا يوجد سجلات نثريات</td></tr>';
+                return;
+            }
+
+            globalExpenses.forEach(exp => {
+                list.innerHTML += `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <td class="p-3 text-sm" dir="ltr">${exp.date}</td>
+                        <td class="p-3 text-sm font-bold text-gray-800 dark:text-gray-200">${exp.desc}</td>
+                        <td class="p-3 text-sm font-bold text-teal-600 dark:text-teal-400" dir="ltr">${exp.amount} JOD</td>
+                        <td class="p-3 text-xs text-gray-500">${exp.addedBy}</td>
+                        <td class="p-3">
+                            <button onclick="window.deleteExpense('${exp.id}')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-gray-700 p-2 rounded"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        window.downloadExpensesReport = async () => {
+            if(!currentUserData || (currentUserData.role !== 'CEO' && currentUserData.role !== 'accountant')) return;
+
+            let csvContent = "\uFEFFالتاريخ,البيان,المبلغ,أُضيف بواسطة\n";
+            globalExpenses.forEach(e => {
+                csvContent += `"${e.date}","${e.desc.replace(/"/g, '""')}","${e.amount}","${e.addedBy}"\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Quill_Expenses_${new Date().toLocaleDateString('en-CA')}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            const dlTime = Date.now();
+            try {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUserData.uid), { lastExpensesDownload: dlTime });
+                document.getElementById('lastExpensesDownloadTxt').innerText = 'آخر سحب للملف: ' + new Date(dlTime).toLocaleString('ar-EG');
+            } catch(e) {}
+        };
+
+        // ===============================================
+        // إعدادات أخرى وجيتسي
+        // ===============================================
         let currentMeetingId = null;
         const MAX_GLOBAL_STORAGE = 15 * 1024 * 1024; 
         let jitsiApi = null; 
@@ -868,7 +1044,6 @@
             }
         };
 
-        // الحصول على مراجع من قواعد البيانات
         function getColRef(colName) { return collection(db, 'artifacts', appId, 'public', 'data', colName); }
         function getStorageColRef(colName) { return collection(dbStorage, 'artifacts', appId, 'public', 'data', colName); }
 
@@ -886,7 +1061,7 @@
         };
 
         // ===============================================
-        // 1. نظام المستندات (من قاعدة البيانات الثانية)
+        // 1. نظام المستندات 
         // ===============================================
         const MAX_FILE_SIZE = 500 * 1024; 
 
@@ -903,29 +1078,19 @@
             reader.onload = async (ev) => {
                 try {
                     await addDoc(getStorageColRef('files'), {
-                        name: file.name,
-                        type: file.type || 'unknown',
-                        size: file.size, 
-                        sizeStr: sizeStr,
-                        data: ev.target.result,
-                        uploaderName: currentUserData.name,
-                        uploaderId: currentUserData.uid,
-                        pinned: false,
-                        timestamp: Date.now()
+                        name: file.name, type: file.type || 'unknown', size: file.size, sizeStr: sizeStr,
+                        data: ev.target.result, uploaderName: currentUserData.name, uploaderId: currentUserData.uid, pinned: false, timestamp: Date.now()
                     });
                     showToast('تم رفع الملف بنجاح!', 'success');
                     window.logAction('رفع ملف', `تم رفع ملف جديد: ${file.name}`);
-                } catch (err) {
-                    console.error(err);
-                    showToast('حدث خطأ أثناء الرفع.', 'warning');
-                }
+                } catch (err) { showToast('حدث خطأ أثناء الرفع.', 'warning'); }
                 e.target.value = '';
             };
             reader.readAsDataURL(file);
         };
 
         window.togglePinFile = async (fileId, currentPinStatus) => {
-            try { await updateDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'files', fileId), { pinned: !currentPinStatus }); } catch(e) { console.error(e); }
+            try { await updateDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'files', fileId), { pinned: !currentPinStatus }); } catch(e) {}
         };
 
         window.deleteDriveFile = async (fileId, fileName) => {
@@ -934,21 +1099,18 @@
                     await deleteDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'files', fileId));
                     showToast('تم حذف الملف', 'success');
                     window.logAction('حذف ملف', `تم حذف الملف: ${fileName}`);
-                } catch(e) { console.error(e); }
+                } catch(e) {}
             }
         };
 
         function renderDriveFiles() {
             const allContainer = document.getElementById('allFilesContainer');
             const pinnedContainer = document.getElementById('pinnedFilesContainer');
-            allContainer.innerHTML = '';
-            pinnedContainer.innerHTML = '';
+            allContainer.innerHTML = ''; pinnedContainer.innerHTML = '';
             
             const isCEO = currentUserData && currentUserData.role === 'CEO';
 
-            if(globalFiles.length === 0) {
-                allContainer.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد ملفات حالياً.</p>';
-            }
+            if(globalFiles.length === 0) { allContainer.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد ملفات حالياً.</p>'; }
 
             globalFiles.forEach(f => {
                 let iconClass = 'fa-file text-gray-400';
@@ -995,7 +1157,7 @@
         }
 
         // ===============================================
-        // 2. الحضور والانصراف
+        // 2. الحضور والانصراف المحدث (الإجباري والخروج المؤقت)
         // ===============================================
         function getTodayDateString() {
             const d = new Date();
@@ -1008,10 +1170,12 @@
             const docId = `${currentUserData.uid}_${today}`;
             try {
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', docId), {
-                    uid: currentUserData.uid, name: currentUserData.name, date: today, punchIn: Date.now(), breakTime: null, punchOut: null, status: 'active'
+                    uid: currentUserData.uid, name: currentUserData.name, date: today, punchIn: Date.now(), breaks: [], punchOut: null, status: 'active'
                 });
                 showToast('تم تسجيل الدخول بنجاح', 'success');
                 window.logAction('حضور', 'قام الموظف بتسجيل الدخول للدوام');
+                hasPunchedInToday = true;
+                unlockNavigation();
             } catch(e) { console.error(e); }
         };
 
@@ -1020,8 +1184,26 @@
             const today = getTodayDateString();
             const docId = `${currentUserData.uid}_${today}`;
             try {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', docId), { breakTime: Date.now(), status: 'break' });
+                const record = globalAttendance.find(a => a.uid === currentUserData.uid && a.date === today);
+                let breaks = record.breaks || [];
+                breaks.push({ start: Date.now(), end: null });
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', docId), { breaks: breaks, status: 'break' });
                 showToast('تم تسجيل خروج مؤقت', 'warning');
+            } catch(e) { console.error(e); }
+        };
+
+        window.returnFromBreak = async () => {
+            if(!currentUserData) return;
+            const today = getTodayDateString();
+            const docId = `${currentUserData.uid}_${today}`;
+            try {
+                const record = globalAttendance.find(a => a.uid === currentUserData.uid && a.date === today);
+                let breaks = record.breaks || [];
+                if(breaks.length > 0) {
+                    breaks[breaks.length - 1].end = Date.now();
+                }
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', docId), { breaks: breaks, status: 'active' });
+                showToast('عدت للعمل، أهلاً بك', 'success');
             } catch(e) { console.error(e); }
         };
 
@@ -1030,7 +1212,13 @@
             const today = getTodayDateString();
             const docId = `${currentUserData.uid}_${today}`;
             try {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', docId), { punchOut: Date.now(), status: 'completed' });
+                // إذا كان في فترة استراحة ولم يعد منها، نقوم بإغلاق الاستراحة
+                const record = globalAttendance.find(a => a.uid === currentUserData.uid && a.date === today);
+                let breaks = record.breaks || [];
+                if(breaks.length > 0 && breaks[breaks.length - 1].end === null) {
+                    breaks[breaks.length - 1].end = Date.now();
+                }
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', docId), { breaks: breaks, punchOut: Date.now(), status: 'completed' });
                 showToast('تم تسجيل الانصراف.', 'success');
                 window.logAction('انصراف', 'قام الموظف بتسجيل الانصراف');
             } catch(e) { console.error(e); }
@@ -1045,23 +1233,29 @@
             
             const inBtn = document.getElementById('punchInBtn');
             const breakBtn = document.getElementById('punchBreakBtn');
+            const returnBtn = document.getElementById('returnBreakBtn');
             const outBtn = document.getElementById('punchOutBtn');
             const msg = document.getElementById('attendanceStatusMsg');
 
             if(!myTodayRecord) {
-                msg.innerText = 'لم تقم بتسجيل الدخول اليوم.';
-                inBtn.classList.remove('hidden'); breakBtn.classList.add('hidden'); outBtn.classList.add('hidden');
+                msg.innerText = 'لم تقم بتسجيل الدخول اليوم. يجب التسجيل أولاً لفتح باقي النظام.';
+                inBtn.classList.remove('hidden'); breakBtn.classList.add('hidden'); outBtn.classList.add('hidden'); returnBtn.classList.add('hidden');
+                hasPunchedInToday = false;
+                lockNavigationIfNeeded();
             } else {
+                hasPunchedInToday = true;
+                unlockNavigation();
                 inBtn.classList.add('hidden');
+                
                 if(myTodayRecord.status === 'active') {
                     msg.innerText = 'أنت الآن على رأس عملك.';
-                    breakBtn.classList.remove('hidden'); outBtn.classList.remove('hidden');
+                    breakBtn.classList.remove('hidden'); returnBtn.classList.add('hidden'); outBtn.classList.remove('hidden');
                 } else if(myTodayRecord.status === 'break') {
                     msg.innerText = 'أنت الآن في فترة خروج مؤقت.';
-                    breakBtn.classList.add('hidden'); outBtn.classList.remove('hidden');
+                    breakBtn.classList.add('hidden'); returnBtn.classList.remove('hidden'); outBtn.classList.remove('hidden');
                 } else if(myTodayRecord.status === 'completed') {
                     msg.innerText = 'لقد قمت بتسجيل الانصراف لهذا اليوم.';
-                    breakBtn.classList.add('hidden'); outBtn.classList.add('hidden');
+                    breakBtn.classList.add('hidden'); returnBtn.classList.add('hidden'); outBtn.classList.add('hidden');
                 }
             }
         }
@@ -1079,13 +1273,26 @@
 
             empRecords.forEach(r => {
                 const pIn = r.punchIn ? new Date(r.punchIn).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}) : '-';
-                const pBreak = r.breakTime ? new Date(r.breakTime).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}) : '-';
                 const pOut = r.punchOut ? new Date(r.punchOut).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}) : '-';
                 
+                let breaksHtml = '-';
+                if(r.breaks && r.breaks.length > 0) {
+                    breaksHtml = r.breaks.map(b => {
+                        const start = b.start ? new Date(b.start).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}) : '';
+                        const end = b.end ? new Date(b.end).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}) : '...';
+                        return `<div class="text-[10px] bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded inline-block m-0.5" dir="ltr">${start} ➔ ${end}</div>`;
+                    }).join('');
+                } else if(r.breakTime) {
+                    // للتوافق مع السجلات القديمة
+                    breaksHtml = `<div class="text-[10px] bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded inline-block m-0.5" dir="ltr">${new Date(r.breakTime).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}</div>`;
+                }
+
                 list.innerHTML += `
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <tr class="hover:bg-gray-50 dark:bg-gray-800 border-b dark:border-gray-700">
                         <td class="p-3 text-sm font-bold">${r.date}</td>
-                        <td class="p-3 text-sm">${pIn}</td><td class="p-3 text-sm">${pBreak}</td><td class="p-3 text-sm">${pOut}</td>
+                        <td class="p-3 text-sm text-green-600 dark:text-green-400 font-bold">${pIn}</td>
+                        <td class="p-3">${breaksHtml}</td>
+                        <td class="p-3 text-sm text-red-600 dark:text-red-400 font-bold">${pOut}</td>
                     </tr>
                 `;
             });
@@ -1317,7 +1524,7 @@
         }
 
         // ===============================================
-        // 5. التوجيه (Routing) والإشعارات المتبادلة
+        // 5. التوجيه (Routing) والقفل
         // ===============================================
 
         window.openModal = (id) => document.getElementById(id).classList.remove('hidden');
@@ -1331,6 +1538,25 @@
             document.getElementById('sidebar').classList.toggle('translate-x-full');
             document.getElementById('mobileOverlay').classList.toggle('hidden');
         };
+
+        function lockNavigationIfNeeded() {
+            if(currentUserData && currentUserData.role !== 'CEO' && !hasPunchedInToday) {
+                document.getElementById('mainNavigationMenu').classList.add('hidden');
+                document.getElementById('sidebarLockMessage').classList.remove('hidden');
+                document.getElementById('homeGridContainer').classList.add('hidden');
+                document.getElementById('attendanceLockBanner').classList.remove('hidden');
+                if(window.location.hash !== '#attendance') {
+                    window.location.hash = 'attendance';
+                }
+            }
+        }
+
+        function unlockNavigation() {
+            document.getElementById('mainNavigationMenu').classList.remove('hidden');
+            document.getElementById('sidebarLockMessage').classList.add('hidden');
+            document.getElementById('homeGridContainer').classList.remove('hidden');
+            document.getElementById('attendanceLockBanner').classList.add('hidden');
+        }
 
         window.showSection = (sectionId) => {
             if(window.location.hash !== `#${sectionId}`) window.history.pushState(null, null, `#${sectionId}`);
@@ -1360,16 +1586,23 @@
         window.addEventListener('hashchange', () => {
             if(!currentUserData) return;
             const hash = window.location.hash.replace('#', '');
-            const validSections = ['home-grid', 'attendance', 'leaves', 'drive', 'meetings', 'settings'];
+            const validSections = ['home-grid', 'attendance', 'leaves', 'drive', 'meetings', 'settings', 'expenses'];
+            
+            if (!hasPunchedInToday && currentUserData.role !== 'CEO' && hash !== 'attendance') {
+                window.location.hash = 'attendance';
+                showToast('عذراً، يجب تسجيل الحضور أولاً لفتح النظام.', 'warning');
+                return;
+            }
+            
             window.showSection(validSections.includes(hash) ? hash : 'home-grid');
         });
 
-        // 🔴 مستمع الإشعارات للروابط الخارجية (مهام وشات من الدومين الأول)
+        // 🔴 مستمع الإشعارات للروابط الخارجية
         function listenForExternalBadges() {
             onSnapshot(getColRef('tasks'), (snapshot) => {
                 if(!currentUserData) return;
                 let pendingTasks = 0;
-                globalTasks = []; // إضافة تخزين المهام للتقرير الشهري
+                globalTasks = []; 
                 snapshot.forEach(doc => {
                     const task = {id: doc.id, ...doc.data()};
                     globalTasks.push(task);
@@ -1409,19 +1642,27 @@
                     if(unreadCount > 0) { 
                         badge.innerText = unreadCount > 99 ? '+99' : unreadCount; 
                         badge.classList.remove('hidden'); 
-                        badge.classList.replace('bg-red-500', 'bg-blue-500'); // تغيير اللون ليكون متوافقاً مع الأرقام
+                        badge.classList.replace('bg-red-500', 'bg-blue-500'); 
                     }
                     else { badge.classList.add('hidden'); }
                 });
             }, (error) => console.error(error));
+            
+            // مستمع المصاريف (للمالية والمدير فقط)
+            if(currentUserData && (currentUserData.role === 'CEO' || currentUserData.role === 'accountant')) {
+                onSnapshot(getColRef('expenses'), (snapshot) => {
+                    globalExpenses = [];
+                    snapshot.forEach(doc => globalExpenses.push({id: doc.id, ...doc.data()}));
+                    globalExpenses.sort((a,b) => b.timestamp - a.timestamp);
+                    renderExpenses();
+                }, (error) => console.error(error));
+            }
         }
 
         // ===============================================
         // تهيئة النظام والمصادقة
         // ===============================================
         onAuthStateChanged(auth, async (user) => {
-            // إخفاء شاشة التحميل مجرد أن يستجيب الفايربيس (Firebase)
-            // إذا كان التخزين المؤقت قد أخفاها مسبقاً، فهذا لن يؤثر.
             document.getElementById('loadingScreen').classList.add('hidden');
             
             if (user) {
@@ -1434,6 +1675,11 @@
                         currentUserData = docSnap.data();
                         groupReadTimestamps = currentUserData.readReceipts || {};
                         
+                        if(currentUserData.lastExpensesDownload) {
+                            const txt = document.getElementById('lastExpensesDownloadTxt');
+                            if(txt) txt.innerText = 'آخر سحب للملف: ' + new Date(currentUserData.lastExpensesDownload).toLocaleString('ar-EG');
+                        }
+                        
                         document.getElementById('setupProfileScreen').classList.add('hidden');
                         finishLoginSetup();
                     } else {
@@ -1444,7 +1690,7 @@
                     showToast('حدث خطأ في قراءة بياناتك، يرجى تحديث الصفحة', 'error');
                 }
             } else {
-                localStorage.removeItem('quill_user_cache_services'); // مسح التخزين المؤقت عند الخروج
+                localStorage.removeItem('quill_user_cache_services'); 
                 document.getElementById('systemPasswordScreen').classList.remove('hidden');
             }
         });
@@ -1473,7 +1719,6 @@
         });
 
         function finishLoginSetup() {
-            // حفظ بيانات المستخدم في التخزين المؤقت للتحميل السريع في المرة القادمة
             localStorage.setItem('quill_user_cache_services', JSON.stringify(currentUserData));
 
             document.getElementById('userName').innerText = currentUserData.name;
@@ -1488,8 +1733,12 @@
                 document.getElementById('ceoAttendanceView').classList.remove('hidden');
                 document.getElementById('ceoReportSection').classList.remove('hidden');
             }
+            if(currentUserData.role === 'CEO' || currentUserData.role === 'accountant') {
+                document.getElementById('nav-expenses-btn').classList.remove('hidden');
+                document.getElementById('nav-expenses-btn').style.display = 'flex';
+                document.getElementById('grid-expenses').classList.remove('hidden');
+            }
 
-            // تفعيل المستمعات المحلية والمستندات
             onSnapshot(getColRef('users'), (snapshot) => {
                 globalUsers = []; snapshot.forEach(d => globalUsers.push({ id: d.id, ...d.data() }));
                 const select = document.getElementById('attendanceEmpSelect');
@@ -1505,6 +1754,9 @@
                 if(!document.getElementById('attendance').classList.contains('hidden')) {
                     renderEmpAttendanceView();
                     if(currentUserData.role === 'CEO') window.renderSelectedEmpAttendance();
+                } else {
+                    // تشغيل الفحص في الخلفية لضمان قفل النظام لو لزم الأمر
+                    renderEmpAttendanceView();
                 }
             }, (error) => console.error(error));
 
@@ -1523,7 +1775,7 @@
                 globalMeetings.sort((a,b) => b.timestamp - a.timestamp); renderMeetings();
             }, (error) => console.error(error));
 
-            listenForExternalBadges(); // تفعيل إشعارات الروابط الخارجية (للدومين الأول)
+            listenForExternalBadges(); 
             
             window.logAction('تسجيل دخول', `سجل ${currentUserData.name} الدخول لخدمات النظام (الدومين الثاني)`);
             window.dispatchEvent(new Event('hashchange'));
