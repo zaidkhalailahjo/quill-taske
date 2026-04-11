@@ -180,10 +180,8 @@
                 <h2 id="page-title" class="text-lg md:text-xl font-bold text-primary dark:text-secondary hidden md:block" data-i18n="الرئيسية">الرئيسية - التطبيقات</h2>
             </div>
 
-            <div class="flex items-center flex-row-reverse z-10">
-                <img src="https://quill.world/wp-content/uploads/2022/01/New-Project-9-1-1.png" alt="Logo" class="h-8 md:h-10 object-contain block dark:hidden">
-                <img src="https://quill.world/wp-content/uploads/2022/01/New-Project-10-1.png" alt="Logo" class="h-8 md:h-10 object-contain hidden dark:block">
-                <span class="text-xs text-gray-400 ml-2 font-bold mt-2">Services</span>
+            <div class="flex items-center flex-row-reverse z-10 font-bold text-2xl text-primary dark:text-white">
+                QUILL <span class="text-xs text-gray-400 ml-2">Services</span>
             </div>
         </header>
 
@@ -241,6 +239,14 @@
                     </a>
                 </div>
                 
+                <!-- زر التحميل الخاص بالمدير -->
+                <div id="ceoReportSection" class="hidden mt-4 pt-4 border-t border-white/10 dark:border-gray-700">
+                    <p class="text-[10px] text-gray-400 mb-2 px-2">خاص بالمدير</p>
+                    <button onclick="window.downloadMonthlyReport()" class="w-full flex items-center py-3 px-4 rounded-lg text-emerald-300 hover:bg-white/10 hover:text-emerald-400 transition-colors font-bold">
+                        <i class="fa-solid fa-file-excel w-6 text-center ml-3"></i><span class="font-semibold text-sm">التقرير الشامل للشهر</span>
+                    </button>
+                </div>
+
                 <button onclick="window.location.hash='settings'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors mt-4 border-t border-white/10 pt-4" data-section="settings">
                     <i class="fa-solid fa-gear w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="الإعدادات">الإعدادات</span>
                 </button>
@@ -696,6 +702,7 @@
         let globalAttendance = [];
         let globalLeaves = [];
         let globalGroups = []; 
+        let globalTasks = []; // تمت إضافة قائمة المهام من أجل تقرير المدير
         let groupReadTimestamps = {};
 
         // التحميل السريع (Fast Load) من الـ Cache 
@@ -718,10 +725,110 @@
                     if(currentUserData.role === 'CEO') {
                         document.getElementById('createMeetingBtn').classList.remove('hidden');
                         document.getElementById('ceoAttendanceView').classList.remove('hidden');
+                        document.getElementById('ceoReportSection').classList.remove('hidden');
                     }
                 } catch(e) { console.error("Cache parsing error", e); }
             }
         });
+
+        // ===============================================
+        // زر تحميل التقرير الشهري الخاص بالمدير
+        // ===============================================
+        window.downloadMonthlyReport = () => {
+            if(!currentUserData || currentUserData.role !== 'CEO') return;
+
+            showToast('جاري تجهيز التقرير، سيتم التحميل خلال لحظات...', 'info');
+
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+
+            // دالة للتحقق مما إذا كان الحدث في الشهر الحالي
+            const isThisMonth = (ts) => {
+                if(!ts) return false;
+                const d = new Date(ts);
+                return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+            };
+
+            // إضافة BOM لتوافق الأحرف العربية مع برنامج Excel
+            let csvContent = "\uFEFF"; 
+            csvContent += `تقرير شركة Quill الشامل\nشهر: ${currentMonth + 1}-${currentYear}\n\n`;
+
+            // 1. الموظفون
+            csvContent += "--- الموظفون ---\n";
+            csvContent += "الاسم,الوظيفة,البريد الإلكتروني\n";
+            globalUsers.forEach(u => {
+                csvContent += `"${u.name}","${u.role}","${u.email}"\n`;
+            });
+            csvContent += "\n";
+
+            // 2. الحضور والانصراف (الشهر الحالي)
+            csvContent += "--- الحضور والانصراف (هذا الشهر) ---\n";
+            csvContent += "الموظف,التاريخ,تسجيل الدخول,خروج مؤقت,تسجيل الانصراف,الحالة\n";
+            const thisMonthAttendance = globalAttendance.filter(a => {
+                const parts = a.date.split('-'); // YYYY-MM-DD
+                return parseInt(parts[0]) === currentYear && parseInt(parts[1]) === (currentMonth + 1);
+            });
+            thisMonthAttendance.forEach(a => {
+                const pIn = a.punchIn ? new Date(a.punchIn).toLocaleTimeString('ar-EG') : '-';
+                const pBreak = a.breakTime ? new Date(a.breakTime).toLocaleTimeString('ar-EG') : '-';
+                const pOut = a.punchOut ? new Date(a.punchOut).toLocaleTimeString('ar-EG') : '-';
+                let statusAr = 'مكتمل';
+                if(a.status === 'active') statusAr = 'نشط';
+                else if(a.status === 'break') statusAr = 'استراحة';
+                
+                csvContent += `"${a.name}","${a.date}","${pIn}","${pBreak}","${pOut}","${statusAr}"\n`;
+            });
+            csvContent += "\n";
+
+            // 3. الإجازات (الشهر الحالي)
+            csvContent += "--- الإجازات والمغادرات (هذا الشهر) ---\n";
+            csvContent += "الموظف,النوع,من,إلى,السبب,الحالة\n";
+            const thisMonthLeaves = globalLeaves.filter(l => isThisMonth(l.timestamp));
+            thisMonthLeaves.forEach(l => {
+                const fromStr = new Date(l.from).toLocaleString('ar-EG');
+                const toStr = new Date(l.to).toLocaleString('ar-EG');
+                const statusAr = l.status === 'approved' ? 'مقبول' : (l.status === 'rejected' ? 'مرفوض' : 'قيد الانتظار');
+                const reasonStr = l.reason ? l.reason.replace(/"/g, '""').replace(/\n/g, ' ') : '-';
+                csvContent += `"${l.name}","${l.type}","${fromStr}","${toStr}","${reasonStr}","${statusAr}"\n`;
+            });
+            csvContent += "\n";
+
+            // 4. المهام (الشهر الحالي)
+            csvContent += "--- المهام (هذا الشهر) ---\n";
+            csvContent += "العنوان,المسؤول,تاريخ الإنشاء,وقت التسليم,الحالة\n";
+            const thisMonthTasks = globalTasks.filter(t => isThisMonth(t.timestamp));
+            thisMonthTasks.forEach(t => {
+                const createdStr = new Date(t.timestamp).toLocaleString('ar-EG');
+                const deadlineStr = t.deadline ? new Date(t.deadline).toLocaleString('ar-EG') : '-';
+                const statusAr = t.status === 'completed' ? 'مكتمل' : (t.status === 'in-progress' ? 'قيد التنفيذ' : 'قيد الانتظار');
+                csvContent += `"${t.title.replace(/"/g, '""')}","${t.assigneeName}","${createdStr}","${deadlineStr}","${statusAr}"\n`;
+            });
+            csvContent += "\n";
+
+            // 5. الاجتماعات (الشهر الحالي)
+            csvContent += "--- الاجتماعات (هذا الشهر) ---\n";
+            csvContent += "العنوان,المنشئ,الموعد المجدول,الحالة\n";
+            const thisMonthMeetings = globalMeetings.filter(m => isThisMonth(m.timestamp));
+            thisMonthMeetings.forEach(m => {
+                const timeStr = m.scheduledFor ? new Date(m.scheduledFor).toLocaleString('ar-EG') : 'فوري';
+                const statusAr = m.status === 'ended' ? 'منتهي' : (m.status === 'active' ? 'جاري' : 'مجدول');
+                csvContent += `"${m.title.replace(/"/g, '""')}","${m.creatorName}","${timeStr}","${statusAr}"\n`;
+            });
+
+            // إنشاء وتحميل الملف
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Quill_Monthly_Report_${currentYear}_${currentMonth+1}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            window.logAction('تحميل تقرير', 'قام المدير بتحميل التقرير الشهري الشامل');
+            showToast('تم تحميل التقرير الشامل بصيغة Excel', 'success');
+        };
 
         let currentMeetingId = null;
         const MAX_GLOBAL_STORAGE = 15 * 1024 * 1024; 
@@ -1262,8 +1369,10 @@
             onSnapshot(getColRef('tasks'), (snapshot) => {
                 if(!currentUserData) return;
                 let pendingTasks = 0;
+                globalTasks = []; // إضافة تخزين المهام للتقرير الشهري
                 snapshot.forEach(doc => {
-                    const task = doc.data();
+                    const task = {id: doc.id, ...doc.data()};
+                    globalTasks.push(task);
                     if(task.assigneeId === currentUserData.uid && task.status === 'pending') pendingTasks++;
                 });
 
@@ -1377,6 +1486,7 @@
             if(currentUserData.role === 'CEO') {
                 document.getElementById('createMeetingBtn').classList.remove('hidden');
                 document.getElementById('ceoAttendanceView').classList.remove('hidden');
+                document.getElementById('ceoReportSection').classList.remove('hidden');
             }
 
             // تفعيل المستمعات المحلية والمستندات
