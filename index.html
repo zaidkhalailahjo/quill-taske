@@ -755,8 +755,9 @@
                         timestamp: Date.now()
                     });
                     showToast('تم رفع الملف بنجاح!', 'success');
-                    logAction('رفع ملف', `تم رفع ملف جديد: ${file.name}`);
+                    window.logAction('رفع ملف', `تم رفع ملف جديد: ${file.name}`);
                 } catch (err) {
+                    console.error(err);
                     showToast('حدث خطأ أثناء الرفع.', 'warning');
                 }
                 e.target.value = '';
@@ -765,7 +766,7 @@
         };
 
         window.togglePinFile = async (fileId, currentPinStatus) => {
-            try { await updateDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'files', fileId), { pinned: !currentPinStatus }); } catch(e) {}
+            try { await updateDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'files', fileId), { pinned: !currentPinStatus }); } catch(e) { console.error(e); }
         };
 
         window.deleteDriveFile = async (fileId, fileName) => {
@@ -773,8 +774,8 @@
                 try {
                     await deleteDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'files', fileId));
                     showToast('تم حذف الملف', 'success');
-                    logAction('حذف ملف', `تم حذف الملف: ${fileName}`);
-                } catch(e) {}
+                    window.logAction('حذف ملف', `تم حذف الملف: ${fileName}`);
+                } catch(e) { console.error(e); }
             }
         };
 
@@ -851,8 +852,8 @@
                     uid: currentUserData.uid, name: currentUserData.name, date: today, punchIn: Date.now(), breakTime: null, punchOut: null, status: 'active'
                 });
                 showToast('تم تسجيل الدخول بنجاح', 'success');
-                logAction('حضور', 'قام الموظف بتسجيل الدخول للدوام');
-            } catch(e) {}
+                window.logAction('حضور', 'قام الموظف بتسجيل الدخول للدوام');
+            } catch(e) { console.error(e); }
         };
 
         window.punchBreak = async () => {
@@ -862,7 +863,7 @@
             try {
                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', docId), { breakTime: Date.now(), status: 'break' });
                 showToast('تم تسجيل خروج مؤقت', 'warning');
-            } catch(e) {}
+            } catch(e) { console.error(e); }
         };
 
         window.punchOut = async () => {
@@ -872,8 +873,8 @@
             try {
                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', docId), { punchOut: Date.now(), status: 'completed' });
                 showToast('تم تسجيل الانصراف.', 'success');
-                logAction('انصراف', 'قام الموظف بتسجيل الانصراف');
-            } catch(e) {}
+                window.logAction('انصراف', 'قام الموظف بتسجيل الانصراف');
+            } catch(e) { console.error(e); }
         };
 
         function renderEmpAttendanceView() {
@@ -946,8 +947,8 @@
                 });
                 window.closeModal('leaveModal');
                 showToast('تم إرسال طلبك', 'success');
-                logAction('إجازات', 'تم تقديم طلب إجازة جديد');
-            } catch(err) {}
+                window.logAction('إجازات', 'تم تقديم طلب إجازة جديد');
+            } catch(err) { console.error(err); }
         });
 
         window.updateLeaveStatus = async (id, newStatus) => {
@@ -955,7 +956,7 @@
             try {
                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'leaves', id), { status: newStatus });
                 showToast('تم التحديث', 'success');
-            } catch(e) {}
+            } catch(e) { console.error(e); }
         };
 
         function renderLeaves() {
@@ -1042,10 +1043,10 @@
                         emailjs.send(EMAILJS_SERVICE_ID_2, EMAILJS_TEMPLATE_MEETING, {
                             to_email: user.email, to_name: user.name, creator_name: currentUserData.name,
                             meeting_title: title, meeting_time: timeStr, meeting_link: window.location.href, company_name: 'Quill'
-                        }, EMAILJS_PUBLIC_KEY_2);
+                        }, EMAILJS_PUBLIC_KEY_2).catch(e => console.error(e));
                     }
                 });
-            } catch(e) {}
+            } catch(e) { console.error(e); }
         });
 
         window.joinMeeting = async (meetingId, title) => {
@@ -1103,7 +1104,7 @@
                     events.push({ uid: currentUserData.uid, name: currentUserData.name, action: actionType, timestamp: Date.now() });
                     await updateDoc(meetingRef, { events: events });
                 }
-            } catch(e) {}
+            } catch(e) { console.error(e); }
         }
 
         function renderMeetings() {
@@ -1123,10 +1124,10 @@
                 if (meeting.status === 'scheduled' || meeting.status === 'active') {
                     hasActive = true;
                     let statusBadge = meeting.status === 'active' ? `<span class="bg-red-100 text-red-600 text-[10px] px-2 py-1 rounded">جاري الآن</span>` : `<span class="bg-blue-100 text-blue-600 text-[10px] px-2 py-1 rounded">مجدول</span>`;
-                    let actionsHtml = `<button onclick="window.joinMeeting('${meeting.id}', '${meeting.title}')" class="flex-1 bg-green-500 hover:bg-green-600 text-white text-xs py-2 rounded font-bold"><i class="fa-solid fa-video mx-1"></i> انضمام</button>`;
+                    let actionsHtml = `<button onclick="window.joinMeeting('${meeting.id}', '${meeting.title.replace(/'/g, "\\'")}')" class="flex-1 bg-green-500 hover:bg-green-600 text-white text-xs py-2 rounded font-bold"><i class="fa-solid fa-video mx-1"></i> انضمام</button>`;
                     
                     if (isCEO) {
-                        actionsHtml += `<button onclick="window.shareMeetingWhatsApp('${meeting.title}')" class="bg-green-100 text-green-700 w-8 h-8 rounded"><i class="fa-brands fa-whatsapp"></i></button>
+                        actionsHtml += `<button onclick="window.shareMeetingWhatsApp('${meeting.title.replace(/'/g, "\\'")}')" class="bg-green-100 text-green-700 w-8 h-8 rounded"><i class="fa-brands fa-whatsapp"></i></button>
                                         <button onclick="window.endMeetingForEveryone('${meeting.id}')" class="bg-red-100 text-red-600 w-8 h-8 rounded"><i class="fa-solid fa-power-off"></i></button>`;
                     }
 
@@ -1216,7 +1217,7 @@
                     if(pendingTasks > 0) { badge.innerText = pendingTasks; badge.classList.remove('hidden'); }
                     else { badge.classList.add('hidden'); }
                 });
-            });
+            }, (error) => console.error(error));
 
             // الاستماع للدردشة والمجموعات
             onSnapshot(getColRef('groups'), (gSnap) => {
@@ -1225,7 +1226,7 @@
                 gSnap.forEach(doc => {
                     if(doc.data().members && doc.data().members.includes(currentUserData.uid)) globalGroups.push({ id: doc.id, ...doc.data() });
                 });
-            });
+            }, (error) => console.error(error));
 
             onSnapshot(getColRef('chat'), (cSnap) => {
                 if(!currentUserData) return;
@@ -1246,12 +1247,7 @@
                     if(hasUnreadOrMention) { badge.innerText = '!'; badge.classList.remove('hidden'); }
                     else { badge.classList.add('hidden'); }
                 });
-            });
-        }
-
-        async function logAction(action, details) {
-            if(!currentUserData) return;
-            try { await addDoc(getColRef('logs'), { action: action, details: details, userName: currentUserData.name, timestamp: Date.now() }); } catch(e) {}
+            }, (error) => console.error(error));
         }
 
         // ===============================================
@@ -1278,7 +1274,7 @@
         });
 
         document.getElementById('googleLoginBtn').addEventListener('click', async () => {
-            try { await signInWithPopup(auth, new GoogleAuthProvider()); } catch (error) {}
+            try { await signInWithPopup(auth, new GoogleAuthProvider()); } catch (error) { console.error(error); }
         });
 
         document.getElementById('setupProfileForm').addEventListener('submit', async (e) => {
@@ -1295,7 +1291,7 @@
                 currentUserData = newUserData;
                 document.getElementById('setupProfileScreen').classList.add('hidden');
                 finishLoginSetup();
-            } catch(e) {}
+            } catch(e) { console.error(e); }
         });
 
         function finishLoginSetup() {
@@ -1304,6 +1300,7 @@
             document.getElementById('userAvatar').src = currentUserData.photoURL;
             document.getElementById('settingsAvatarPreview').src = currentUserData.photoURL;
             document.getElementById('settingsName').value = currentUserData.name;
+            document.getElementById('settingsRole').value = currentUserData.role;
             
             if(currentUserData.role === 'CEO') {
                 document.getElementById('createMeetingBtn').classList.remove('hidden');
@@ -1315,32 +1312,38 @@
                 globalUsers = []; snapshot.forEach(d => globalUsers.push({ id: d.id, ...d.data() }));
                 const select = document.getElementById('attendanceEmpSelect');
                 if(select && select.options.length <= 1) {
-                    globalUsers.forEach(u => select.innerHTML += `<option value="${u.id}">${u.name}</option>`);
+                    globalUsers.forEach(u => {
+                        if (u.role !== 'CEO') select.innerHTML += `<option value="${u.id}">${u.name}</option>`;
+                    });
                 }
-            });
+            }, (error) => console.error(error));
 
             onSnapshot(getColRef('attendance'), (snapshot) => {
                 globalAttendance = []; snapshot.forEach(d => globalAttendance.push({ id: d.id, ...d.data() }));
-                if(!document.getElementById('attendance').classList.contains('hidden')) renderEmpAttendanceView();
-            });
+                if(!document.getElementById('attendance').classList.contains('hidden')) {
+                    renderEmpAttendanceView();
+                    if(currentUserData.role === 'CEO') window.renderSelectedEmpAttendance();
+                }
+            }, (error) => console.error(error));
 
             onSnapshot(getColRef('leaves'), (snapshot) => {
                 globalLeaves = []; snapshot.forEach(d => globalLeaves.push({ id: d.id, ...d.data() }));
                 globalLeaves.sort((a,b) => b.timestamp - a.timestamp); renderLeaves();
-            });
+            }, (error) => console.error(error));
 
             onSnapshot(getStorageColRef('files'), (snapshot) => {
                 globalFiles = []; snapshot.forEach(d => globalFiles.push({ id: d.id, ...d.data() }));
                 globalFiles.sort((a,b) => b.timestamp - a.timestamp); renderDriveFiles(); updateStorageProgress();
-            });
+            }, (error) => console.error(error));
 
             onSnapshot(getColRef('meetings'), (snapshot) => {
                 globalMeetings = []; snapshot.forEach(d => globalMeetings.push({ id: d.id, ...d.data() }));
                 globalMeetings.sort((a,b) => b.timestamp - a.timestamp); renderMeetings();
-            });
+            }, (error) => console.error(error));
 
             listenForExternalBadges(); // تفعيل إشعارات الروابط الخارجية (للدومين الأول)
             
+            window.logAction('تسجيل دخول', `سجل ${currentUserData.name} الدخول لخدمات النظام (الدومين الثاني)`);
             window.dispatchEvent(new Event('hashchange'));
         }
 
