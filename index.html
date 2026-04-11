@@ -1,1 +1,223 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام شركة Quill - البوابة الرئيسية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class', 
+            theme: {
+                extend: {
+                    colors: { primary: '#002d74', secondary: '#00839b' },
+                    fontFamily: { sans: ['Cairo', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #00839b; border-radius: 4px; }
+        .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #00839b; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 h-screen overflow-hidden flex relative transition-colors duration-300">
 
+    <div id="loadingScreen" class="fixed inset-0 bg-white dark:bg-gray-900 z-50 flex flex-col items-center justify-center">
+        <div class="loader mb-4"></div>
+        <p class="text-primary font-bold text-lg">جاري تحميل النظام...</p>
+    </div>
+
+    <div id="systemPasswordScreen" class="fixed inset-0 bg-primary z-[45] hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-md text-center">
+            <h2 class="text-2xl font-bold mb-4">رمز الدخول للنظام</h2>
+            <input type="password" id="sysPasswordInput" class="w-full border rounded-lg px-4 py-3 mb-4 text-center dark:bg-gray-700 dark:text-white" placeholder="اكتب كلمة السر">
+            <button onclick="window.checkSystemPassword()" class="w-full bg-secondary text-white font-bold py-3 rounded-lg">متابعة</button>
+            <p id="sysPassError" class="text-red-500 text-sm mt-3 hidden font-bold">رمز الدخول غير صحيح!</p>
+        </div>
+    </div>
+
+    <div id="loginScreen" class="fixed inset-0 bg-primary z-40 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-md text-center">
+            <h2 class="text-2xl font-bold mb-4">مرحباً بك في نظام شركة Quill</h2>
+            <p class="text-gray-500 mb-8">يجب تسجيل الدخول للوصول إلى النظام</p>
+            <button id="googleLoginBtn" class="w-full flex items-center justify-center gap-3 border-2 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-600 font-bold">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-6 h-6"> تسجيل الدخول باستخدام Google
+            </button>
+        </div>
+    </div>
+
+    <aside id="sidebar" class="fixed inset-y-0 right-0 w-64 bg-primary text-white flex flex-col shadow-xl z-30 transform translate-x-full md:translate-x-0 transition-transform md:relative">
+        <div class="p-6 text-center text-xl font-bold border-b border-white/10">Quill Portal</div>
+        <nav class="flex-1 mt-4 px-4 space-y-2 overflow-y-auto">
+            <button onclick="window.location.hash='home-grid'" class="w-full flex items-center py-3 px-4 rounded-lg bg-secondary text-white"><i class="fa-solid fa-house w-6 ml-3"></i> الرئيسية</button>
+            
+            <button onclick="window.location.hash='chat'" class="w-full flex items-center py-3 px-4 rounded-lg hover:bg-white/10"><i class="fa-solid fa-comments w-6 ml-3"></i> المناقشة</button>
+            <button onclick="window.location.hash='tasks'" class="w-full flex items-center py-3 px-4 rounded-lg hover:bg-white/10"><i class="fa-solid fa-list-check w-6 ml-3"></i> المهام</button>
+            <button onclick="window.location.hash='crm'" class="w-full flex items-center py-3 px-4 rounded-lg hover:bg-white/10"><i class="fa-solid fa-address-book w-6 ml-3"></i> العملاء</button>
+            <button id="nav-employees-btn" onclick="window.location.hash='employees'" class="hidden w-full flex items-center py-3 px-4 rounded-lg hover:bg-white/10"><i class="fa-solid fa-users w-6 ml-3"></i> الموظفون (للمدير)</button>
+            
+            <hr class="border-white/20 my-4">
+            <p class="text-xs text-gray-400 px-4 mb-2">تطبيقات خارجية</p>
+            <a href="https://meetings.quill.com" class="w-full flex items-center py-3 px-4 rounded-lg hover:bg-white/10 text-gray-300"><i class="fa-solid fa-video w-6 ml-3"></i> الاجتماعات</a>
+            <a href="https://files.quill.com" class="w-full flex items-center py-3 px-4 rounded-lg hover:bg-white/10 text-gray-300"><i class="fa-solid fa-folder-open w-6 ml-3"></i> المستندات</a>
+            <a href="https://notices.quill.com" class="w-full flex items-center py-3 px-4 rounded-lg hover:bg-white/10 text-gray-300"><i class="fa-solid fa-bullhorn w-6 ml-3"></i> التعميمات</a>
+            <a href="https://hr.quill.com" class="w-full flex items-center py-3 px-4 rounded-lg hover:bg-white/10 text-gray-300"><i class="fa-solid fa-clock w-6 ml-3"></i> الحضور والمغادرات</a>
+        </nav>
+    </aside>
+
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+        <header class="bg-white dark:bg-gray-800 shadow-sm p-4 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <img id="userAvatar" src="" class="w-10 h-10 rounded-full border-2 border-secondary object-cover">
+                <div>
+                    <p id="userName" class="text-sm font-bold dark:text-white">جاري التحميل...</p>
+                    <p id="userRole" class="text-xs text-secondary"></p>
+                </div>
+            </div>
+            <button onclick="window.logout()" class="text-red-500 hover:bg-red-50 px-3 py-1 rounded font-bold text-sm"><i class="fa-solid fa-right-from-bracket"></i> خروج</button>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-gray-900 relative">
+            
+            <section id="home-grid" class="section-content animate-fade-in">
+                <h2 class="text-2xl font-bold mb-6 dark:text-white">تطبيقات Quill</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div onclick="window.location.hash='chat'" class="cursor-pointer bg-white dark:bg-gray-800 p-6 rounded-xl shadow border border-gray-100 dark:border-gray-700 flex flex-col items-center hover:border-secondary transition">
+                        <i class="fa-solid fa-comments text-4xl text-orange-500 mb-3"></i><span class="font-bold dark:text-white">المناقشات</span>
+                    </div>
+                    <div onclick="window.location.hash='tasks'" class="cursor-pointer bg-white dark:bg-gray-800 p-6 rounded-xl shadow border border-gray-100 dark:border-gray-700 flex flex-col items-center hover:border-secondary transition">
+                        <i class="fa-solid fa-list-check text-4xl text-emerald-500 mb-3"></i><span class="font-bold dark:text-white">المهام</span>
+                    </div>
+                    <div onclick="window.location.hash='crm'" class="cursor-pointer bg-white dark:bg-gray-800 p-6 rounded-xl shadow border border-gray-100 dark:border-gray-700 flex flex-col items-center hover:border-secondary transition">
+                        <i class="fa-solid fa-address-book text-4xl text-lime-500 mb-3"></i><span class="font-bold dark:text-white">العملاء</span>
+                    </div>
+
+                    <a href="https://meetings.quill.com" class="cursor-pointer bg-white dark:bg-gray-800 p-6 rounded-xl shadow border border-gray-100 dark:border-gray-700 flex flex-col items-center hover:border-blue-500 transition">
+                        <i class="fa-solid fa-video text-4xl text-blue-500 mb-3"></i><span class="font-bold dark:text-white">الاجتماعات <i class="fa-solid fa-external-link-alt text-xs ml-1"></i></span>
+                    </a>
+                    <a href="https://files.quill.com" class="cursor-pointer bg-white dark:bg-gray-800 p-6 rounded-xl shadow border border-gray-100 dark:border-gray-700 flex flex-col items-center hover:border-cyan-500 transition">
+                        <i class="fa-solid fa-folder-open text-4xl text-cyan-500 mb-3"></i><span class="font-bold dark:text-white">المستندات <i class="fa-solid fa-external-link-alt text-xs ml-1"></i></span>
+                    </a>
+                </div>
+            </section>
+
+            <section id="chat" class="section-content hidden animate-fade-in h-full">
+                <div class="flex h-[80vh] bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden relative">
+                    <div class="flex-1 flex flex-col p-4 justify-center items-center text-gray-400">
+                        <i class="fa-solid fa-comments text-4xl mb-2"></i>
+                        <p>نظام المناقشات يعمل هنا (نفس الكود السابق)</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tasks" class="section-content hidden animate-fade-in h-full">
+               <div class="flex-1 flex flex-col p-4 justify-center items-center text-gray-400">
+                    <i class="fa-solid fa-list-check text-4xl mb-2"></i>
+                    <p>نظام المهام يعمل هنا (نفس الكود السابق)</p>
+               </div>
+            </section>
+
+            <section id="crm" class="section-content hidden animate-fade-in h-full">
+               <div class="flex-1 flex flex-col p-4 justify-center items-center text-gray-400">
+                    <i class="fa-solid fa-address-book text-4xl mb-2"></i>
+                    <p>نظام العملاء يعمل هنا (نفس الكود السابق)</p>
+               </div>
+            </section>
+
+            <section id="employees" class="section-content hidden animate-fade-in h-full">
+               <div class="flex-1 flex flex-col p-4 justify-center items-center text-gray-400">
+                    <i class="fa-solid fa-users text-4xl mb-2"></i>
+                    <p>قائمة الموظفين تعمل هنا للمدير (نفس الكود السابق)</p>
+               </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // هنا قاعدة بياناتك الأساسية للـ (Users, Tasks, Chat, CRM)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCfoP0rgX8WZthQVP_AeZcxDHHCllgu3TM",
+            authDomain: "quill-world.firebaseapp.com",
+            projectId: "quill-world",
+            storageBucket: "quill-world.firebasestorage.app",
+            messagingSenderId: "339188796023",
+            appId: "1:339188796023:web:e0a1ba750b49909220d472"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // -- دوال الواجهة المبسطة --
+        window.checkSystemPassword = () => {
+            if(document.getElementById('sysPasswordInput').value === '1112021') {
+                document.getElementById('systemPasswordScreen').classList.add('hidden');
+                document.getElementById('loginScreen').classList.remove('hidden');
+            } else {
+                document.getElementById('sysPassError').classList.remove('hidden');
+            }
+        };
+
+        document.getElementById('googleLoginBtn').addEventListener('click', async () => {
+            try { await signInWithPopup(auth, new GoogleAuthProvider()); } catch (error) {}
+        });
+
+        window.logout = () => signOut(auth).then(() => window.location.reload());
+
+        onAuthStateChanged(auth, async (user) => {
+            document.getElementById('loadingScreen').classList.add('hidden');
+            if (user) {
+                document.getElementById('systemPasswordScreen').classList.add('hidden');
+                document.getElementById('loginScreen').classList.add('hidden');
+                
+                // جلب بيانات المستخدم
+                const docSnap = await getDoc(doc(db, 'artifacts', 'quill-world-system', 'public', 'data', 'users', user.uid));
+                if (docSnap.exists()) {
+                    const userData = docSnap.data();
+                    document.getElementById('userName').innerText = userData.name;
+                    document.getElementById('userRole').innerText = userData.role;
+                    document.getElementById('userAvatar').src = userData.photoURL || '';
+                    
+                    if(userData.role === 'CEO') {
+                        document.getElementById('nav-employees-btn').classList.remove('hidden');
+                    }
+                }
+            } else {
+                document.getElementById('systemPasswordScreen').classList.remove('hidden');
+            }
+        });
+
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash.replace('#', '') || 'home-grid';
+            document.querySelectorAll('.section-content').forEach(el => el.classList.add('hidden'));
+            const activeSec = document.getElementById(hash);
+            if(activeSec) activeSec.classList.remove('hidden');
+        });
+        
+        // تفعيل النافذة عند التحميل
+        if(!window.location.hash) window.location.hash = 'home-grid';
+        else window.dispatchEvent(new Event('hashchange'));
+
+        // ===============================================
+        // ملاحظة لك يا مهندس:
+        // في هذا الملف ستضع دوال الجافاسكريبت المتبقية 
+        // الخاصة بـ (المهام، الدردشة، العملاء، والموظفين) فقط.
+        // أي شيء آخر (ملفات، اجتماعات، إجازات) تم مسحه من هنا!
+        // ===============================================
+    </script>
+</body>
+</html>
