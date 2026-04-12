@@ -77,6 +77,13 @@
             margin-bottom: 1rem;
             font-size: 1.5rem;
         }
+        
+        @media print {
+            body * { visibility: hidden; }
+            #printArea, #printArea * { visibility: visible; }
+            #printArea { position: absolute; left: 0; top: 0; width: 100%; direction: rtl; }
+            .no-print { display: none !important; }
+        }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 h-screen overflow-hidden flex relative transition-colors duration-300">
@@ -146,7 +153,7 @@
 
     <div class="flex-1 flex flex-col h-screen overflow-hidden w-full relative">
         
-        <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 p-4 flex justify-between items-center z-10 flex-shrink-0 relative transition-colors">
+        <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 p-4 flex justify-between items-center z-10 flex-shrink-0 relative transition-colors no-print">
             <div class="flex items-center space-x-2 md:space-x-4 space-x-reverse z-10">
                 <button onclick="window.toggleSidebar()" class="md:hidden text-gray-500 hover:text-primary ml-2">
                     <i class="fa-solid fa-bars text-xl"></i>
@@ -166,10 +173,6 @@
                 <button onclick="window.toggleTheme()" class="text-gray-400 hover:text-secondary p-2 rounded transition" title="الوضع الليلي/النهاري">
                     <i id="themeToggleIcon" class="fa-solid fa-moon"></i>
                 </button>
-
-                <button onclick="window.showLatestNotification()" class="text-gray-400 hover:text-secondary p-2 rounded transition" title="آخر إشعار">
-                    <i class="fa-solid fa-bell"></i>
-                </button>
             </div>
             
             <div class="absolute inset-x-0 top-0 h-full flex items-center justify-center pointer-events-none w-full z-0">
@@ -184,8 +187,8 @@
             </div>
         </header>
 
-        <div id="mobileOverlay" class="fixed inset-0 bg-black/50 z-20 hidden md:hidden transition-opacity" onclick="window.toggleSidebar()"></div>
-        <aside id="sidebar" class="fixed inset-y-0 right-0 transform translate-x-full transition duration-300 ease-in-out w-64 bg-primary dark:bg-gray-800 text-white flex flex-col shadow-xl z-30 flex-shrink-0 md:hidden">
+        <div id="mobileOverlay" class="fixed inset-0 bg-black/50 z-20 hidden md:hidden transition-opacity no-print" onclick="window.toggleSidebar()"></div>
+        <aside id="sidebar" class="fixed inset-y-0 right-0 transform translate-x-full transition duration-300 ease-in-out w-64 bg-primary dark:bg-gray-800 text-white flex flex-col shadow-xl z-30 flex-shrink-0 md:hidden no-print">
             <div class="p-6 flex items-center justify-between border-b border-white/10 dark:border-gray-700">
                 <div class="flex items-center gap-2">
                     <img src="https://quill.world/wp-content/uploads/2022/01/New-Project-10-1.png" alt="Logo" class="h-8 object-contain">
@@ -201,7 +204,6 @@
                     <i class="fa-solid fa-house w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="الرئيسية">الرئيسية</span>
                 </button>
                 
-                <!-- تطبيقات النطاق الحالي -->
                 <button onclick="window.location.hash='attendance'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors" data-section="attendance">
                     <i class="fa-solid fa-clock w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="الحضور والانصراف">الحضور والانصراف</span>
                 </button>
@@ -215,12 +217,10 @@
                     <i class="fa-solid fa-video w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="الاجتماعات">الاجتماعات</span>
                 </button>
                 
-                <!-- زر النثريات (للمالية والمدير فقط) -->
                 <button id="nav-expenses-btn" onclick="window.location.hash='expenses'" class="nav-btn hidden w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative" data-section="expenses">
                     <i class="fa-solid fa-file-invoice-dollar w-6 text-center ml-3"></i><span class="font-semibold text-sm">المصاريف والنثريات</span>
                 </button>
 
-                <!-- قسم الروابط الخارجية للنطاق الأول -->
                 <div class="mt-4 pt-4 border-t border-white/10 dark:border-gray-700">
                     <p class="text-[10px] text-gray-400 mb-2 px-2" data-i18n="تطبيقات خارجية">تطبيقات النظام الرئيسية</p>
                     
@@ -243,14 +243,6 @@
                     </a>
                 </div>
                 
-                <!-- زر التحميل الخاص بالمدير -->
-                <div id="ceoReportSection" class="hidden mt-4 pt-4 border-t border-white/10 dark:border-gray-700">
-                    <p class="text-[10px] text-gray-400 mb-2 px-2">خاص بالمدير</p>
-                    <button onclick="window.downloadMonthlyReport()" class="w-full flex items-center py-3 px-4 rounded-lg text-emerald-300 hover:bg-white/10 hover:text-emerald-400 transition-colors font-bold">
-                        <i class="fa-solid fa-file-excel w-6 text-center ml-3"></i><span class="font-semibold text-sm">التقرير الشامل للشهر</span>
-                    </button>
-                </div>
-
                 <button onclick="window.location.hash='settings'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors mt-4 border-t border-white/10 pt-4" data-section="settings">
                     <i class="fa-solid fa-gear w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="الإعدادات">الإعدادات</span>
                 </button>
@@ -265,9 +257,17 @@
         <div class="flex-1 overflow-y-auto p-0 md:p-6 bg-gray-50 dark:bg-gray-900 relative">
             
             <section id="home-grid" class="section-content animate-fade-in p-4 md:p-10 max-w-6xl mx-auto">
-                <div class="mb-10 text-right">
-                    <h2 class="text-3xl font-bold text-gray-800 dark:text-white" data-i18n="الخدمات والمستندات">الخدمات والمستندات</h2>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm mt-2" data-i18n="اختر التطبيق الذي تود العمل عليه">اختر التطبيق الذي تود العمل عليه</p>
+                <div class="mb-10 flex justify-between items-end">
+                    <div class="text-right">
+                        <h2 class="text-3xl font-bold text-gray-800 dark:text-white" data-i18n="الخدمات والمستندات">الخدمات والمستندات</h2>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mt-2" data-i18n="اختر التطبيق الذي تود العمل عليه">اختر التطبيق الذي تود العمل عليه</p>
+                    </div>
+                    <!-- زر سحب تفاصيل النظام للمدير -->
+                    <div id="ceoExportSection" class="hidden">
+                        <button onclick="window.openModal('exportModal')" class="bg-primary hover:bg-secondary text-white px-5 py-2.5 rounded-xl transition-colors font-bold shadow-md flex items-center gap-2">
+                            <i class="fa-solid fa-file-export"></i> سحب تفاصيل النظام
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="homeGridContainer">
@@ -419,11 +419,11 @@
                             <tr>
                                 <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">الموظف</th>
                                 <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">النوع (الرصيد)</th>
-                                <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">التفاصيل</th>
+                                <th class="p-3 font-semibold text-gray-600 dark:text-gray-200 text-center">التفاصيل</th>
                                 <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">من تاريخ</th>
                                 <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">إلى تاريخ</th>
                                 <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">الحالة</th>
-                                <th id="leaveActionHeader" class="p-3 font-semibold text-gray-600 dark:text-gray-200 hidden">الإجراء</th>
+                                <th id="leaveActionHeader" class="p-3 font-semibold text-gray-600 dark:text-gray-200 hidden text-center">الإجراء</th>
                             </tr>
                         </thead>
                         <tbody id="leavesList" class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -485,17 +485,11 @@
             <section id="expenses" class="section-content hidden animate-fade-in p-4 md:p-0">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
                     <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 font-bold">سجل المصاريف والنثريات (خاص بالمالية والمدير)</p>
-                    <div class="flex flex-col items-end">
-                        <button onclick="window.downloadExpensesReport()" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm font-bold shadow-sm">
-                            <i class="fa-solid fa-file-excel mx-2"></i> تحميل ملف Excel
-                        </button>
-                        <span id="lastExpensesDownloadTxt" class="text-[10px] text-gray-400 mt-1">آخر سحب للملف: لم يتم السحب بعد</span>
-                    </div>
                 </div>
 
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mb-6">
                     <h3 class="font-bold text-teal-600 dark:text-teal-400 mb-4 border-b border-gray-100 dark:border-gray-700 pb-2">إضافة مصروف جديد</h3>
-                    <form id="expensesForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <form id="expensesForm" onsubmit="window.handleExpenseSubmit(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">البيان / الوصف</label>
                             <input type="text" id="expDesc" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-500">
@@ -522,7 +516,7 @@
                                 <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">البيان</th>
                                 <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">المبلغ</th>
                                 <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">أُضيف بواسطة</th>
-                                <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">إجراء</th>
+                                <th class="p-3 font-semibold text-gray-600 dark:text-gray-200 text-center">إجراء</th>
                             </tr>
                         </thead>
                         <tbody id="expensesList" class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -607,7 +601,7 @@
         </div>
     </div>
     
-    <!-- نافذة قراءة تفاصيل الطلب -->
+    <!-- نافذة قراءة تفاصيل الطلب للمدير -->
     <div id="leaveDetailsModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[60] p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden">
             <div class="bg-pink-600 text-white p-4 flex justify-between items-center">
@@ -625,6 +619,36 @@
             </div>
         </div>
     </div>
+
+    <!-- نافذة سحب التقارير للمدير -->
+    <div id="exportModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[60] p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden">
+            <div class="bg-primary text-white p-4 flex justify-between items-center">
+                <h3 class="font-bold text-base md:text-lg">سحب تفاصيل النظام (كاملة)</h3>
+                <button onclick="window.closeModal('exportModal')" class="hover:text-gray-300"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-6 text-center">
+                <i class="fa-solid fa-database text-4xl text-gray-400 mb-3"></i>
+                <p class="text-sm text-gray-600 dark:text-gray-300 font-bold mb-1">اختر الصيغة التي تريد تحميل البيانات بها</p>
+                <p id="lastSystemExportTxt" class="text-[10px] text-red-500 font-bold mb-6">آخر سحب: لم يتم السحب بعد</p>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="window.exportSystemData('excel')" class="flex flex-col items-center justify-center gap-2 p-4 bg-green-50 dark:bg-gray-700 hover:bg-green-100 dark:hover:bg-gray-600 border border-green-200 dark:border-gray-600 rounded-xl transition cursor-pointer">
+                        <i class="fa-solid fa-file-excel text-3xl text-green-600 dark:text-green-400"></i>
+                        <span class="font-bold text-gray-800 dark:text-white text-sm">ملف Excel</span>
+                    </button>
+                    
+                    <button onclick="window.exportSystemData('pdf')" class="flex flex-col items-center justify-center gap-2 p-4 bg-red-50 dark:bg-gray-700 hover:bg-red-100 dark:hover:bg-gray-600 border border-red-200 dark:border-gray-600 rounded-xl transition cursor-pointer">
+                        <i class="fa-solid fa-file-pdf text-3xl text-red-600 dark:text-red-400"></i>
+                        <span class="font-bold text-gray-800 dark:text-white text-sm">ملف PDF</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة الطباعة المخفية (لـ PDF) -->
+    <div id="printArea" class="hidden bg-white text-black p-8 text-right" dir="rtl"></div>
 
     <div id="createMeetingModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden">
@@ -828,7 +852,7 @@
                     if(currentUserData.role === 'CEO') {
                         document.getElementById('createMeetingBtn').classList.remove('hidden');
                         document.getElementById('ceoAttendanceView').classList.remove('hidden');
-                        document.getElementById('ceoReportSection').classList.remove('hidden');
+                        document.getElementById('ceoExportSection').classList.remove('hidden');
                     }
                     
                     if(currentUserData.role === 'CEO' || currentUserData.role === 'accountant') {
@@ -841,121 +865,88 @@
         });
 
         // ===============================================
-        // ميزة تحميل التقرير الشهري الخاص بالمدير
+        // ميزة سحب تفاصيل النظام الشاملة
         // ===============================================
-        window.downloadMonthlyReport = () => {
+        window.exportSystemData = (format) => {
             if(!currentUserData || currentUserData.role !== 'CEO') return;
 
-            showToast('جاري تجهيز التقرير، سيتم التحميل خلال لحظات...', 'info');
+            showToast('جاري تجهيز البيانات، سيتم التحميل خلال لحظات...', 'info');
 
             const now = new Date();
-            const currentMonth = now.getMonth();
-            const currentYear = now.getFullYear();
+            let content = "";
+            let htmlContent = "";
 
-            const isThisMonth = (ts) => {
-                if(!ts) return false;
-                const d = new Date(ts);
-                return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
-            };
+            if (format === 'excel') {
+                content = "\uFEFF"; 
+                content += `تقرير نظام شركة Quill الشامل (كامل السجل)\nتاريخ السحب: ${now.toLocaleString('ar-EG')}\n\n`;
 
-            let csvContent = "\uFEFF"; 
-            csvContent += `تقرير شركة Quill الشامل\nشهر: ${currentMonth + 1}-${currentYear}\n\n`;
-
-            // الموظفون
-            csvContent += "--- الموظفون ---\n";
-            csvContent += "الاسم,الوظيفة,البريد الإلكتروني\n";
-            globalUsers.forEach(u => {
-                csvContent += `"${u.name}","${u.role}","${u.email}"\n`;
-            });
-            csvContent += "\n";
-
-            // الحضور والانصراف (هذا الشهر)
-            csvContent += "--- الحضور والانصراف (هذا الشهر) ---\n";
-            csvContent += "الموظف,التاريخ,تسجيل الدخول,فترات الاستراحة,تسجيل الانصراف,الحالة\n";
-            const thisMonthAttendance = globalAttendance.filter(a => {
-                const parts = a.date.split('-'); // YYYY-MM-DD
-                return parseInt(parts[0]) === currentYear && parseInt(parts[1]) === (currentMonth + 1);
-            });
-            thisMonthAttendance.forEach(a => {
-                const pIn = a.punchIn ? new Date(a.punchIn).toLocaleTimeString('ar-EG') : '-';
+                content += "--- الموظفون ---\nالاسم,الوظيفة,تاريخ الانضمام\n";
+                globalUsers.forEach(u => { content += `"${u.name}","${u.role}","${new Date(u.timestamp||0).toLocaleDateString('ar-EG')}"\n`; });
                 
-                let breakStr = '-';
-                if(a.breaks && a.breaks.length > 0) {
-                    breakStr = a.breaks.map(b => {
-                        const s = b.start ? new Date(b.start).toLocaleTimeString('ar-EG') : '';
-                        const e = b.end ? new Date(b.end).toLocaleTimeString('ar-EG') : 'لم يعد';
-                        return `(${s} الى ${e})`;
-                    }).join(' | ');
-                } else if (a.breakTime) {
-                    breakStr = new Date(a.breakTime).toLocaleTimeString('ar-EG');
+                content += "\n--- الحضور والانصراف (السجل الكامل) ---\nالموظف,التاريخ,تسجيل الدخول,تسجيل الانصراف,الحالة\n";
+                globalAttendance.forEach(a => {
+                    const pIn = a.punchIn ? new Date(a.punchIn).toLocaleTimeString('ar-EG') : '-';
+                    const pOut = a.punchOut ? new Date(a.punchOut).toLocaleTimeString('ar-EG') : '-';
+                    content += `"${a.name}","${a.date}","${pIn}","${pOut}","${a.status}"\n`;
+                });
+
+                content += "\n--- الإجازات والمغادرات (السجل الكامل) ---\nالموظف,النوع,من,إلى,السبب,الحالة\n";
+                globalLeaves.forEach(l => {
+                    const fromStr = new Date(l.from).toLocaleString('ar-EG');
+                    const toStr = new Date(l.to).toLocaleString('ar-EG');
+                    const reasonStr = l.reason ? l.reason.replace(/"/g, '""').replace(/\n/g, ' ') : '-';
+                    content += `"${l.name}","${l.type}","${fromStr}","${toStr}","${reasonStr}","${l.status}"\n`;
+                });
+
+                content += "\n--- المهام (السجل الكامل) ---\nالعنوان,المسؤول,تاريخ الإنشاء,وقت التسليم,الحالة\n";
+                globalTasks.forEach(t => {
+                    const createdStr = new Date(t.timestamp).toLocaleString('ar-EG');
+                    const deadlineStr = t.deadline ? new Date(t.deadline).toLocaleString('ar-EG') : '-';
+                    content += `"${t.title.replace(/"/g, '""')}","${t.assigneeName}","${createdStr}","${deadlineStr}","${t.status}"\n`;
+                });
+
+                if(globalExpenses.length > 0) {
+                    content += "\n--- المصاريف والنثريات (السجل الكامل) ---\nالتاريخ,البيان,المبلغ,بواسطة\n";
+                    globalExpenses.forEach(e => { content += `"${e.date}","${e.desc.replace(/"/g, '""')}","${e.amount}","${e.addedBy}"\n`; });
                 }
 
-                const pOut = a.punchOut ? new Date(a.punchOut).toLocaleTimeString('ar-EG') : '-';
-                let statusAr = 'مكتمل';
-                if(a.status === 'active') statusAr = 'نشط';
-                else if(a.status === 'break') statusAr = 'في استراحة';
-                
-                csvContent += `"${a.name}","${a.date}","${pIn}","${breakStr}","${pOut}","${statusAr}"\n`;
-            });
-            csvContent += "\n";
+                const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", `Quill_System_Export_${now.getTime()}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
 
-            // الإجازات (هذا الشهر)
-            csvContent += "--- الإجازات والمغادرات (هذا الشهر) ---\n";
-            csvContent += "الموظف,النوع,من,إلى,السبب,الحالة\n";
-            const thisMonthLeaves = globalLeaves.filter(l => isThisMonth(l.timestamp));
-            thisMonthLeaves.forEach(l => {
-                const fromStr = new Date(l.from).toLocaleString('ar-EG');
-                const toStr = new Date(l.to).toLocaleString('ar-EG');
-                const statusAr = l.status === 'approved' ? 'مقبول' : (l.status === 'rejected' ? 'مرفوض' : 'قيد الانتظار');
-                const reasonStr = l.reason ? l.reason.replace(/"/g, '""').replace(/\n/g, ' ') : '-';
-                csvContent += `"${l.name}","${l.type}","${fromStr}","${toStr}","${reasonStr}","${statusAr}"\n`;
-            });
-            csvContent += "\n";
-
-            // المهام (هذا الشهر)
-            csvContent += "--- المهام (هذا الشهر) ---\n";
-            csvContent += "العنوان,المسؤول,تاريخ الإنشاء,وقت التسليم,الحالة\n";
-            const thisMonthTasks = globalTasks.filter(t => isThisMonth(t.timestamp));
-            thisMonthTasks.forEach(t => {
-                const createdStr = new Date(t.timestamp).toLocaleString('ar-EG');
-                const deadlineStr = t.deadline ? new Date(t.deadline).toLocaleString('ar-EG') : '-';
-                const statusAr = t.status === 'completed' ? 'مكتمل' : (t.status === 'in-progress' ? 'قيد التنفيذ' : 'قيد الانتظار');
-                csvContent += `"${t.title.replace(/"/g, '""')}","${t.assigneeName}","${createdStr}","${deadlineStr}","${statusAr}"\n`;
-            });
-            csvContent += "\n";
-
-            // الاجتماعات (هذا الشهر)
-            csvContent += "--- الاجتماعات (هذا الشهر) ---\n";
-            csvContent += "العنوان,المنشئ,الموعد المجدول,الحالة\n";
-            const thisMonthMeetings = globalMeetings.filter(m => isThisMonth(m.timestamp));
-            thisMonthMeetings.forEach(m => {
-                const timeStr = m.scheduledFor ? new Date(m.scheduledFor).toLocaleString('ar-EG') : 'فوري';
-                const statusAr = m.status === 'ended' ? 'منتهي' : (m.status === 'active' ? 'جاري' : 'مجدول');
-                csvContent += `"${m.title.replace(/"/g, '""')}","${m.creatorName}","${timeStr}","${statusAr}"\n`;
-            });
-            csvContent += "\n";
-
-            // المصاريف (هذا الشهر)
-            if(globalExpenses.length > 0) {
-                csvContent += "--- المصاريف والنثريات (هذا الشهر) ---\n";
-                csvContent += "التاريخ,البيان,المبلغ,بواسطة\n";
-                const thisMonthExps = globalExpenses.filter(e => isThisMonth(e.timestamp));
-                thisMonthExps.forEach(e => {
-                    csvContent += `"${e.date}","${e.desc.replace(/"/g, '""')}","${e.amount}","${e.addedBy}"\n`;
-                });
+            } else if (format === 'pdf') {
+                htmlContent = `
+                    <div style="font-family: 'Cairo', sans-serif; padding: 20px;">
+                        <h1 style="color: #002d74; border-bottom: 2px solid #00839b; padding-bottom: 10px;">تقرير نظام شركة Quill الشامل</h1>
+                        <p style="color: gray;">تاريخ سحب التقرير: ${now.toLocaleString('ar-EG')}</p>
+                        
+                        <h3 style="color: #00839b; margin-top: 30px;">إحصائيات النظام:</h3>
+                        <ul>
+                            <li>عدد الموظفين المسجلين: ${globalUsers.length}</li>
+                            <li>إجمالي المهام في النظام: ${globalTasks.length}</li>
+                            <li>إجمالي طلبات الإجازات والمغادرات: ${globalLeaves.length}</li>
+                            <li>إجمالي عدد المصاريف المسجلة: ${globalExpenses.length}</li>
+                        </ul>
+                        <p style="margin-top: 50px; text-align: center; color: gray; font-size: 12px;">نهاية التقرير.</p>
+                    </div>
+                `;
+                const printDiv = document.getElementById('printArea');
+                printDiv.innerHTML = htmlContent;
+                window.print();
             }
 
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", `Quill_Monthly_Report_${currentYear}_${currentMonth+1}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            window.logAction('تحميل تقرير', 'قام المدير بتحميل التقرير الشهري الشامل');
-            showToast('تم تحميل التقرير الشامل بصيغة Excel', 'success');
+            const exportTime = Date.now();
+            updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUserData.uid), { lastSystemExport: exportTime }).catch(e=>console.log(e));
+            const txt = document.getElementById('lastSystemExportTxt');
+            if(txt) txt.innerText = 'آخر سحب: ' + new Date(exportTime).toLocaleString('ar-EG');
+            
+            window.closeModal('exportModal');
+            window.logAction('تحميل تقرير', `قام المدير بسحب تفاصيل النظام الكاملة بصيغة ${format.toUpperCase()}`);
         };
 
         let currentMeetingId = null;
@@ -1086,13 +1077,17 @@
                 else if(f.type.includes('word')) iconClass = 'fa-file-word text-blue-600';
 
                 const isOwner = f.uploaderId === currentUserData.uid;
-                const deleteBtn = isOwner || isCEO ? `<button onclick="window.deleteDriveFile('${f.id}', '${f.name.replace(/'/g, "\\'")}')" class="text-red-400 hover:text-red-600 p-1" title="حذف"><i class="fa-solid fa-trash"></i></button>` : '';
+                // السماح لصاحب الملف أو المدير بالحذف والتثبيت
+                const canManage = isOwner || isCEO;
+                const deleteBtn = canManage ? `<button onclick="window.deleteDriveFile('${f.id}', '${f.name.replace(/'/g, "\\'")}')" class="text-red-400 hover:text-red-600 p-1" title="حذف"><i class="fa-solid fa-trash"></i></button>` : '';
+                const pinBtnClass = canManage ? 'cursor-pointer hover:text-primary' : 'cursor-not-allowed opacity-50';
+                const pinBtnAction = canManage ? `onclick="window.togglePinFile('${f.id}', ${f.pinned})"` : '';
 
                 const cardHtml = `
                     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm hover:shadow-md transition group flex flex-col h-full">
                         <div class="flex justify-between items-start mb-2">
                             <i class="fa-solid ${iconClass} text-2xl"></i>
-                            <button onclick="window.togglePinFile('${f.id}', ${f.pinned})" class="text-xl ${f.pinned ? 'text-primary dark:text-secondary' : 'text-gray-300 dark:text-gray-600 hover:text-primary'}"><i class="fa-solid fa-thumbtack"></i></button>
+                            <button ${pinBtnAction} class="text-xl ${pinBtnClass} ${f.pinned ? 'text-primary dark:text-secondary' : 'text-gray-300 dark:text-gray-600'}"><i class="fa-solid fa-thumbtack"></i></button>
                         </div>
                         <h4 class="font-bold text-sm text-gray-800 dark:text-gray-200 truncate mb-1" title="${f.name}">${f.name}</h4>
                         <p class="text-[10px] text-gray-400 mb-3">${f.sizeStr} • بواسطة ${f.uploaderName}</p>
@@ -1262,7 +1257,7 @@
         };
 
         // ===============================================
-        // 3. الإجازات وتتبع الرصيد
+        // 3. الإجازات وتتبع الرصيد (14 يوم - 20 ساعة)
         // ===============================================
         function calculateBalances(uid) {
             const currentYear = new Date().getFullYear();
@@ -1274,9 +1269,9 @@
                     const fromDate = new Date(l.from);
                     if(fromDate.getFullYear() === currentYear) {
                         const diffMs = l.to - l.from;
-                        if(l.type === 'إجازة سنوية') {
+                        if(l.type.includes('سنوية')) {
                             usedDays += diffMs / (1000 * 60 * 60 * 24);
-                        } else if(l.type === 'مغادرة مبكرة') {
+                        } else if(l.type.includes('مبكرة')) {
                             usedHours += diffMs / (1000 * 60 * 60);
                         }
                     }
@@ -1350,7 +1345,6 @@
                 document.getElementById('leaveActionHeader').classList.add('hidden');
                 document.getElementById('myLeaveBalances').classList.remove('hidden');
                 
-                // تحديث رصيد الموظف في اللوحة العلوية
                 const myBalances = calculateBalances(currentUserData.uid);
                 document.getElementById('balDaysTxt').innerHTML = `${myBalances.daysLeft} <span class="text-sm font-normal">يوم</span>`;
                 document.getElementById('balHoursTxt').innerHTML = `${myBalances.hoursLeft} <span class="text-sm font-normal">ساعة</span>`;
@@ -1364,11 +1358,10 @@
                 const toStr = new Date(l.to).toLocaleString('ar-EG', {month: 'short', day: 'numeric', hour:'2-digit', minute:'2-digit'});
                 let statusHtml = l.status === 'pending' ? '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold shadow-sm">قيد الانتظار</span>' : (l.status === 'approved' ? '<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold shadow-sm">مقبول</span>' : '<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold shadow-sm">مرفوض</span>');
 
-                // حساب الرصيد للمدير ليعرفه وقت الموافقة
                 const bal = calculateBalances(l.uid);
                 let balInfo = '';
-                if(l.type === 'إجازة سنوية') balInfo = `<br><span class="text-[10px] text-gray-500">متبقي: ${bal.daysLeft} يوم من 14</span>`;
-                else if(l.type === 'مغادرة مبكرة') balInfo = `<br><span class="text-[10px] text-gray-500">متبقي: ${bal.hoursLeft} ساعة من 20</span>`;
+                if(l.type.includes('سنوية')) balInfo = `<br><span class="text-[10px] text-gray-500">متبقي: ${bal.daysLeft} يوم من 14</span>`;
+                else if(l.type.includes('مبكرة')) balInfo = `<br><span class="text-[10px] text-gray-500">متبقي: ${bal.hoursLeft} ساعة من 20</span>`;
 
                 const safeReason = encodeURIComponent(l.reason || 'لا توجد تفاصيل إضافية');
                 const reasonBtn = `<button onclick="window.viewLeaveDetails('${l.name.replace(/'/g, "\\'")}', '${safeReason}')" class="text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-1.5 rounded-lg transition font-bold text-gray-700 dark:text-gray-300 shadow-sm"><i class="fa-solid fa-eye mx-1"></i> التفاصيل</button>`;
@@ -1403,7 +1396,7 @@
         }
 
         // ===============================================
-        // 4. الاجتماعات
+        // 4. الاجتماعات بتصميم مطابق للصورة
         // ===============================================
         window.openCreateMeetingModal = () => {
             const container = document.getElementById('meetingMembersSelection');
@@ -1554,10 +1547,46 @@
                     const myEvents = meeting.events ? meeting.events.filter(e => e.uid === currentUserData.uid) : [];
                     if (!isCEO && myEvents.length === 0) return;
                     hasPast = true;
+                    
+                    // حساب مدة الاجتماع والتاريخ ليتطابق مع الصورة
+                    const durationMins = meeting.endedAt && meeting.startedAt ? Math.max(1, Math.round((meeting.endedAt - meeting.startedAt) / 60000)) : 0;
+                    const dateStr = meeting.startedAt ? new Date(meeting.startedAt).toLocaleDateString('ar-EG', {year: 'numeric', month: 'numeric', day: 'numeric'}) : '';
+                    
+                    // استخراج قائمة الدخول الفريدة (كل شخص متى دخل أول مرة)
+                    const uniqueJoins = [];
+                    const seenUids = new Set();
+                    if(meeting.events) {
+                        meeting.events.filter(e => e.action === 'joined').forEach(e => {
+                            if(!seenUids.has(e.uid)) {
+                                seenUids.add(e.uid);
+                                uniqueJoins.push(e);
+                            }
+                        });
+                    }
+
+                    let joinLogsHtml = '';
+                    uniqueJoins.forEach(e => {
+                         const t = new Date(e.timestamp).toLocaleTimeString('ar-EG', {hour: '2-digit', minute: '2-digit'});
+                         joinLogsHtml += `<span class="inline-block text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded">وقت دخولك: ${t} | الحضور: ${e.name}</span> `;
+                    });
+
+                    if(!joinLogsHtml && isCEO) joinLogsHtml = '<span class="text-gray-400">لم يسجل دخول أي شخص</span>';
+
                     pastList.innerHTML += `
-                        <div class="bg-white dark:bg-gray-800 border dark:border-gray-700 p-3 rounded-xl flex justify-between items-center shadow-sm">
-                            <div><h4 class="font-bold text-sm text-gray-700 dark:text-gray-300">${meeting.title}</h4></div>
-                            <span class="text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-500 font-bold px-2 py-1 rounded">منتهي</span>
+                        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition flex flex-col">
+                            <div class="p-4 flex justify-between items-center bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+                                <div>
+                                    <h4 class="font-bold text-sm text-gray-800 dark:text-white mb-1">${meeting.title}</h4>
+                                    <div class="text-[10px] text-gray-500 font-semibold flex gap-3">
+                                        <span><i class="fa-regular fa-calendar ml-1"></i> ${dateStr}</span>
+                                        <span><i class="fa-solid fa-stopwatch ml-1"></i> المدة: ${durationMins} دقيقة</span>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-bold px-2 py-1 rounded flex items-center gap-1 border border-gray-200 dark:border-gray-600"><i class="fa-solid fa-check"></i> منتهي</span>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-900 p-3 text-[10px] font-medium leading-relaxed">
+                                ${joinLogsHtml}
+                            </div>
                         </div>
                     `;
                 }
@@ -1567,9 +1596,85 @@
         }
 
         // ===============================================
-        // 5. التوجيه (Routing) والقفل
+        // 5. قسم المالية والنثريات
         // ===============================================
+        window.handleExpenseSubmit = async (e) => {
+            e.preventDefault();
+            if(!currentUserData || (currentUserData.role !== 'CEO' && currentUserData.role !== 'accountant')) return;
+            
+            const desc = document.getElementById('expDesc').value;
+            const amount = document.getElementById('expAmount').value;
+            const date = document.getElementById('expDate').value;
+            
+            try {
+                await addDoc(getColRef('expenses'), {
+                    desc: desc, amount: amount, date: date, addedBy: currentUserData.name, uid: currentUserData.uid, timestamp: Date.now()
+                });
+                document.getElementById('expensesForm').reset();
+                showToast('تم إضافة المصروف بنجاح', 'success');
+            } catch(err) { console.error(err); }
+        };
 
+        window.deleteExpense = async (id) => {
+            if(currentUserData.role !== 'CEO' && currentUserData.role !== 'accountant') return;
+            if(confirm('تأكيد حذف هذا السجل؟')) {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'expenses', id));
+            }
+        };
+
+        function renderExpenses() {
+            const list = document.getElementById('expensesList');
+            if(!list) return;
+            list.innerHTML = '';
+            
+            if(globalExpenses.length === 0) {
+                list.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">لا يوجد سجلات نثريات</td></tr>';
+                return;
+            }
+
+            globalExpenses.forEach(exp => {
+                list.innerHTML += `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 border-b dark:border-gray-700">
+                        <td class="p-3 text-sm" dir="ltr">${exp.date}</td>
+                        <td class="p-3 text-sm font-bold text-gray-800 dark:text-gray-200">${exp.desc}</td>
+                        <td class="p-3 text-sm font-bold text-teal-600 dark:text-teal-400" dir="ltr">${exp.amount} JOD</td>
+                        <td class="p-3 text-xs text-gray-500">${exp.addedBy}</td>
+                        <td class="p-3">
+                            <button onclick="window.deleteExpense('${exp.id}')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-gray-700 p-2 rounded"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        window.downloadExpensesReport = async () => {
+            if(!currentUserData || (currentUserData.role !== 'CEO' && currentUserData.role !== 'accountant')) return;
+
+            let csvContent = "\uFEFFالتاريخ,البيان,المبلغ,أُضيف بواسطة\n";
+            globalExpenses.forEach(e => {
+                csvContent += `"${e.date}","${e.desc.replace(/"/g, '""')}","${e.amount}","${e.addedBy}"\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Quill_Expenses_${new Date().toLocaleDateString('en-CA')}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            const dlTime = Date.now();
+            try {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUserData.uid), { lastExpensesDownload: dlTime });
+                const txt = document.getElementById('lastExpensesDownloadTxt');
+                if(txt) txt.innerText = 'آخر سحب للملف: ' + new Date(dlTime).toLocaleString('ar-EG');
+            } catch(e) {}
+        };
+
+        // ===============================================
+        // 6. التوجيه (Routing) والقفل
+        // ===============================================
         window.openModal = (id) => document.getElementById(id).classList.remove('hidden');
         window.closeModal = (id) => {
             document.getElementById(id).classList.add('hidden');
@@ -1692,7 +1797,6 @@
                 });
             }, (error) => console.error(error));
             
-            // مستمع المصاريف (للمالية والمدير فقط)
             if(currentUserData && (currentUserData.role === 'CEO' || currentUserData.role === 'accountant')) {
                 onSnapshot(getColRef('expenses'), (snapshot) => {
                     globalExpenses = [];
@@ -1719,9 +1823,13 @@
                         currentUserData = docSnap.data();
                         groupReadTimestamps = currentUserData.readReceipts || {};
                         
+                        if(currentUserData.lastSystemExport) {
+                            const txt = document.getElementById('lastSystemExportTxt');
+                            if(txt) txt.innerText = 'آخر سحب: ' + new Date(currentUserData.lastSystemExport).toLocaleString('ar-EG');
+                        }
                         if(currentUserData.lastExpensesDownload) {
-                            const txt = document.getElementById('lastExpensesDownloadTxt');
-                            if(txt) txt.innerText = 'آخر سحب للملف: ' + new Date(currentUserData.lastExpensesDownload).toLocaleString('ar-EG');
+                            const txtExp = document.getElementById('lastExpensesDownloadTxt');
+                            if(txtExp) txtExp.innerText = 'آخر سحب للملف: ' + new Date(currentUserData.lastExpensesDownload).toLocaleString('ar-EG');
                         }
                         
                         document.getElementById('setupProfileScreen').classList.add('hidden');
@@ -1775,7 +1883,7 @@
             if(currentUserData.role === 'CEO') {
                 document.getElementById('createMeetingBtn').classList.remove('hidden');
                 document.getElementById('ceoAttendanceView').classList.remove('hidden');
-                document.getElementById('ceoReportSection').classList.remove('hidden');
+                document.getElementById('ceoExportSection').classList.remove('hidden');
             }
             if(currentUserData.role === 'CEO' || currentUserData.role === 'accountant') {
                 document.getElementById('nav-expenses-btn').classList.remove('hidden');
