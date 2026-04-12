@@ -400,17 +400,30 @@
                         <i class="fa-solid fa-plus mx-2"></i> تقديم طلب إجازة
                     </button>
                 </div>
+
+                <!-- لوحة رصيد الإجازات تظهر للموظفين فقط -->
+                <div id="myLeaveBalances" class="hidden grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border-t-4 border-indigo-500 shadow-sm text-center">
+                        <h4 class="font-bold text-gray-700 dark:text-gray-300 mb-1 text-sm"><i class="fa-solid fa-calendar-day text-indigo-500 mx-1"></i> رصيد الإجازات المتبقي</h4>
+                        <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400" id="balDaysTxt">14 <span class="text-sm font-normal">يوم</span></p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border-t-4 border-teal-500 shadow-sm text-center">
+                        <h4 class="font-bold text-gray-700 dark:text-gray-300 mb-1 text-sm"><i class="fa-solid fa-clock text-teal-500 mx-1"></i> رصيد المغادرات المتبقي</h4>
+                        <p class="text-2xl font-bold text-teal-600 dark:text-teal-400" id="balHoursTxt">20 <span class="text-sm font-normal">ساعة</span></p>
+                    </div>
+                </div>
                 
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden overflow-x-auto">
                     <table class="w-full text-right min-w-[700px]">
                         <thead class="bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
                             <tr>
                                 <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">الموظف</th>
-                                <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">نوع الطلب</th>
+                                <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">النوع (الرصيد)</th>
+                                <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">التفاصيل</th>
                                 <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">من تاريخ</th>
-                                <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">إلى تاريخ / الوقت</th>
+                                <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">إلى تاريخ</th>
                                 <th class="p-3 font-semibold text-gray-600 dark:text-gray-200">الحالة</th>
-                                <th id="leaveActionHeader" class="p-3 font-semibold text-gray-600 dark:text-gray-200 hidden">إجراء المدير</th>
+                                <th id="leaveActionHeader" class="p-3 font-semibold text-gray-600 dark:text-gray-200 hidden">الإجراء</th>
                             </tr>
                         </thead>
                         <tbody id="leavesList" class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -575,22 +588,41 @@
             <form id="leaveForm" class="p-4 md:p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">نوع الطلب</label>
-                    <select id="leaveType" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-pink-500 focus:outline-none">
-                        <option value="إجازة سنوية">إجازة سنوية</option>
+                    <select id="leaveType" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-pink-500 focus:outline-none font-bold">
+                        <option value="إجازة سنوية">إجازة سنوية (تخصم من 14 يوم)</option>
                         <option value="إجازة مرضية">إجازة مرضية</option>
-                        <option value="مغادرة مبكرة">مغادرة مبكرة (ساعات)</option>
+                        <option value="مغادرة مبكرة">مغادرة مبكرة (تخصم من 20 ساعة)</option>
                     </select>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div><label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">من تاريخ/وقت</label><input type="datetime-local" id="leaveFrom" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-pink-500 focus:outline-none"></div>
                     <div><label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">إلى تاريخ/وقت</label><input type="datetime-local" id="leaveTo" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-pink-500 focus:outline-none"></div>
                 </div>
-                <div><label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">السبب / ملاحظات</label><textarea id="leaveReason" rows="2" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-pink-500 focus:outline-none"></textarea></div>
+                <div><label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">السبب / التفاصيل الكاملة</label><textarea id="leaveReason" rows="3" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-pink-500 focus:outline-none whitespace-pre-wrap" required></textarea></div>
                 <div class="pt-4 flex justify-end space-x-2 space-x-reverse">
-                    <button type="button" onclick="window.closeModal('leaveModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm md:text-base">إلغاء</button>
-                    <button type="submit" class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors text-sm md:text-base">إرسال الطلب</button>
+                    <button type="button" onclick="window.closeModal('leaveModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm md:text-base font-bold">إلغاء</button>
+                    <button type="submit" class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors text-sm md:text-base font-bold shadow">إرسال الطلب</button>
                 </div>
             </form>
+        </div>
+    </div>
+    
+    <!-- نافذة قراءة تفاصيل الطلب -->
+    <div id="leaveDetailsModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[60] p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden">
+            <div class="bg-pink-600 text-white p-4 flex justify-between items-center">
+                <h3 class="font-bold text-base md:text-lg">تفاصيل طلب الموظف</h3>
+                <button onclick="window.closeModal('leaveDetailsModal')" class="hover:text-pink-200"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-6">
+                <h4 class="font-bold text-gray-800 dark:text-white mb-2" id="leaveDetailsName"></h4>
+                <div class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 p-3 rounded-lg min-h-[100px] max-h-[300px] overflow-y-auto">
+                    <p id="leaveDetailsText" class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed"></p>
+                </div>
+                <div class="pt-4 flex justify-end">
+                    <button onclick="window.closeModal('leaveDetailsModal')" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white rounded-lg text-sm font-bold transition-colors">إغلاق</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -772,12 +804,11 @@
         let globalLeaves = [];
         let globalGroups = []; 
         let globalTasks = []; 
-        let globalExpenses = []; // للنثريات
+        let globalExpenses = []; 
         let groupReadTimestamps = {};
         
-        let hasPunchedInToday = true; // يتم تغييرها لاحقاً حسب الداتا
+        let hasPunchedInToday = true; 
 
-        // التحميل السريع (Fast Load) من الـ Cache 
         document.addEventListener("DOMContentLoaded", () => {
             applyLanguageToDOM();
             const cachedUser = localStorage.getItem('quill_user_cache_services');
@@ -927,85 +958,6 @@
             showToast('تم تحميل التقرير الشامل بصيغة Excel', 'success');
         };
 
-        // ===============================================
-        // ميزة المصاريف والنثريات (للمدير والمحاسب)
-        // ===============================================
-        document.getElementById('expensesForm')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if(!currentUserData || (currentUserData.role !== 'CEO' && currentUserData.role !== 'accountant')) return;
-            
-            const desc = document.getElementById('expDesc').value;
-            const amount = document.getElementById('expAmount').value;
-            const date = document.getElementById('expDate').value;
-            
-            try {
-                await addDoc(getColRef('expenses'), {
-                    desc: desc, amount: amount, date: date, addedBy: currentUserData.name, uid: currentUserData.uid, timestamp: Date.now()
-                });
-                document.getElementById('expensesForm').reset();
-                showToast('تم إضافة المصروف بنجاح', 'success');
-            } catch(err) { console.error(err); }
-        });
-
-        window.deleteExpense = async (id) => {
-            if(currentUserData.role !== 'CEO' && currentUserData.role !== 'accountant') return;
-            if(confirm('تأكيد حذف هذا السجل؟')) {
-                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'expenses', id));
-            }
-        };
-
-        function renderExpenses() {
-            const list = document.getElementById('expensesList');
-            if(!list) return;
-            list.innerHTML = '';
-            
-            if(globalExpenses.length === 0) {
-                list.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">لا يوجد سجلات نثريات</td></tr>';
-                return;
-            }
-
-            globalExpenses.forEach(exp => {
-                list.innerHTML += `
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                        <td class="p-3 text-sm" dir="ltr">${exp.date}</td>
-                        <td class="p-3 text-sm font-bold text-gray-800 dark:text-gray-200">${exp.desc}</td>
-                        <td class="p-3 text-sm font-bold text-teal-600 dark:text-teal-400" dir="ltr">${exp.amount} JOD</td>
-                        <td class="p-3 text-xs text-gray-500">${exp.addedBy}</td>
-                        <td class="p-3">
-                            <button onclick="window.deleteExpense('${exp.id}')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-gray-700 p-2 rounded"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        window.downloadExpensesReport = async () => {
-            if(!currentUserData || (currentUserData.role !== 'CEO' && currentUserData.role !== 'accountant')) return;
-
-            let csvContent = "\uFEFFالتاريخ,البيان,المبلغ,أُضيف بواسطة\n";
-            globalExpenses.forEach(e => {
-                csvContent += `"${e.date}","${e.desc.replace(/"/g, '""')}","${e.amount}","${e.addedBy}"\n`;
-            });
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", `Quill_Expenses_${new Date().toLocaleDateString('en-CA')}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            const dlTime = Date.now();
-            try {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUserData.uid), { lastExpensesDownload: dlTime });
-                document.getElementById('lastExpensesDownloadTxt').innerText = 'آخر سحب للملف: ' + new Date(dlTime).toLocaleString('ar-EG');
-            } catch(e) {}
-        };
-
-        // ===============================================
-        // إعدادات أخرى وجيتسي
-        // ===============================================
         let currentMeetingId = null;
         const MAX_GLOBAL_STORAGE = 15 * 1024 * 1024; 
         let jitsiApi = null; 
@@ -1078,19 +1030,29 @@
             reader.onload = async (ev) => {
                 try {
                     await addDoc(getStorageColRef('files'), {
-                        name: file.name, type: file.type || 'unknown', size: file.size, sizeStr: sizeStr,
-                        data: ev.target.result, uploaderName: currentUserData.name, uploaderId: currentUserData.uid, pinned: false, timestamp: Date.now()
+                        name: file.name,
+                        type: file.type || 'unknown',
+                        size: file.size, 
+                        sizeStr: sizeStr,
+                        data: ev.target.result,
+                        uploaderName: currentUserData.name,
+                        uploaderId: currentUserData.uid,
+                        pinned: false,
+                        timestamp: Date.now()
                     });
                     showToast('تم رفع الملف بنجاح!', 'success');
                     window.logAction('رفع ملف', `تم رفع ملف جديد: ${file.name}`);
-                } catch (err) { showToast('حدث خطأ أثناء الرفع.', 'warning'); }
+                } catch (err) {
+                    console.error(err);
+                    showToast('حدث خطأ أثناء الرفع.', 'warning');
+                }
                 e.target.value = '';
             };
             reader.readAsDataURL(file);
         };
 
         window.togglePinFile = async (fileId, currentPinStatus) => {
-            try { await updateDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'files', fileId), { pinned: !currentPinStatus }); } catch(e) {}
+            try { await updateDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'files', fileId), { pinned: !currentPinStatus }); } catch(e) { console.error(e); }
         };
 
         window.deleteDriveFile = async (fileId, fileName) => {
@@ -1099,18 +1061,21 @@
                     await deleteDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'files', fileId));
                     showToast('تم حذف الملف', 'success');
                     window.logAction('حذف ملف', `تم حذف الملف: ${fileName}`);
-                } catch(e) {}
+                } catch(e) { console.error(e); }
             }
         };
 
         function renderDriveFiles() {
             const allContainer = document.getElementById('allFilesContainer');
             const pinnedContainer = document.getElementById('pinnedFilesContainer');
-            allContainer.innerHTML = ''; pinnedContainer.innerHTML = '';
+            allContainer.innerHTML = '';
+            pinnedContainer.innerHTML = '';
             
             const isCEO = currentUserData && currentUserData.role === 'CEO';
 
-            if(globalFiles.length === 0) { allContainer.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد ملفات حالياً.</p>'; }
+            if(globalFiles.length === 0) {
+                allContainer.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد ملفات حالياً.</p>';
+            }
 
             globalFiles.forEach(f => {
                 let iconClass = 'fa-file text-gray-400';
@@ -1157,7 +1122,7 @@
         }
 
         // ===============================================
-        // 2. الحضور والانصراف المحدث (الإجباري والخروج المؤقت)
+        // 2. الحضور والانصراف
         // ===============================================
         function getTodayDateString() {
             const d = new Date();
@@ -1212,7 +1177,6 @@
             const today = getTodayDateString();
             const docId = `${currentUserData.uid}_${today}`;
             try {
-                // إذا كان في فترة استراحة ولم يعد منها، نقوم بإغلاق الاستراحة
                 const record = globalAttendance.find(a => a.uid === currentUserData.uid && a.date === today);
                 let breaks = record.breaks || [];
                 if(breaks.length > 0 && breaks[breaks.length - 1].end === null) {
@@ -1283,7 +1247,6 @@
                         return `<div class="text-[10px] bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded inline-block m-0.5" dir="ltr">${start} ➔ ${end}</div>`;
                     }).join('');
                 } else if(r.breakTime) {
-                    // للتوافق مع السجلات القديمة
                     breaksHtml = `<div class="text-[10px] bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded inline-block m-0.5" dir="ltr">${new Date(r.breakTime).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}</div>`;
                 }
 
@@ -1299,16 +1262,49 @@
         };
 
         // ===============================================
-        // 3. الإجازات
+        // 3. الإجازات وتتبع الرصيد
         // ===============================================
+        function calculateBalances(uid) {
+            const currentYear = new Date().getFullYear();
+            let usedDays = 0;
+            let usedHours = 0;
+
+            globalLeaves.forEach(l => {
+                if(l.uid === uid && l.status === 'approved') {
+                    const fromDate = new Date(l.from);
+                    if(fromDate.getFullYear() === currentYear) {
+                        const diffMs = l.to - l.from;
+                        if(l.type === 'إجازة سنوية') {
+                            usedDays += diffMs / (1000 * 60 * 60 * 24);
+                        } else if(l.type === 'مغادرة مبكرة') {
+                            usedHours += diffMs / (1000 * 60 * 60);
+                        }
+                    }
+                }
+            });
+            
+            return {
+                daysLeft: Math.max(0, 14 - usedDays).toFixed(1),
+                hoursLeft: Math.max(0, 20 - usedHours).toFixed(1),
+            };
+        }
+
         document.getElementById('leaveForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if(!currentUserData) return;
+            
+            const fromDate = new Date(document.getElementById('leaveFrom').value).getTime();
+            const toDate = new Date(document.getElementById('leaveTo').value).getTime();
+            
+            if(toDate <= fromDate) {
+                showToast('تاريخ الانتهاء يجب أن يكون بعد تاريخ البدء', 'warning');
+                return;
+            }
+
             try {
                 await addDoc(getColRef('leaves'), {
                     uid: currentUserData.uid, name: currentUserData.name, type: document.getElementById('leaveType').value,
-                    from: new Date(document.getElementById('leaveFrom').value).getTime(),
-                    to: new Date(document.getElementById('leaveTo').value).getTime(),
+                    from: fromDate, to: toDate,
                     reason: document.getElementById('leaveReason').value, status: 'pending', timestamp: Date.now()
                 });
                 window.closeModal('leaveModal');
@@ -1325,32 +1321,79 @@
             } catch(e) { console.error(e); }
         };
 
+        window.deleteLeave = async (id) => {
+            if(currentUserData.role !== 'CEO') return;
+            if(confirm('هل أنت متأكد من حذف هذا السجل نهائياً؟')) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'leaves', id));
+                    showToast('تم حذف السجل', 'success');
+                    window.logAction('حذف إجازة', 'تم حذف سجل إجازة/مغادرة');
+                } catch(e) { console.error(e); }
+            }
+        };
+
+        window.viewLeaveDetails = (name, text) => {
+            document.getElementById('leaveDetailsName').innerText = `الموظف: ${name}`;
+            document.getElementById('leaveDetailsText').innerText = decodeURIComponent(text);
+            window.openModal('leaveDetailsModal');
+        };
+
         function renderLeaves() {
             const list = document.getElementById('leavesList');
             list.innerHTML = '';
             const isCEO = currentUserData && currentUserData.role === 'CEO';
-            if(isCEO) document.getElementById('leaveActionHeader').classList.remove('hidden');
-            else document.getElementById('leaveActionHeader').classList.add('hidden');
+            
+            if(isCEO) {
+                document.getElementById('leaveActionHeader').classList.remove('hidden');
+                document.getElementById('myLeaveBalances').classList.add('hidden');
+            } else {
+                document.getElementById('leaveActionHeader').classList.add('hidden');
+                document.getElementById('myLeaveBalances').classList.remove('hidden');
+                
+                // تحديث رصيد الموظف في اللوحة العلوية
+                const myBalances = calculateBalances(currentUserData.uid);
+                document.getElementById('balDaysTxt').innerHTML = `${myBalances.daysLeft} <span class="text-sm font-normal">يوم</span>`;
+                document.getElementById('balHoursTxt').innerHTML = `${myBalances.hoursLeft} <span class="text-sm font-normal">ساعة</span>`;
+            }
 
             const filteredLeaves = isCEO ? globalLeaves : globalLeaves.filter(l => l.uid === currentUserData.uid);
-            if(filteredLeaves.length === 0) { list.innerHTML = `<tr><td colspan="${isCEO ? 6 : 5}" class="p-4 text-center">لا توجد طلبات</td></tr>`; return; }
+            if(filteredLeaves.length === 0) { list.innerHTML = `<tr><td colspan="${isCEO ? 7 : 6}" class="p-4 text-center text-gray-500">لا توجد طلبات</td></tr>`; return; }
 
             filteredLeaves.forEach(l => {
                 const fromStr = new Date(l.from).toLocaleString('ar-EG', {month: 'short', day: 'numeric', hour:'2-digit', minute:'2-digit'});
                 const toStr = new Date(l.to).toLocaleString('ar-EG', {month: 'short', day: 'numeric', hour:'2-digit', minute:'2-digit'});
                 let statusHtml = l.status === 'pending' ? '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold shadow-sm">قيد الانتظار</span>' : (l.status === 'approved' ? '<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold shadow-sm">مقبول</span>' : '<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold shadow-sm">مرفوض</span>');
 
+                // حساب الرصيد للمدير ليعرفه وقت الموافقة
+                const bal = calculateBalances(l.uid);
+                let balInfo = '';
+                if(l.type === 'إجازة سنوية') balInfo = `<br><span class="text-[10px] text-gray-500">متبقي: ${bal.daysLeft} يوم من 14</span>`;
+                else if(l.type === 'مغادرة مبكرة') balInfo = `<br><span class="text-[10px] text-gray-500">متبقي: ${bal.hoursLeft} ساعة من 20</span>`;
+
+                const safeReason = encodeURIComponent(l.reason || 'لا توجد تفاصيل إضافية');
+                const reasonBtn = `<button onclick="window.viewLeaveDetails('${l.name.replace(/'/g, "\\'")}', '${safeReason}')" class="text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-1.5 rounded-lg transition font-bold text-gray-700 dark:text-gray-300 shadow-sm"><i class="fa-solid fa-eye mx-1"></i> التفاصيل</button>`;
+
                 let actionHtml = '';
                 if(isCEO) {
                     if(l.status === 'pending') {
-                        actionHtml = `<td class="p-3"><button onclick="window.updateLeaveStatus('${l.id}', 'approved')" class="bg-green-500 hover:bg-green-600 text-white p-1.5 rounded mr-1 shadow"><i class="fa-solid fa-check"></i></button><button onclick="window.updateLeaveStatus('${l.id}', 'rejected')" class="bg-red-500 hover:bg-red-600 text-white p-1.5 rounded shadow"><i class="fa-solid fa-xmark"></i></button></td>`;
-                    } else actionHtml = `<td class="p-3 text-xs text-gray-400 font-bold">تم الإجراء</td>`;
+                        actionHtml = `<td class="p-3 whitespace-nowrap text-center">
+                            <button onclick="window.updateLeaveStatus('${l.id}', 'approved')" class="bg-green-500 hover:bg-green-600 text-white p-1.5 rounded mr-1 shadow" title="موافقة"><i class="fa-solid fa-check"></i></button>
+                            <button onclick="window.updateLeaveStatus('${l.id}', 'rejected')" class="bg-red-500 hover:bg-red-600 text-white p-1.5 rounded mr-1 shadow" title="رفض"><i class="fa-solid fa-xmark"></i></button>
+                            <button onclick="window.deleteLeave('${l.id}')" class="bg-gray-500 hover:bg-gray-600 text-white p-1.5 rounded shadow" title="حذف"><i class="fa-solid fa-trash"></i></button>
+                        </td>`;
+                    } else {
+                        actionHtml = `<td class="p-3 whitespace-nowrap text-center">
+                            <span class="text-xs text-gray-400 font-bold mr-2">تم الإجراء</span>
+                            <button onclick="window.deleteLeave('${l.id}')" class="text-red-400 hover:text-red-600 p-1 rounded transition" title="حذف السجل"><i class="fa-solid fa-trash"></i></button>
+                        </td>`;
+                    }
                 }
 
                 list.innerHTML += `
                     <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
                         <td class="p-3 font-bold text-sm text-primary dark:text-secondary">${l.name}</td>
-                        <td class="p-3 text-sm font-bold text-gray-700 dark:text-gray-300">${l.type}</td>
+                        <td class="p-3 text-sm font-bold text-gray-700 dark:text-gray-300">${l.type} ${isCEO ? balInfo : ''}</td>
+                        <td class="p-3 text-center">${reasonBtn}</td>
                         <td class="p-3 text-xs font-semibold" dir="ltr">${fromStr}</td>
                         <td class="p-3 text-xs font-semibold" dir="ltr">${toStr}</td>
                         <td class="p-3">${statusHtml}</td>${actionHtml}
@@ -1581,6 +1624,7 @@
             
             if(window.innerWidth < 768) { document.getElementById('sidebar').classList.add('translate-x-full'); document.getElementById('mobileOverlay').classList.add('hidden'); }
             if(sectionId === 'attendance') renderEmpAttendanceView();
+            if(sectionId === 'leaves') renderLeaves();
         };
 
         window.addEventListener('hashchange', () => {
@@ -1755,14 +1799,14 @@
                     renderEmpAttendanceView();
                     if(currentUserData.role === 'CEO') window.renderSelectedEmpAttendance();
                 } else {
-                    // تشغيل الفحص في الخلفية لضمان قفل النظام لو لزم الأمر
                     renderEmpAttendanceView();
                 }
             }, (error) => console.error(error));
 
             onSnapshot(getColRef('leaves'), (snapshot) => {
                 globalLeaves = []; snapshot.forEach(d => globalLeaves.push({ id: d.id, ...d.data() }));
-                globalLeaves.sort((a,b) => b.timestamp - a.timestamp); renderLeaves();
+                globalLeaves.sort((a,b) => b.timestamp - a.timestamp); 
+                if(!document.getElementById('leaves').classList.contains('hidden')) renderLeaves();
             }, (error) => console.error(error));
 
             onSnapshot(getStorageColRef('files'), (snapshot) => {
