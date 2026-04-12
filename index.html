@@ -204,6 +204,7 @@
                     <i class="fa-solid fa-house w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="الرئيسية">الرئيسية</span>
                 </button>
                 
+                <!-- تطبيقات النطاق الحالي -->
                 <button onclick="window.location.hash='attendance'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors" data-section="attendance">
                     <i class="fa-solid fa-clock w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="الحضور والانصراف">الحضور والانصراف</span>
                 </button>
@@ -217,6 +218,7 @@
                     <i class="fa-solid fa-video w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="الاجتماعات">الاجتماعات</span>
                 </button>
                 
+                <!-- زر النثريات (للمالية والمدير فقط) -->
                 <button id="nav-expenses-btn" onclick="window.location.hash='expenses'" class="nav-btn hidden w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative" data-section="expenses">
                     <i class="fa-solid fa-file-invoice-dollar w-6 text-center ml-3"></i><span class="font-semibold text-sm">المصاريف والنثريات</span>
                 </button>
@@ -243,6 +245,14 @@
                     </a>
                 </div>
                 
+                <!-- زر التحميل الخاص بالمدير -->
+                <div id="ceoReportSection" class="hidden mt-4 pt-4 border-t border-white/10 dark:border-gray-700">
+                    <p class="text-[10px] text-gray-400 mb-2 px-2">خاص بالمدير</p>
+                    <button onclick="window.downloadMonthlyReport()" class="w-full flex items-center py-3 px-4 rounded-lg text-emerald-300 hover:bg-white/10 hover:text-emerald-400 transition-colors font-bold">
+                        <i class="fa-solid fa-file-excel w-6 text-center ml-3"></i><span class="font-semibold text-sm">التقرير الشامل للشهر</span>
+                    </button>
+                </div>
+
                 <button onclick="window.location.hash='settings'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors mt-4 border-t border-white/10 pt-4" data-section="settings">
                     <i class="fa-solid fa-gear w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="الإعدادات">الإعدادات</span>
                 </button>
@@ -257,7 +267,7 @@
         <div class="flex-1 overflow-y-auto p-0 md:p-6 bg-gray-50 dark:bg-gray-900 relative">
             
             <section id="home-grid" class="section-content animate-fade-in p-4 md:p-10 max-w-6xl mx-auto">
-                <div class="mb-10 flex justify-between items-end">
+                <div class="mb-6 flex justify-between items-end">
                     <div class="text-right">
                         <h2 class="text-3xl font-bold text-gray-800 dark:text-white" data-i18n="الخدمات والمستندات">الخدمات والمستندات</h2>
                         <p class="text-gray-500 dark:text-gray-400 text-sm mt-2" data-i18n="اختر التطبيق الذي تود العمل عليه">اختر التطبيق الذي تود العمل عليه</p>
@@ -268,6 +278,13 @@
                             <i class="fa-solid fa-file-export"></i> سحب تفاصيل النظام
                         </button>
                     </div>
+                </div>
+
+                <!-- زر تسجيل الانصراف السريع من الرئيسية (يظهر إذا كان الموظف مسجل دخول) -->
+                <div id="homePunchOutContainer" class="hidden mb-6">
+                    <button onclick="window.punchOut()" class="w-full md:w-auto bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-person-walking-arrow-right"></i> تسجيل الانصراف (إنهاء الدوام)
+                    </button>
                 </div>
                 
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="homeGridContainer">
@@ -582,15 +599,16 @@
             <form id="leaveForm" class="p-4 md:p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">نوع الطلب</label>
-                    <select id="leaveType" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-pink-500 focus:outline-none font-bold">
+                    <!-- تم إضافة حدث onchange للتبديل بين التاريخ والتاريخ مع الوقت -->
+                    <select id="leaveType" onchange="window.handleLeaveTypeChange()" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-pink-500 focus:outline-none font-bold">
                         <option value="إجازة سنوية">إجازة سنوية (تخصم من 14 يوم)</option>
                         <option value="إجازة مرضية">إجازة مرضية</option>
                         <option value="مغادرة مبكرة">مغادرة مبكرة (تخصم من 20 ساعة)</option>
                     </select>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <div><label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">من تاريخ/وقت</label><input type="datetime-local" id="leaveFrom" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-pink-500 focus:outline-none"></div>
-                    <div><label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">إلى تاريخ/وقت</label><input type="datetime-local" id="leaveTo" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-pink-500 focus:outline-none"></div>
+                    <div><label class="block text-sm text-gray-600 dark:text-gray-300 mb-1" id="lblLeaveFrom">من تاريخ</label><input type="date" id="leaveFrom" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-pink-500 focus:outline-none"></div>
+                    <div><label class="block text-sm text-gray-600 dark:text-gray-300 mb-1" id="lblLeaveTo">إلى تاريخ</label><input type="date" id="leaveTo" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-pink-500 focus:outline-none"></div>
                 </div>
                 <div><label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">السبب / التفاصيل الكاملة</label><textarea id="leaveReason" rows="3" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-pink-500 focus:outline-none whitespace-pre-wrap" required></textarea></div>
                 <div class="pt-4 flex justify-end space-x-2 space-x-reverse">
@@ -1077,7 +1095,6 @@
                 else if(f.type.includes('word')) iconClass = 'fa-file-word text-blue-600';
 
                 const isOwner = f.uploaderId === currentUserData.uid;
-                // السماح لصاحب الملف أو المدير بالحذف والتثبيت
                 const canManage = isOwner || isCEO;
                 const deleteBtn = canManage ? `<button onclick="window.deleteDriveFile('${f.id}', '${f.name.replace(/'/g, "\\'")}')" class="text-red-400 hover:text-red-600 p-1" title="حذف"><i class="fa-solid fa-trash"></i></button>` : '';
                 const pinBtnClass = canManage ? 'cursor-pointer hover:text-primary' : 'cursor-not-allowed opacity-50';
@@ -1168,18 +1185,22 @@
         };
 
         window.punchOut = async () => {
+            if(!confirm('هل أنت متأكد من تسجيل الانصراف وإنهاء الدوام لهذا اليوم؟')) return;
             if(!currentUserData) return;
             const today = getTodayDateString();
             const docId = `${currentUserData.uid}_${today}`;
             try {
                 const record = globalAttendance.find(a => a.uid === currentUserData.uid && a.date === today);
-                let breaks = record.breaks || [];
-                if(breaks.length > 0 && breaks[breaks.length - 1].end === null) {
-                    breaks[breaks.length - 1].end = Date.now();
+                if(record) {
+                    let breaks = record.breaks || [];
+                    if(breaks.length > 0 && breaks[breaks.length - 1].end === null) {
+                        breaks[breaks.length - 1].end = Date.now();
+                    }
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', docId), { breaks: breaks, punchOut: Date.now(), status: 'completed' });
                 }
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', docId), { breaks: breaks, punchOut: Date.now(), status: 'completed' });
                 showToast('تم تسجيل الانصراف.', 'success');
                 window.logAction('انصراف', 'قام الموظف بتسجيل الانصراف');
+                renderEmpAttendanceView(); // تحديث الواجهة فوراً
             } catch(e) { console.error(e); }
         };
 
@@ -1195,10 +1216,12 @@
             const returnBtn = document.getElementById('returnBreakBtn');
             const outBtn = document.getElementById('punchOutBtn');
             const msg = document.getElementById('attendanceStatusMsg');
+            const homePunchOutContainer = document.getElementById('homePunchOutContainer'); // زر الانصراف في الرئيسية
 
             if(!myTodayRecord) {
                 msg.innerText = 'لم تقم بتسجيل الدخول اليوم. يجب التسجيل أولاً لفتح باقي النظام.';
                 inBtn.classList.remove('hidden'); breakBtn.classList.add('hidden'); outBtn.classList.add('hidden'); returnBtn.classList.add('hidden');
+                if(homePunchOutContainer) homePunchOutContainer.classList.add('hidden');
                 hasPunchedInToday = false;
                 lockNavigationIfNeeded();
             } else {
@@ -1209,12 +1232,15 @@
                 if(myTodayRecord.status === 'active') {
                     msg.innerText = 'أنت الآن على رأس عملك.';
                     breakBtn.classList.remove('hidden'); returnBtn.classList.add('hidden'); outBtn.classList.remove('hidden');
+                    if(homePunchOutContainer) homePunchOutContainer.classList.remove('hidden');
                 } else if(myTodayRecord.status === 'break') {
                     msg.innerText = 'أنت الآن في فترة خروج مؤقت.';
                     breakBtn.classList.add('hidden'); returnBtn.classList.remove('hidden'); outBtn.classList.remove('hidden');
+                    if(homePunchOutContainer) homePunchOutContainer.classList.remove('hidden');
                 } else if(myTodayRecord.status === 'completed') {
                     msg.innerText = 'لقد قمت بتسجيل الانصراف لهذا اليوم.';
                     breakBtn.classList.add('hidden'); returnBtn.classList.add('hidden'); outBtn.classList.add('hidden');
+                    if(homePunchOutContainer) homePunchOutContainer.classList.add('hidden');
                 }
             }
         }
@@ -1259,6 +1285,26 @@
         // ===============================================
         // 3. الإجازات وتتبع الرصيد (14 يوم - 20 ساعة)
         // ===============================================
+        window.handleLeaveTypeChange = () => {
+            const val = document.getElementById('leaveType').value;
+            const fromInput = document.getElementById('leaveFrom');
+            const toInput = document.getElementById('leaveTo');
+            const lblFrom = document.getElementById('lblLeaveFrom');
+            const lblTo = document.getElementById('lblLeaveTo');
+            
+            if (val.includes('مبكرة')) {
+                fromInput.type = 'datetime-local';
+                toInput.type = 'datetime-local';
+                lblFrom.innerText = 'من تاريخ / وقت';
+                lblTo.innerText = 'إلى تاريخ / وقت';
+            } else {
+                fromInput.type = 'date';
+                toInput.type = 'date';
+                lblFrom.innerText = 'من تاريخ';
+                lblTo.innerText = 'إلى تاريخ';
+            }
+        };
+
         function calculateBalances(uid) {
             const currentYear = new Date().getFullYear();
             let usedDays = 0;
@@ -1354,8 +1400,16 @@
             if(filteredLeaves.length === 0) { list.innerHTML = `<tr><td colspan="${isCEO ? 7 : 6}" class="p-4 text-center text-gray-500">لا توجد طلبات</td></tr>`; return; }
 
             filteredLeaves.forEach(l => {
-                const fromStr = new Date(l.from).toLocaleString('ar-EG', {month: 'short', day: 'numeric', hour:'2-digit', minute:'2-digit'});
-                const toStr = new Date(l.to).toLocaleString('ar-EG', {month: 'short', day: 'numeric', hour:'2-digit', minute:'2-digit'});
+                let fromStr, toStr;
+                // إذا كان إجازة سنوية أو مرضية يعرض التاريخ فقط
+                if (!l.type.includes('مبكرة')) {
+                    fromStr = new Date(l.from).toLocaleDateString('ar-EG');
+                    toStr = new Date(l.to).toLocaleDateString('ar-EG');
+                } else {
+                    fromStr = new Date(l.from).toLocaleString('ar-EG', {month: 'short', day: 'numeric', hour:'2-digit', minute:'2-digit'});
+                    toStr = new Date(l.to).toLocaleString('ar-EG', {month: 'short', day: 'numeric', hour:'2-digit', minute:'2-digit'});
+                }
+
                 let statusHtml = l.status === 'pending' ? '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold shadow-sm">قيد الانتظار</span>' : (l.status === 'approved' ? '<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold shadow-sm">مقبول</span>' : '<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold shadow-sm">مرفوض</span>');
 
                 const bal = calculateBalances(l.uid);
@@ -1396,7 +1450,7 @@
         }
 
         // ===============================================
-        // 4. الاجتماعات بتصميم مطابق للصورة
+        // 4. الاجتماعات 
         // ===============================================
         window.openCreateMeetingModal = () => {
             const container = document.getElementById('meetingMembersSelection');
@@ -1567,7 +1621,7 @@
                     let joinLogsHtml = '';
                     uniqueJoins.forEach(e => {
                          const t = new Date(e.timestamp).toLocaleTimeString('ar-EG', {hour: '2-digit', minute: '2-digit'});
-                         joinLogsHtml += `<span class="inline-block text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded">وقت دخولك: ${t} | الحضور: ${e.name}</span> `;
+                         joinLogsHtml += `<span class="inline-block text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded m-0.5">وقت دخولك: ${t} | الحضور: ${e.name}</span> `;
                     });
 
                     if(!joinLogsHtml && isCEO) joinLogsHtml = '<span class="text-gray-400">لم يسجل دخول أي شخص</span>';
@@ -1679,7 +1733,10 @@
         window.closeModal = (id) => {
             document.getElementById(id).classList.add('hidden');
             if(id === 'createMeetingModal') document.getElementById('createMeetingForm').reset();
-            if(id === 'leaveModal') document.getElementById('leaveForm').reset();
+            if(id === 'leaveModal') {
+                document.getElementById('leaveForm').reset();
+                window.handleLeaveTypeChange(); // إعادة ضبط الحقول للوضع الافتراضي
+            }
         };
 
         window.toggleSidebar = () => {
@@ -1692,6 +1749,11 @@
                 document.getElementById('mainNavigationMenu').classList.add('hidden');
                 document.getElementById('sidebarLockMessage').classList.remove('hidden');
                 document.getElementById('homeGridContainer').classList.add('hidden');
+                
+                // إخفاء زر تسجيل الانصراف في الرئيسية إن وُجد
+                const homePunchOutContainer = document.getElementById('homePunchOutContainer');
+                if(homePunchOutContainer) homePunchOutContainer.classList.add('hidden');
+
                 document.getElementById('attendanceLockBanner').classList.remove('hidden');
                 if(window.location.hash !== '#attendance') {
                     window.location.hash = 'attendance';
@@ -1833,6 +1895,10 @@
                         }
                         
                         document.getElementById('setupProfileScreen').classList.add('hidden');
+                        
+                        // تطبيق الإعدادات الافتراضية لنموذج الإجازات
+                        window.handleLeaveTypeChange();
+                        
                         finishLoginSetup();
                     } else {
                         document.getElementById('setupProfileScreen').classList.remove('hidden');
