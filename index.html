@@ -428,20 +428,46 @@
                 </div>
             </section>
             
-            <!-- أقسام الجرد (جاهزة للعمل لاحقاً) -->
-            <section id="office-inventory" class="section-content hidden animate-fade-in p-4 md:p-10 max-w-6xl mx-auto">
-                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4"><i class="fa-solid fa-desktop text-purple-500 mx-2"></i>جرد المكتب</h2>
-                <div class="bg-white dark:bg-gray-800 p-8 rounded-xl text-center shadow-sm border border-gray-100 dark:border-gray-700">
-                    <i class="fa-solid fa-screwdriver-wrench text-4xl text-gray-400 mb-4"></i>
-                    <p class="text-gray-500 font-bold">هذا القسم قيد الإنشاء وسيكون متاحاً قريباً.</p>
+            <!-- أقسام الجرد الجديدة -->
+            <section id="office-inventory" class="section-content hidden animate-fade-in p-4 md:p-0">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
+                    <p class="text-sm md:text-base text-purple-600 dark:text-purple-400 font-bold"><i class="fa-solid fa-desktop mx-2"></i>إدارة جرد المكتب</p>
+                    <button onclick="window.openAddInventoryModal('office')" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-sm flex gap-2">
+                        <i class="fa-solid fa-plus"></i> إضافة محتويات
+                    </button>
+                </div>
+
+                <div class="flex gap-4 border-b border-gray-200 dark:border-gray-700 mb-6">
+                    <button onclick="window.switchInventoryTab('office', 'active')" id="tabOfficeActive" class="py-2 px-4 font-bold text-sm border-b-2 border-purple-600 text-purple-600 dark:text-purple-400">آخر جرد</button>
+                    <button onclick="window.switchInventoryTab('office', 'past')" id="tabOfficePast" class="py-2 px-4 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">جرد قديم</button>
+                </div>
+
+                <div id="officeActiveContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- سيتم تعبئتها بواسطة JS -->
+                </div>
+                <div id="officePastContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- سيتم تعبئتها بواسطة JS -->
                 </div>
             </section>
 
-            <section id="warehouse-inventory" class="section-content hidden animate-fade-in p-4 md:p-10 max-w-6xl mx-auto">
-                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4"><i class="fa-solid fa-boxes-stacked text-orange-500 mx-2"></i>جرد المستودع</h2>
-                <div class="bg-white dark:bg-gray-800 p-8 rounded-xl text-center shadow-sm border border-gray-100 dark:border-gray-700">
-                    <i class="fa-solid fa-screwdriver-wrench text-4xl text-gray-400 mb-4"></i>
-                    <p class="text-gray-500 font-bold">هذا القسم قيد الإنشاء وسيكون متاحاً قريباً.</p>
+            <section id="warehouse-inventory" class="section-content hidden animate-fade-in p-4 md:p-0">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
+                    <p class="text-sm md:text-base text-orange-600 dark:text-orange-400 font-bold"><i class="fa-solid fa-boxes-stacked mx-2"></i>إدارة جرد المستودع</p>
+                    <button onclick="window.openAddInventoryModal('warehouse')" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-sm flex gap-2">
+                        <i class="fa-solid fa-plus"></i> إضافة محتويات
+                    </button>
+                </div>
+
+                <div class="flex gap-4 border-b border-gray-200 dark:border-gray-700 mb-6">
+                    <button onclick="window.switchInventoryTab('warehouse', 'active')" id="tabWarehouseActive" class="py-2 px-4 font-bold text-sm border-b-2 border-orange-600 text-orange-600 dark:text-orange-400">آخر جرد</button>
+                    <button onclick="window.switchInventoryTab('warehouse', 'past')" id="tabWarehousePast" class="py-2 px-4 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">جرد قديم</button>
+                </div>
+
+                <div id="warehouseActiveContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- سيتم تعبئتها بواسطة JS -->
+                </div>
+                <div id="warehousePastContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- سيتم تعبئتها بواسطة JS -->
                 </div>
             </section>
 
@@ -765,6 +791,84 @@
                 <div class="pt-2 flex justify-end gap-2">
                     <button type="button" onclick="window.closeModal('createFolderModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-bold text-sm">إلغاء</button>
                     <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-bold text-sm shadow">إنشاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- نافذة الجرد (روبوت أو قطعة) -->
+    <div id="inventoryModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden">
+            <div id="invModalHeader" class="bg-purple-600 text-white p-4 flex justify-between items-center">
+                <h3 class="font-bold text-base md:text-lg">إضافة محتويات</h3>
+                <button onclick="window.closeModal('inventoryModal')" class="hover:text-gray-200"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <form id="inventoryForm" class="p-4 md:p-6 space-y-4">
+                <input type="hidden" id="invLocation">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">نوع المحتوى</label>
+                    <select id="invItemType" onchange="window.handleInvTypeChange()" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none font-bold">
+                        <option value="robot">روبوت</option>
+                        <option value="part">قطعة</option>
+                    </select>
+                </div>
+                
+                <!-- حقول الروبوت -->
+                <div id="invRobotFields" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">اسم الروبوت</label>
+                        <input list="robotNames" id="invRobotName" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none" dir="ltr" placeholder="اختر أو اكتب الاسم">
+                        <datalist id="robotNames">
+                            <option value="Ketty bot"></option>
+                            <option value="Bella bot"></option>
+                            <option value="Quill bot"></option>
+                            <option value="mini bot"></option>
+                            <option value="nova bot"></option>
+                        </datalist>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">السيريال نمبر</label>
+                        <input type="text" id="invRobotSerial" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none" dir="ltr">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">الحالة</label>
+                        <select id="invRobotStatus" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none">
+                            <option value="جديد">جديد</option>
+                            <option value="مستعمل">مستعمل</option>
+                            <option value="معطل">معطل</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- حقول القطعة -->
+                <div id="invPartFields" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">اسم القطعة</label>
+                        <input type="text" id="invPartName" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">عدد الموجود</label>
+                            <input type="number" id="invPartQty" min="1" value="1" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none" dir="ltr">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">السيريال نمبر (إن وجد)</label>
+                            <input type="text" id="invPartSerial" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none" dir="ltr" placeholder="اختياري">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">الحالة</label>
+                        <select id="invPartStatus" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none">
+                            <option value="جديد">جديد</option>
+                            <option value="مستخدم">مستخدم</option>
+                            <option value="غير صالحة للاستخدام">غير صالحة للاستخدام</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-end gap-2 border-t dark:border-gray-700">
+                    <button type="button" onclick="window.closeModal('inventoryModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-bold text-sm">إلغاء</button>
+                    <button type="submit" id="invSubmitBtn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-bold text-sm shadow">حفظ المحتويات</button>
                 </div>
             </form>
         </div>
@@ -1095,6 +1199,7 @@
         let globalTasks = []; 
         let globalExpenses = []; 
         let globalTrainees = []; 
+        let globalInventory = []; // بيانات الجرد (مكتب + مستودع)
         let groupReadTimestamps = {};
         
         let hasPunchedInToday = true; 
@@ -2011,7 +2116,7 @@
         }
 
         // ===============================================
-        // 4. الاجتماعات 
+        // 4. الاجتماعات (مع زر الحذف للمدير)
         // ===============================================
         window.openCreateMeetingModal = () => {
             const container = document.getElementById('meetingMembersSelection');
@@ -2114,6 +2219,16 @@
             }
         };
 
+        window.deleteMeeting = async (id) => {
+            if(currentUserData.role !== 'CEO') return;
+            if(confirm('هل أنت متأكد من حذف هذا الاجتماع من السجل نهائياً؟')) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'meetings', id));
+                    showToast('تم حذف الاجتماع', 'success');
+                } catch(e) { console.error(e); }
+            }
+        };
+
         window.shareMeetingWhatsApp = (title) => {
             const text = encodeURIComponent(`مرحباً، أنت مدعو لاجتماع: "${title}". للانضمام، اضغط هنا: ${window.location.href}`);
             window.open(`https://wa.me/?text=${text}`, '_blank');
@@ -2190,14 +2305,20 @@
 
                     if(!joinLogsHtml && isCEO) joinLogsHtml = '<span class="text-gray-400">لم يسجل دخول أي شخص</span>';
 
+                    let deleteBtnHtml = '';
+                    if(isCEO) {
+                        deleteBtnHtml = `<button onclick="window.deleteMeeting('${meeting.id}')" class="text-red-400 hover:text-red-600 p-1.5 rounded transition" title="حذف من السجل"><i class="fa-solid fa-trash"></i></button>`;
+                    }
+
                     pastList.innerHTML += `
                         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition flex flex-col">
                             <div class="p-4 flex justify-between items-center bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
                                 <div>
                                     <h4 class="font-bold text-sm text-gray-800 dark:text-white mb-1">${meeting.title}</h4>
-                                    <div class="text-[10px] text-gray-500 font-semibold flex gap-3">
+                                    <div class="text-[10px] text-gray-500 font-semibold flex gap-3 items-center">
                                         <span><i class="fa-regular fa-calendar ml-1"></i> ${dateStr}</span>
                                         <span><i class="fa-solid fa-stopwatch ml-1"></i> المدة: ${durationMins} دقيقة</span>
+                                        ${deleteBtnHtml}
                                     </div>
                                 </div>
                                 <span class="text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-bold px-2 py-1 rounded flex items-center gap-1 border border-gray-200 dark:border-gray-600"><i class="fa-solid fa-check"></i> منتهي</span>
@@ -2266,7 +2387,171 @@
         }
 
         // ===============================================
-        // 6. نظام المتدربين (المطور)
+        // 6. الجرد (المكتب / المستودع) - الميزة الجديدة
+        // ===============================================
+        window.switchInventoryTab = (location, tab) => {
+            const activeBtn = document.getElementById(`tab${location.charAt(0).toUpperCase() + location.slice(1)}Active`);
+            const pastBtn = document.getElementById(`tab${location.charAt(0).toUpperCase() + location.slice(1)}Past`);
+            const activeContainer = document.getElementById(`${location}ActiveContainer`);
+            const pastContainer = document.getElementById(`${location}PastContainer`);
+            const color = location === 'office' ? 'purple' : 'orange';
+
+            if(tab === 'active') {
+                activeBtn.className = `py-2 px-4 font-bold text-sm border-b-2 border-${color}-600 text-${color}-600 dark:text-${color}-400`;
+                pastBtn.className = "py-2 px-4 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300";
+                activeContainer.classList.remove('hidden');
+                pastContainer.classList.add('hidden');
+            } else {
+                pastBtn.className = `py-2 px-4 font-bold text-sm border-b-2 border-${color}-600 text-${color}-600 dark:text-${color}-400`;
+                activeBtn.className = "py-2 px-4 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300";
+                pastContainer.classList.remove('hidden');
+                activeContainer.classList.add('hidden');
+            }
+        };
+
+        window.openAddInventoryModal = (location) => {
+            document.getElementById('invLocation').value = location;
+            document.getElementById('inventoryForm').reset();
+            window.handleInvTypeChange(); // ضبط الحقول
+            window.openModal('inventoryModal');
+        };
+
+        window.handleInvTypeChange = () => {
+            const type = document.getElementById('invItemType').value;
+            if(type === 'robot') {
+                document.getElementById('invRobotFields').classList.remove('hidden');
+                document.getElementById('invPartFields').classList.add('hidden');
+                // require attributes
+                document.getElementById('invRobotName').required = true;
+                document.getElementById('invRobotSerial').required = true;
+                document.getElementById('invPartName').required = false;
+            } else {
+                document.getElementById('invRobotFields').classList.add('hidden');
+                document.getElementById('invPartFields').classList.remove('hidden');
+                // require attributes
+                document.getElementById('invRobotName').required = false;
+                document.getElementById('invRobotSerial').required = false;
+                document.getElementById('invPartName').required = true;
+            }
+        };
+
+        document.getElementById('inventoryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(!currentUserData) return;
+
+            const location = document.getElementById('invLocation').value; // office or warehouse
+            const type = document.getElementById('invItemType').value; // robot or part
+            
+            let data = {
+                location: location,
+                itemType: type,
+                isOld: false,
+                addedBy: currentUserData.name,
+                timestamp: Date.now()
+            };
+
+            if(type === 'robot') {
+                data.name = document.getElementById('invRobotName').value;
+                data.serialNumber = document.getElementById('invRobotSerial').value;
+                data.status = document.getElementById('invRobotStatus').value;
+                data.quantity = 1; // الروبوت دائماً 1
+            } else {
+                data.name = document.getElementById('invPartName').value;
+                data.quantity = document.getElementById('invPartQty').value;
+                data.serialNumber = document.getElementById('invPartSerial').value || 'لا يوجد';
+                data.status = document.getElementById('invPartStatus').value;
+            }
+
+            try {
+                await addDoc(getColRef('inventory'), data);
+                window.closeModal('inventoryModal');
+                showToast('تمت إضافة العنصر بنجاح', 'success');
+                window.logAction('إضافة جرد', `تم إضافة ${data.name} إلى جرد ${location === 'office' ? 'المكتب' : 'المستودع'}`);
+            } catch(err) { console.error(err); }
+        });
+
+        window.moveToOldInventory = async (id) => {
+            if(confirm('نقل هذا العنصر إلى الجرد القديم؟')) {
+                try {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id), { isOld: true });
+                    showToast('تم النقل للجرد القديم', 'info');
+                } catch(e) { console.error(e); }
+            }
+        };
+
+        window.deleteInventoryItem = async (id) => {
+            if(currentUserData.role !== 'CEO') return;
+            if(confirm('هل أنت متأكد من الحذف النهائي؟')) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id));
+                    showToast('تم الحذف', 'success');
+                } catch(e) { console.error(e); }
+            }
+        };
+
+        function renderInventory(location) {
+            const activeCont = document.getElementById(`${location}ActiveContainer`);
+            const pastCont = document.getElementById(`${location}PastContainer`);
+            if(!activeCont || !pastCont) return;
+
+            activeCont.innerHTML = '';
+            pastCont.innerHTML = '';
+
+            let hasActive = false;
+            let hasPast = false;
+
+            const colorClass = location === 'office' ? 'purple' : 'orange';
+            const locationItems = globalInventory.filter(i => i.location === location);
+
+            locationItems.forEach(item => {
+                const dateStr = new Date(item.timestamp).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' });
+                const icon = item.itemType === 'robot' ? 'fa-robot' : 'fa-microchip';
+                const typeText = item.itemType === 'robot' ? 'روبوت' : 'قطعة';
+                const statusColor = item.status.includes('جديد') ? 'text-green-500' : (item.status.includes('معطل') || item.status.includes('غير صالحة') ? 'text-red-500' : 'text-yellow-500');
+                
+                const isCEO = currentUserData.role === 'CEO';
+                const deleteBtnHtml = isCEO ? `<button onclick="window.deleteInventoryItem('${item.id}')" class="text-red-400 hover:text-red-600 p-1" title="حذف"><i class="fa-solid fa-trash"></i></button>` : '';
+
+                let cardHtml = `
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col h-full relative group transition hover:shadow-md">
+                        <div class="flex justify-between items-start mb-3 border-b dark:border-gray-700 pb-2">
+                            <h3 class="font-bold text-lg text-${colorClass}-600 dark:text-${colorClass}-400"><i class="fa-solid ${icon} mx-1"></i> ${item.name}</h3>
+                            <div class="flex gap-2">
+                                <span class="text-[10px] bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded font-bold">${typeText}</span>
+                                ${deleteBtnHtml}
+                            </div>
+                        </div>
+                        <div class="text-xs text-gray-600 dark:text-gray-300 space-y-2 mb-4">
+                            <p class="flex justify-between"><span>العدد:</span> <span class="font-bold">${item.quantity}</span></p>
+                            <p class="flex justify-between"><span>السيريال:</span> <span class="font-bold" dir="ltr">${item.serialNumber}</span></p>
+                            <p class="flex justify-between"><span>الحالة:</span> <span class="font-bold ${statusColor}">${item.status}</span></p>
+                            <p class="flex justify-between"><span>أُضيف بواسطة:</span> <span>${item.addedBy}</span></p>
+                            <p class="flex justify-between text-[10px] text-gray-400 pt-2 border-t dark:border-gray-700"><span>تاريخ الإضافة:</span> <span>${dateStr}</span></p>
+                        </div>
+                `;
+
+                if(!item.isOld) {
+                    hasActive = true;
+                    cardHtml += `
+                        <div class="mt-auto">
+                            <button onclick="window.moveToOldInventory('${item.id}')" class="w-full text-xs bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 py-2 rounded font-bold transition">نقل إلى الجرد القديم</button>
+                        </div>
+                    </div>`;
+                    activeCont.innerHTML += cardHtml;
+                } else {
+                    hasPast = true;
+                    cardHtml += `</div>`;
+                    pastCont.innerHTML += cardHtml;
+                }
+            });
+
+            if(!hasActive) activeCont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد عناصر في الجرد الأخير.</p>';
+            if(!hasPast) pastCont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد عناصر في الجرد القديم.</p>';
+        }
+
+
+        // ===============================================
+        // 7. نظام المتدربين (المطور)
         // ===============================================
         
         window.switchTraineesTab = (tab) => {
@@ -2612,7 +2897,7 @@
 
 
         // ===============================================
-        // 7. التوجيه (Routing) والقفل
+        // 8. التوجيه (Routing) والقفل
         // ===============================================
         window.openModal = (id) => document.getElementById(id).classList.remove('hidden');
         window.closeModal = (id) => {
@@ -2625,6 +2910,7 @@
             }
             if(id === 'traineeModal') document.getElementById('traineeForm').reset();
             if(id === 'traineeSessionModal') document.getElementById('traineeSessionForm').reset();
+            if(id === 'inventoryModal') document.getElementById('inventoryForm').reset();
         };
 
         window.toggleSidebar = () => {
@@ -2685,16 +2971,14 @@
             if(sectionId === 'leaves') renderLeaves();
             if(sectionId === 'trainees') renderTrainees();
             if(sectionId === 'drive') renderDriveFiles();
-            if(sectionId === 'notifications' && currentUserData) {
-                renderNotifications(currentUserData.notifications || []);
-                window.markAllNotifsAsRead();
-            }
+            if(sectionId === 'office-inventory') renderInventory('office');
+            if(sectionId === 'warehouse-inventory') renderInventory('warehouse');
         };
 
         window.addEventListener('hashchange', () => {
             if(!currentUserData) return;
             const hash = window.location.hash.replace('#', '');
-            const validSections = ['home-grid', 'attendance', 'leaves', 'drive', 'meetings', 'settings', 'expenses', 'trainees', 'notifications', 'office-inventory', 'warehouse-inventory'];
+            const validSections = ['home-grid', 'attendance', 'leaves', 'drive', 'meetings', 'settings', 'expenses', 'trainees', 'office-inventory', 'warehouse-inventory'];
             
             if (!hasPunchedInToday && currentUserData.role !== 'CEO' && hash !== 'attendance') {
                 window.location.hash = 'attendance';
@@ -2771,6 +3055,15 @@
                 snapshot.forEach(doc => globalTrainees.push({id: doc.id, ...doc.data()}));
                 globalTrainees.sort((a,b) => b.timestamp - a.timestamp);
                 if(window.location.hash === '#trainees') renderTrainees();
+            }, (error) => console.error(error));
+
+            // مستمع الجرد
+            onSnapshot(getColRef('inventory'), (snapshot) => {
+                globalInventory = [];
+                snapshot.forEach(doc => globalInventory.push({id: doc.id, ...doc.data()}));
+                globalInventory.sort((a,b) => b.timestamp - a.timestamp);
+                if(window.location.hash === '#office-inventory') renderInventory('office');
+                if(window.location.hash === '#warehouse-inventory') renderInventory('warehouse');
             }, (error) => console.error(error));
 
             // مستمع المهام (للإشعارات الخارجية)
