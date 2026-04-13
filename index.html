@@ -182,8 +182,9 @@
                 <h2 id="page-title" class="text-lg md:text-xl font-bold text-primary dark:text-secondary hidden md:block" data-i18n="الرئيسية">الرئيسية - التطبيقات</h2>
             </div>
 
-            <div class="flex items-center flex-row-reverse z-10 font-bold text-2xl text-primary dark:text-white">
-                QUILL <span class="text-xs text-gray-400 ml-2">Services</span>
+            <div class="flex items-center flex-row-reverse z-10 font-bold text-2xl text-primary dark:text-white gap-2">
+                <img src="https://quill.world/wp-content/uploads/2022/01/New-Project-9-1-1.png" alt="Logo" class="h-8 md:h-10 object-contain block dark:hidden">
+                <img src="https://quill.world/wp-content/uploads/2022/01/New-Project-10-1.png" alt="Logo" class="h-8 md:h-10 object-contain hidden dark:block">
             </div>
         </header>
 
@@ -216,6 +217,9 @@
                 </button>
                 <button onclick="window.location.hash='meetings'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative" data-section="meetings">
                     <i class="fa-solid fa-video w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="الاجتماعات">الاجتماعات</span>
+                </button>
+                <button onclick="window.location.hash='trainees'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative" data-section="trainees">
+                    <i class="fa-solid fa-graduation-cap w-6 text-center ml-3"></i><span class="font-semibold text-sm">المتدربين</span>
                 </button>
                 
                 <!-- زر النثريات (للمالية والمدير فقط) -->
@@ -316,6 +320,13 @@
                             <i class="fa-solid fa-video"></i>
                         </div>
                         <span class="font-bold text-gray-800 dark:text-gray-200" data-i18n="الاجتماعات">الاجتماعات</span>
+                    </div>
+                    
+                    <div onclick="window.location.hash='trainees'" class="app-card hover:border-amber-200 group relative">
+                        <div class="app-icon-container bg-amber-50 text-amber-500 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                        </div>
+                        <span class="font-bold text-gray-800 dark:text-gray-200">المتدربين</span>
                     </div>
                     
                     <div id="grid-expenses" onclick="window.location.hash='expenses'" class="app-card hover:border-teal-200 group hidden">
@@ -542,6 +553,29 @@
                 </div>
             </section>
 
+            <!-- قسم المتدربين الجديد -->
+            <section id="trainees" class="section-content hidden animate-fade-in p-4 md:p-0">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
+                    <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 font-bold">إدارة المتدربين ومتابعة تقدمهم</p>
+                    <button onclick="window.openAddTraineeModal()" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-sm flex gap-2">
+                        <i class="fa-solid fa-user-plus"></i> إضافة متدرب جديد
+                    </button>
+                </div>
+
+                <div class="flex gap-4 border-b border-gray-200 dark:border-gray-700 mb-6">
+                    <button onclick="window.switchTraineesTab('active')" id="tabTraineesActive" class="py-2 px-4 font-bold text-sm border-b-2 border-amber-500 text-amber-600 dark:text-amber-400">المتدربين الحاليين</button>
+                    <button onclick="window.switchTraineesTab('past')" id="tabTraineesPast" class="py-2 px-4 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">المتدربين السابقين</button>
+                </div>
+
+                <div id="activeTraineesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- سيتم تعبئتها بالجافاسكربت -->
+                </div>
+
+                <div id="pastTraineesContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- سيتم تعبئتها بالجافاسكربت -->
+                </div>
+            </section>
+
             <section id="settings" class="section-content hidden animate-fade-in p-4 md:p-0">
                 <div class="flex justify-between items-center mb-4 md:mb-6">
                     <p class="text-sm md:text-base text-gray-600 dark:text-gray-300" data-i18n="إعدادات الحساب">إعدادات الحساب والملف الشخصي</p>
@@ -553,17 +587,10 @@
                     <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8 text-center sm:text-right">
                         <div class="relative group">
                             <img id="settingsAvatarPreview" src="https://ui-avatars.com/api/?name=مستخدم&background=00839b&color=fff" class="w-24 h-24 rounded-full border-4 border-gray-50 dark:border-gray-700 object-cover shadow-md">
-                            <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onclick="document.getElementById('profilePicInput').click()">
-                                <i class="fa-solid fa-camera text-white text-xl"></i>
-                            </div>
                         </div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-gray-800 dark:text-gray-200 text-base mb-1" data-i18n="تغيير الصورة">تغيير الصورة الشخصية</h4>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3" data-i18n="اختر صورة تعبر عنك">اختر صورة تعبر عنك ليراها زملاؤك في العمل (الحد الأقصى 500KB).</p>
-                            <input type="file" id="profilePicInput" class="hidden" accept="image/*" onchange="window.handleProfilePicChange(event)">
-                            <button onclick="document.getElementById('profilePicInput').click()" class="bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm">
-                                <i class="fa-solid fa-upload mx-2"></i> <span data-i18n="اختيار صورة">اختيار صورة</span>
-                            </button>
+                            <h4 class="font-bold text-gray-800 dark:text-gray-200 text-base mb-1" data-i18n="تغيير الصورة">الصورة الشخصية</h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">يمكنك تغيير صورتك من المنصة الرئيسية.</p>
                         </div>
                     </div>
 
@@ -589,7 +616,76 @@
         </div>
     </div>
 
-    <!-- Modals -->
+    <!-- Modals الخاصة بالمتدربين -->
+    <div id="traineeModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="bg-amber-500 text-white p-4 flex justify-between items-center flex-shrink-0">
+                <h3 class="font-bold text-base md:text-lg" id="traineeModalTitle">إضافة متدرب جديد</h3>
+                <button onclick="window.closeModal('traineeModal')" class="hover:text-amber-200"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-4 md:p-6 overflow-y-auto flex-1">
+                <form id="traineeForm" class="space-y-4">
+                    <input type="hidden" id="traineeId">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">اسم المتدرب</label>
+                        <input type="text" id="traineeName" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-amber-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">رقم الهاتف</label>
+                        <input type="tel" id="traineePhone" dir="ltr" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-amber-500 outline-none text-right">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">تاريخ بدء التدريب</label>
+                        <input type="date" id="traineeStartDate" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-amber-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">من سيدربه من الموظفين؟</label>
+                        <div id="traineeTrainersList" class="border border-gray-200 dark:border-gray-600 rounded-lg p-2 max-h-32 overflow-y-auto space-y-1 bg-gray-50 dark:bg-gray-700">
+                            <!-- JS will populate checkboxes here -->
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">معلومات إضافية عن المتدرب</label>
+                        <textarea id="traineeNotes" rows="3" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-amber-500 outline-none whitespace-pre-wrap"></textarea>
+                    </div>
+                    <div class="pt-4 flex justify-end gap-2">
+                        <button type="button" onclick="window.closeModal('traineeModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-bold">إلغاء</button>
+                        <button type="submit" class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-bold shadow">حفظ البيانات</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="traineeSessionModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden">
+            <div class="bg-blue-600 text-white p-4 flex justify-between items-center">
+                <h3 class="font-bold text-base md:text-lg" id="sessionModalTitle">تسجيل موعد تدريب</h3>
+                <button onclick="window.closeModal('traineeSessionModal')" class="hover:text-blue-200"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <form id="traineeSessionForm" class="p-4 md:p-6 space-y-4">
+                <input type="hidden" id="sessionId">
+                <input type="hidden" id="sessionNumber">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">معلومات إضافية عن ما تم إنجازه (اختياري)</label>
+                    <textarea id="sessionNotes" rows="3" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-blue-500 outline-none whitespace-pre-wrap"></textarea>
+                </div>
+                <div class="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="sessionFinishTraining" class="w-4 h-4 text-red-600 rounded">
+                        <span class="text-sm font-bold text-red-700 dark:text-red-400">آخر يوم تدريب لهذا المتدرب (نقل للمتدربين السابقين)</span>
+                    </label>
+                </div>
+                <div class="pt-4 flex justify-end gap-2">
+                    <button type="button" onclick="window.closeModal('traineeSessionModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-bold">إلغاء</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-bold shadow">حفظ الموعد</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- نهاية Modals المتدربين -->
+
+    <!-- Modals القديمة... -->
     <div id="leaveModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden">
             <div class="bg-pink-600 text-white p-4 flex justify-between items-center">
@@ -599,7 +695,6 @@
             <form id="leaveForm" class="p-4 md:p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">نوع الطلب</label>
-                    <!-- تم إضافة حدث onchange للتبديل بين التاريخ والتاريخ مع الوقت -->
                     <select id="leaveType" onchange="window.handleLeaveTypeChange()" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-pink-500 focus:outline-none font-bold">
                         <option value="إجازة سنوية">إجازة سنوية (تخصم من 14 يوم)</option>
                         <option value="إجازة مرضية">إجازة مرضية</option>
@@ -619,7 +714,6 @@
         </div>
     </div>
     
-    <!-- نافذة قراءة تفاصيل الطلب للمدير -->
     <div id="leaveDetailsModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[60] p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden">
             <div class="bg-pink-600 text-white p-4 flex justify-between items-center">
@@ -638,7 +732,6 @@
         </div>
     </div>
 
-    <!-- نافذة سحب التقارير للمدير -->
     <div id="exportModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[60] p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden">
             <div class="bg-primary text-white p-4 flex justify-between items-center">
@@ -664,9 +757,6 @@
             </div>
         </div>
     </div>
-
-    <!-- نافذة الطباعة المخفية (لـ PDF) -->
-    <div id="printArea" class="hidden bg-white text-black p-8 text-right" dir="rtl"></div>
 
     <div id="createMeetingModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden">
@@ -847,6 +937,7 @@
         let globalGroups = []; 
         let globalTasks = []; 
         let globalExpenses = []; 
+        let globalTrainees = []; // بيانات المتدربين
         let groupReadTimestamps = {};
         
         let hasPunchedInToday = true; 
@@ -1020,6 +1111,22 @@
                 });
             } catch(e) { console.error("Error logging action", e); }
         };
+
+        function addNotificationToDB(title, body, link, uid) {
+            getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid)).then(docSnap => {
+                if (docSnap.exists()) {
+                    let currentNotifs = docSnap.data().notifications || [];
+                    currentNotifs.unshift({
+                        id: Date.now().toString(),
+                        title: title,
+                        body: body,
+                        link: link,
+                        timestamp: Date.now()
+                    });
+                    updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid), { notifications: currentNotifs.slice(0, 50) });
+                }
+            });
+        }
 
         // ===============================================
         // 1. نظام المستندات 
@@ -1717,17 +1824,263 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-
-            const dlTime = Date.now();
-            try {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUserData.uid), { lastExpensesDownload: dlTime });
-                const txt = document.getElementById('lastExpensesDownloadTxt');
-                if(txt) txt.innerText = 'آخر سحب للملف: ' + new Date(dlTime).toLocaleString('ar-EG');
-            } catch(e) {}
         };
 
         // ===============================================
-        // 6. التوجيه (Routing) والقفل
+        // 6. نظام المتدربين الجديد
+        // ===============================================
+        
+        window.switchTraineesTab = (tab) => {
+            const activeBtn = document.getElementById('tabTraineesActive');
+            const pastBtn = document.getElementById('tabTraineesPast');
+            const activeContainer = document.getElementById('activeTraineesContainer');
+            const pastContainer = document.getElementById('pastTraineesContainer');
+
+            if(tab === 'active') {
+                activeBtn.className = "py-2 px-4 font-bold text-sm border-b-2 border-amber-500 text-amber-600 dark:text-amber-400";
+                pastBtn.className = "py-2 px-4 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300";
+                activeContainer.classList.remove('hidden');
+                pastContainer.classList.add('hidden');
+            } else {
+                pastBtn.className = "py-2 px-4 font-bold text-sm border-b-2 border-amber-500 text-amber-600 dark:text-amber-400";
+                activeBtn.className = "py-2 px-4 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300";
+                pastContainer.classList.remove('hidden');
+                activeContainer.classList.add('hidden');
+            }
+        };
+
+        window.openAddTraineeModal = () => {
+            document.getElementById('traineeModalTitle').innerText = 'إضافة متدرب جديد';
+            document.getElementById('traineeForm').reset();
+            document.getElementById('traineeId').value = '';
+            
+            // تعبئة قائمة الموظفين لاختيار المدربين
+            const list = document.getElementById('traineeTrainersList');
+            list.innerHTML = '';
+            globalUsers.forEach(u => {
+                list.innerHTML += `
+                    <label class="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded cursor-pointer transition">
+                        <input type="checkbox" value="${u.uid}" class="trainee-trainer-checkbox w-4 h-4 text-amber-500 rounded">
+                        <span class="text-sm font-bold text-gray-700 dark:text-gray-200">${u.name} <span class="text-xs text-gray-400">(${u.role})</span></span>
+                    </label>
+                `;
+            });
+            window.openModal('traineeModal');
+        };
+
+        window.openEditTraineeModal = (id) => {
+            const t = globalTrainees.find(x => x.id === id);
+            if(!t) return;
+
+            document.getElementById('traineeModalTitle').innerText = 'تعديل بيانات المتدرب';
+            document.getElementById('traineeId').value = t.id;
+            document.getElementById('traineeName').value = t.name;
+            document.getElementById('traineePhone').value = t.phone || '';
+            document.getElementById('traineeStartDate').value = t.startDate || '';
+            document.getElementById('traineeNotes').value = t.notes || '';
+
+            const list = document.getElementById('traineeTrainersList');
+            list.innerHTML = '';
+            globalUsers.forEach(u => {
+                const isChecked = (t.trainers || []).includes(u.uid) ? 'checked' : '';
+                list.innerHTML += `
+                    <label class="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded cursor-pointer transition">
+                        <input type="checkbox" value="${u.uid}" class="trainee-trainer-checkbox w-4 h-4 text-amber-500 rounded" ${isChecked}>
+                        <span class="text-sm font-bold text-gray-700 dark:text-gray-200">${u.name} <span class="text-xs text-gray-400">(${u.role})</span></span>
+                    </label>
+                `;
+            });
+            window.openModal('traineeModal');
+        };
+
+        document.getElementById('traineeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(!currentUserData) return;
+
+            const id = document.getElementById('traineeId').value;
+            const name = document.getElementById('traineeName').value;
+            const phone = document.getElementById('traineePhone').value;
+            const startDate = document.getElementById('traineeStartDate').value;
+            const notes = document.getElementById('traineeNotes').value;
+            
+            const checkboxes = document.querySelectorAll('.trainee-trainer-checkbox:checked');
+            const trainers = Array.from(checkboxes).map(cb => cb.value);
+
+            try {
+                if(id) {
+                    // Update
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'trainees', id), {
+                        name, phone, startDate, trainers, notes
+                    });
+                    showToast('تم تحديث البيانات بنجاح', 'success');
+                } else {
+                    // Create
+                    await addDoc(getColRef('trainees'), {
+                        name, phone, startDate, trainers, notes, status: 'active', sessions: [], timestamp: Date.now()
+                    });
+                    showToast('تمت إضافة المتدرب بنجاح', 'success');
+                }
+                window.closeModal('traineeModal');
+            } catch(e) { console.error(e); showToast('حدث خطأ', 'error'); }
+        });
+
+        window.takeOverTraining = async (id) => {
+            if(!currentUserData) return;
+            const trainee = globalTrainees.find(t => t.id === id);
+            if(!trainee) return;
+            
+            if(trainee.trainers.includes(currentUserData.uid)) {
+                showToast('أنت من ضمن المدربين بالفعل', 'info'); return;
+            }
+
+            if(confirm(`هل أنت متأكد من استلامك لتدريب ${trainee.name} بدلاً من المدربين السابقين؟`)) {
+                const oldTrainers = [...trainee.trainers];
+                try {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'trainees', id), {
+                        trainers: [currentUserData.uid]
+                    });
+                    showToast('تم استلام التدريب بنجاح', 'success');
+                    
+                    // إرسال إشعارات للمدربين القدامى
+                    oldTrainers.forEach(uid => {
+                        if(uid !== currentUserData.uid) {
+                            addNotificationToDB('تغيير مدرب', `قام ${currentUserData.name} باستلام تدريب ${trainee.name} بدلاً منك.`, 'trainees', uid);
+                        }
+                    });
+                } catch(e) { console.error(e); }
+            }
+        };
+
+        window.openTraineeSessionModal = (id) => {
+            const trainee = globalTrainees.find(t => t.id === id);
+            if(!trainee) return;
+            
+            const sessionNum = (trainee.sessions ? trainee.sessions.length : 0) + 1;
+            document.getElementById('sessionModalTitle').innerText = `تسجيل موعد تدريب رقم ${sessionNum}`;
+            document.getElementById('sessionId').value = id;
+            document.getElementById('sessionNumber').value = sessionNum;
+            document.getElementById('sessionNotes').value = '';
+            document.getElementById('sessionFinishTraining').checked = false;
+            
+            window.openModal('traineeSessionModal');
+        };
+
+        document.getElementById('traineeSessionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(!currentUserData) return;
+
+            const id = document.getElementById('sessionId').value;
+            const num = document.getElementById('sessionNumber').value;
+            const notes = document.getElementById('sessionNotes').value;
+            const isFinished = document.getElementById('sessionFinishTraining').checked;
+
+            const trainee = globalTrainees.find(t => t.id === id);
+            if(!trainee) return;
+
+            let sessions = trainee.sessions || [];
+            sessions.push({
+                title: `موعد تدريب رقم ${num}`,
+                notes: notes,
+                trainerId: currentUserData.uid,
+                trainerName: currentUserData.name,
+                timestamp: Date.now()
+            });
+
+            try {
+                let updateData = { sessions: sessions };
+                if(isFinished) {
+                    updateData.status = 'completed';
+                    updateData.completedAt = Date.now();
+                }
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'trainees', id), updateData);
+                window.closeModal('traineeSessionModal');
+                showToast(isFinished ? 'تم إنهاء فترة التدريب للمتدرب' : 'تم تسجيل الموعد بنجاح', 'success');
+            } catch(e) { console.error(e); }
+        });
+
+        function renderTrainees() {
+            const activeCont = document.getElementById('activeTraineesContainer');
+            const pastCont = document.getElementById('pastTraineesContainer');
+            if(!activeCont || !pastCont) return;
+
+            activeCont.innerHTML = '';
+            pastCont.innerHTML = '';
+
+            let hasActive = false;
+            let hasPast = false;
+
+            globalTrainees.forEach(t => {
+                let trainersNames = 'غير محدد';
+                if(t.trainers && t.trainers.length > 0) {
+                    trainersNames = t.trainers.map(uid => {
+                        const u = globalUsers.find(x => x.uid === uid);
+                        return u ? u.name : 'مجهول';
+                    }).join('، ');
+                }
+
+                const sessionsCount = t.sessions ? t.sessions.length : 0;
+                
+                let sessionsHtml = '';
+                if(t.sessions && t.sessions.length > 0) {
+                    sessionsHtml = `<div class="mt-3 border-t dark:border-gray-700 pt-2"><p class="text-[10px] font-bold text-gray-500 mb-1">المواعيد السابقة:</p><div class="space-y-1 max-h-24 overflow-y-auto pr-1">`;
+                    t.sessions.forEach(s => {
+                        sessionsHtml += `<div class="bg-gray-50 dark:bg-gray-700 p-1.5 rounded text-[10px]">
+                            <span class="font-bold text-blue-600 dark:text-blue-400">${s.title}</span> - ${s.trainerName}
+                            ${s.notes ? `<p class="text-gray-500 dark:text-gray-400 mt-1">${s.notes}</p>` : ''}
+                        </div>`;
+                    });
+                    sessionsHtml += `</div></div>`;
+                }
+
+                if(t.status === 'active') {
+                    hasActive = true;
+                    activeCont.innerHTML += `
+                        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col h-full relative group">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-lg text-amber-600 dark:text-amber-500"><i class="fa-solid fa-user-graduate mx-1"></i> ${t.name}</h3>
+                                <button onclick="window.takeOverTraining('${t.id}')" class="text-[10px] bg-amber-50 text-amber-600 px-2 py-1 rounded shadow-sm font-bold hover:bg-amber-100 transition">استلام التدريب</button>
+                            </div>
+                            <div class="text-xs text-gray-600 dark:text-gray-300 space-y-1 mb-2">
+                                <p><i class="fa-solid fa-phone text-gray-400 mx-1"></i> <span dir="ltr">${t.phone || '-'}</span></p>
+                                <p><i class="fa-solid fa-calendar-day text-gray-400 mx-1"></i> البدء: <span dir="ltr">${t.startDate}</span></p>
+                                <p><i class="fa-solid fa-chalkboard-user text-gray-400 mx-1"></i> المدرب: <span class="font-bold">${trainersNames}</span></p>
+                            </div>
+                            ${t.notes ? `<p class="text-[10px] text-gray-500 bg-gray-50 dark:bg-gray-700 p-2 rounded mb-2">${t.notes}</p>` : ''}
+                            
+                            ${sessionsHtml}
+
+                            <div class="mt-auto pt-3 flex gap-2 border-t dark:border-gray-700">
+                                <button onclick="window.openEditTraineeModal('${t.id}')" class="flex-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-gray-700 dark:text-gray-200 py-2 rounded font-bold transition">تعديل البيانات</button>
+                                <button onclick="window.openTraineeSessionModal('${t.id}')" class="flex-1 text-xs bg-blue-50 hover:bg-blue-100 text-blue-600 py-2 rounded font-bold transition shadow-sm">إضافة موعد رقم ${sessionsCount + 1}</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    hasPast = true;
+                    const compDate = t.completedAt ? new Date(t.completedAt).toLocaleDateString('ar-EG') : '';
+                    pastCont.innerHTML += `
+                        <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col h-full opacity-80">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-lg text-gray-700 dark:text-gray-300 line-through decoration-gray-400"><i class="fa-solid fa-user-graduate mx-1"></i> ${t.name}</h3>
+                                <span class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded shadow-sm font-bold"><i class="fa-solid fa-check"></i> تدريب مكتمل</span>
+                            </div>
+                            <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1 mb-2">
+                                <p><i class="fa-solid fa-calendar-day mx-1"></i> من: <span dir="ltr">${t.startDate}</span> إلى: <span dir="ltr">${compDate}</span></p>
+                                <p><i class="fa-solid fa-chalkboard-user mx-1"></i> المدرب: <span class="font-bold">${trainersNames}</span></p>
+                            </div>
+                            ${sessionsHtml}
+                        </div>
+                    `;
+                }
+            });
+
+            if(!hasActive) activeCont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد متدربين حالياً.</p>';
+            if(!hasPast) pastCont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد متدربين سابقين.</p>';
+        }
+
+
+        // ===============================================
+        // 7. التوجيه (Routing) والقفل
         // ===============================================
         window.openModal = (id) => document.getElementById(id).classList.remove('hidden');
         window.closeModal = (id) => {
@@ -1735,8 +2088,10 @@
             if(id === 'createMeetingModal') document.getElementById('createMeetingForm').reset();
             if(id === 'leaveModal') {
                 document.getElementById('leaveForm').reset();
-                window.handleLeaveTypeChange(); // إعادة ضبط الحقول للوضع الافتراضي
+                window.handleLeaveTypeChange(); 
             }
+            if(id === 'traineeModal') document.getElementById('traineeForm').reset();
+            if(id === 'traineeSessionModal') document.getElementById('traineeSessionForm').reset();
         };
 
         window.toggleSidebar = () => {
@@ -1750,7 +2105,6 @@
                 document.getElementById('sidebarLockMessage').classList.remove('hidden');
                 document.getElementById('homeGridContainer').classList.add('hidden');
                 
-                // إخفاء زر تسجيل الانصراف في الرئيسية إن وُجد
                 const homePunchOutContainer = document.getElementById('homePunchOutContainer');
                 if(homePunchOutContainer) homePunchOutContainer.classList.add('hidden');
 
@@ -1766,6 +2120,9 @@
             document.getElementById('sidebarLockMessage').classList.add('hidden');
             document.getElementById('homeGridContainer').classList.remove('hidden');
             document.getElementById('attendanceLockBanner').classList.add('hidden');
+            
+            const homePunchOutContainer = document.getElementById('homePunchOutContainer');
+            if(homePunchOutContainer && currentUserData.role !== 'CEO') homePunchOutContainer.classList.remove('hidden');
         }
 
         window.showSection = (sectionId) => {
@@ -1792,12 +2149,13 @@
             if(window.innerWidth < 768) { document.getElementById('sidebar').classList.add('translate-x-full'); document.getElementById('mobileOverlay').classList.add('hidden'); }
             if(sectionId === 'attendance') renderEmpAttendanceView();
             if(sectionId === 'leaves') renderLeaves();
+            if(sectionId === 'trainees') renderTrainees();
         };
 
         window.addEventListener('hashchange', () => {
             if(!currentUserData) return;
             const hash = window.location.hash.replace('#', '');
-            const validSections = ['home-grid', 'attendance', 'leaves', 'drive', 'meetings', 'settings', 'expenses'];
+            const validSections = ['home-grid', 'attendance', 'leaves', 'drive', 'meetings', 'settings', 'expenses', 'trainees'];
             
             if (!hasPunchedInToday && currentUserData.role !== 'CEO' && hash !== 'attendance') {
                 window.location.hash = 'attendance';
@@ -1808,8 +2166,54 @@
             window.showSection(validSections.includes(hash) ? hash : 'home-grid');
         });
 
-        // 🔴 مستمع الإشعارات للروابط الخارجية
-        function listenForExternalBadges() {
+        // 🔴 مستمعات قاعدة البيانات
+        function startDatabaseListeners() {
+            onSnapshot(getColRef('users'), (snapshot) => {
+                globalUsers = []; snapshot.forEach(d => globalUsers.push({ uid: d.id, ...d.data() })); // uid is explicitly set for users
+                const select = document.getElementById('attendanceEmpSelect');
+                if(select && select.options.length <= 1) {
+                    globalUsers.forEach(u => {
+                        if (u.role !== 'CEO') select.innerHTML += `<option value="${u.uid}">${u.name}</option>`;
+                    });
+                }
+                if(window.location.hash === '#trainees') renderTrainees();
+            }, (error) => console.error(error));
+
+            onSnapshot(getColRef('attendance'), (snapshot) => {
+                globalAttendance = []; snapshot.forEach(d => globalAttendance.push({ id: d.id, ...d.data() }));
+                if(!document.getElementById('attendance').classList.contains('hidden')) {
+                    renderEmpAttendanceView();
+                    if(currentUserData.role === 'CEO') window.renderSelectedEmpAttendance();
+                } else {
+                    renderEmpAttendanceView();
+                }
+            }, (error) => console.error(error));
+
+            onSnapshot(getColRef('leaves'), (snapshot) => {
+                globalLeaves = []; snapshot.forEach(d => globalLeaves.push({ id: d.id, ...d.data() }));
+                globalLeaves.sort((a,b) => b.timestamp - a.timestamp); 
+                if(!document.getElementById('leaves').classList.contains('hidden')) renderLeaves();
+            }, (error) => console.error(error));
+
+            onSnapshot(getStorageColRef('files'), (snapshot) => {
+                globalFiles = []; snapshot.forEach(d => globalFiles.push({ id: d.id, ...d.data() }));
+                globalFiles.sort((a,b) => b.timestamp - a.timestamp); renderDriveFiles(); updateStorageProgress();
+            }, (error) => console.error(error));
+
+            onSnapshot(getColRef('meetings'), (snapshot) => {
+                globalMeetings = []; snapshot.forEach(d => globalMeetings.push({ id: d.id, ...d.data() }));
+                globalMeetings.sort((a,b) => b.timestamp - a.timestamp); renderMeetings();
+            }, (error) => console.error(error));
+
+            // مستمع المتدربين
+            onSnapshot(getColRef('trainees'), (snapshot) => {
+                globalTrainees = [];
+                snapshot.forEach(doc => globalTrainees.push({id: doc.id, ...doc.data()}));
+                globalTrainees.sort((a,b) => b.timestamp - a.timestamp);
+                if(window.location.hash === '#trainees') renderTrainees();
+            }, (error) => console.error(error));
+
+            // مستمع المهام (للإشعارات الخارجية)
             onSnapshot(getColRef('tasks'), (snapshot) => {
                 if(!currentUserData) return;
                 let pendingTasks = 0;
@@ -1826,6 +2230,7 @@
                 });
             }, (error) => console.error(error));
 
+            // مستمع المجموعات والمحادثات (للإشعارات الخارجية)
             onSnapshot(getColRef('groups'), (gSnap) => {
                 if(!currentUserData) return;
                 globalGroups = [{ id: 'global', members: [] }];
@@ -1895,10 +2300,7 @@
                         }
                         
                         document.getElementById('setupProfileScreen').classList.add('hidden');
-                        
-                        // تطبيق الإعدادات الافتراضية لنموذج الإجازات
                         window.handleLeaveTypeChange();
-                        
                         finishLoginSetup();
                     } else {
                         document.getElementById('setupProfileScreen').classList.remove('hidden');
@@ -1957,43 +2359,7 @@
                 document.getElementById('grid-expenses').classList.remove('hidden');
             }
 
-            onSnapshot(getColRef('users'), (snapshot) => {
-                globalUsers = []; snapshot.forEach(d => globalUsers.push({ id: d.id, ...d.data() }));
-                const select = document.getElementById('attendanceEmpSelect');
-                if(select && select.options.length <= 1) {
-                    globalUsers.forEach(u => {
-                        if (u.role !== 'CEO') select.innerHTML += `<option value="${u.id}">${u.name}</option>`;
-                    });
-                }
-            }, (error) => console.error(error));
-
-            onSnapshot(getColRef('attendance'), (snapshot) => {
-                globalAttendance = []; snapshot.forEach(d => globalAttendance.push({ id: d.id, ...d.data() }));
-                if(!document.getElementById('attendance').classList.contains('hidden')) {
-                    renderEmpAttendanceView();
-                    if(currentUserData.role === 'CEO') window.renderSelectedEmpAttendance();
-                } else {
-                    renderEmpAttendanceView();
-                }
-            }, (error) => console.error(error));
-
-            onSnapshot(getColRef('leaves'), (snapshot) => {
-                globalLeaves = []; snapshot.forEach(d => globalLeaves.push({ id: d.id, ...d.data() }));
-                globalLeaves.sort((a,b) => b.timestamp - a.timestamp); 
-                if(!document.getElementById('leaves').classList.contains('hidden')) renderLeaves();
-            }, (error) => console.error(error));
-
-            onSnapshot(getStorageColRef('files'), (snapshot) => {
-                globalFiles = []; snapshot.forEach(d => globalFiles.push({ id: d.id, ...d.data() }));
-                globalFiles.sort((a,b) => b.timestamp - a.timestamp); renderDriveFiles(); updateStorageProgress();
-            }, (error) => console.error(error));
-
-            onSnapshot(getColRef('meetings'), (snapshot) => {
-                globalMeetings = []; snapshot.forEach(d => globalMeetings.push({ id: d.id, ...d.data() }));
-                globalMeetings.sort((a,b) => b.timestamp - a.timestamp); renderMeetings();
-            }, (error) => console.error(error));
-
-            listenForExternalBadges(); 
+            startDatabaseListeners();
             
             window.logAction('تسجيل دخول', `سجل ${currentUserData.name} الدخول لخدمات النظام (الدومين الثاني)`);
             window.dispatchEvent(new Event('hashchange'));
