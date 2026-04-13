@@ -88,6 +88,18 @@
             #printArea { position: absolute; left: 0; top: 0; width: 100%; direction: rtl; }
             .no-print { display: none !important; }
         }
+        
+        .notif-dropdown {
+            transform-origin: top left;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        .notif-dropdown.hidden {
+            transform: scale(0.95);
+            opacity: 0;
+            pointer-events: none;
+            display: flex !important; /* Keep flex structure but hide visually via JS logic */
+            visibility: hidden;
+        }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 h-screen overflow-hidden flex relative transition-colors duration-300">
@@ -171,18 +183,31 @@
                     </div>
                 </div>
                 
-                <!-- زر الإشعارات في الهيدر الرئيسي -->
-                <button onclick="window.location.hash='notifications'" class="text-gray-400 hover:text-secondary p-2 rounded transition relative hidden md:block" title="الإشعارات">
-                    <i class="fa-solid fa-bell text-lg"></i>
-                    <span id="headerNotifBadge" class="absolute top-1 right-1 flex items-center justify-center w-4 h-4 text-[9px] font-bold text-white bg-red-500 rounded-full hidden"></span>
-                    <span id="headerNotifDot" class="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full hidden"><span class="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping-slow"></span><span class="relative inline-flex rounded-full w-2.5 h-2.5"></span></span>
-                </button>
+                <!-- زر وقائمة الإشعارات المنسدلة -->
+                <div class="relative">
+                    <button onclick="window.toggleNotifDropdown()" id="headerNotifBtn" class="text-gray-400 hover:text-secondary p-2 rounded transition relative" title="الإشعارات">
+                        <i class="fa-solid fa-bell text-lg"></i>
+                        <span id="headerNotifBadge" class="absolute top-1 right-1 flex items-center justify-center w-4 h-4 text-[9px] font-bold text-white bg-red-500 rounded-full hidden"></span>
+                        <span id="headerNotifDot" class="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full hidden"><span class="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping-slow"></span><span class="relative inline-flex rounded-full w-2.5 h-2.5"></span></span>
+                    </button>
 
-                <button onclick="window.toggleLanguage()" class="text-gray-400 hover:text-secondary p-2 rounded transition font-bold" title="تبديل اللغة">
+                    <!-- القائمة المنسدلة للإشعارات -->
+                    <div id="notifDropdownUI" style="visibility: hidden;" class="notif-dropdown absolute rtl:right-0 ltr:left-0 mt-2 w-80 bg-white dark:bg-gray-800 shadow-2xl rounded-xl flex flex-col z-[100] border border-gray-200 dark:border-gray-700">
+                        <div class="flex justify-between items-center p-3 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-t-xl">
+                            <button onclick="window.deleteAllNotifs()" class="text-red-500 hover:text-red-700 text-xs font-bold transition">حذف الكل</button>
+                            <span class="font-bold text-gray-800 dark:text-white">الإشعارات</span>
+                        </div>
+                        <div id="notifDropdownList" class="max-h-[70vh] overflow-y-auto p-2 space-y-2 bg-gray-100 dark:bg-gray-900/50">
+                            <!-- Items go here -->
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="window.toggleLanguage()" class="text-gray-400 hover:text-secondary p-2 rounded transition font-bold hidden md:block" title="تبديل اللغة">
                     <span id="langIconTxt">EN</span>
                 </button>
                 
-                <button onclick="window.toggleTheme()" class="text-gray-400 hover:text-secondary p-2 rounded transition" title="الوضع الليلي/النهاري">
+                <button onclick="window.toggleTheme()" class="text-gray-400 hover:text-secondary p-2 rounded transition hidden md:block" title="الوضع الليلي/النهاري">
                     <i id="themeToggleIcon" class="fa-solid fa-moon"></i>
                 </button>
             </div>
@@ -218,7 +243,7 @@
                 </button>
                 
                 <!-- زر الإشعارات للقائمة الجانبية -->
-                <button onclick="window.location.hash='notifications'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative" data-section="notifications">
+                <button onclick="window.toggleNotifDropdown(); window.toggleSidebar();" class="w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative">
                     <i class="fa-solid fa-bell w-6 text-center ml-3"></i><span class="font-semibold text-sm">الإشعارات</span>
                     <span id="navNotifBadgeNum" class="absolute left-4 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden"></span>
                     <span id="navNotifBadgeDot" class="absolute left-6 w-2.5 h-2.5 rounded-full hidden"><span class="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping-slow"></span><span class="relative inline-flex rounded-full w-2.5 h-2.5"></span></span>
@@ -287,7 +312,7 @@
             </div>
         </aside>
 
-        <div class="flex-1 overflow-y-auto p-0 md:p-6 bg-gray-50 dark:bg-gray-900 relative">
+        <div class="flex-1 overflow-y-auto p-0 md:p-6 bg-gray-50 dark:bg-gray-900 relative" id="mainScrollArea" onclick="closeNotifDropdownIfOpen(event)">
             
             <section id="home-grid" class="section-content animate-fade-in p-4 md:p-10 max-w-6xl mx-auto">
                 <div class="mb-6 flex justify-between items-end">
@@ -355,6 +380,21 @@
                         <span class="font-bold text-gray-800 dark:text-gray-200">المصاريف والنثريات</span>
                     </div>
 
+                    <!-- أقسام الجرد الجديدة -->
+                    <div onclick="window.location.hash='office-inventory'" class="app-card hover:border-purple-200 group relative">
+                        <div class="app-icon-container bg-purple-50 text-purple-500 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-desktop"></i>
+                        </div>
+                        <span class="font-bold text-gray-800 dark:text-gray-200">جرد المكتب</span>
+                    </div>
+
+                    <div onclick="window.location.hash='warehouse-inventory'" class="app-card hover:border-orange-200 group relative">
+                        <div class="app-icon-container bg-orange-50 text-orange-500 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-boxes-stacked"></i>
+                        </div>
+                        <span class="font-bold text-gray-800 dark:text-gray-200">جرد المستودع</span>
+                    </div>
+
                     <!-- روابط لتطبيقات خارجية (الدومين الرئيسي) -->
                     <a href="https://quill.farah-snacks.store/#tasks" class="app-card hover:border-emerald-200 group relative">
                         <div class="app-icon-container bg-emerald-50 text-emerald-500 group-hover:scale-110 transition-transform">
@@ -388,14 +428,20 @@
                 </div>
             </section>
             
-            <!-- قسم الإشعارات الجديد -->
-            <section id="notifications" class="section-content hidden animate-fade-in p-4 md:p-10 max-w-4xl mx-auto">
-                <div class="flex justify-between items-center mb-6 border-b dark:border-gray-700 pb-4">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white"><i class="fa-solid fa-bell text-primary dark:text-secondary mx-2"></i>الإشعارات</h2>
-                    <button onclick="window.markAllNotifsAsRead()" class="text-sm text-secondary hover:text-primary font-bold">تحديد الكل كمقروء</button>
+            <!-- أقسام الجرد (جاهزة للعمل لاحقاً) -->
+            <section id="office-inventory" class="section-content hidden animate-fade-in p-4 md:p-10 max-w-6xl mx-auto">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4"><i class="fa-solid fa-desktop text-purple-500 mx-2"></i>جرد المكتب</h2>
+                <div class="bg-white dark:bg-gray-800 p-8 rounded-xl text-center shadow-sm border border-gray-100 dark:border-gray-700">
+                    <i class="fa-solid fa-screwdriver-wrench text-4xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-500 font-bold">هذا القسم قيد الإنشاء وسيكون متاحاً قريباً.</p>
                 </div>
-                <div id="notificationsList" class="space-y-3">
-                    <!-- سيتم تعبئتها بواسطة JS -->
+            </section>
+
+            <section id="warehouse-inventory" class="section-content hidden animate-fade-in p-4 md:p-10 max-w-6xl mx-auto">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4"><i class="fa-solid fa-boxes-stacked text-orange-500 mx-2"></i>جرد المستودع</h2>
+                <div class="bg-white dark:bg-gray-800 p-8 rounded-xl text-center shadow-sm border border-gray-100 dark:border-gray-700">
+                    <i class="fa-solid fa-screwdriver-wrench text-4xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-500 font-bold">هذا القسم قيد الإنشاء وسيكون متاحاً قريباً.</p>
                 </div>
             </section>
 
@@ -490,6 +536,7 @@
             </section>
 
             <section id="drive" class="section-content hidden animate-fade-in p-4 md:p-0">
+                <!-- شريط المساحة -->
                 <div class="mb-6 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
                     <div class="flex justify-between text-sm mb-2 font-bold text-gray-700 dark:text-gray-300">
                         <span data-i18n="المساحة المستخدمة">المساحة المستخدمة</span>
@@ -502,26 +549,34 @@
                 </div>
 
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
-                    <p class="text-sm md:text-base text-gray-600 dark:text-gray-300" data-i18n="مشاركة الملفات">مشاركة وتثبيت الملفات الهامة (الحد الأقصى 500KB للملف الواحد)</p>
-                    <div>
+                    <p class="text-sm md:text-base text-gray-600 dark:text-gray-300" data-i18n="مشاركة الملفات">إدارة المستندات (الحد الأقصى 500KB للملف)</p>
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <button onclick="window.openModal('createFolderModal')" class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm font-bold shadow flex-1 md:flex-none justify-center">
+                            <i class="fa-solid fa-folder-plus mx-2"></i> مجلد جديد
+                        </button>
                         <input type="file" id="driveFileInput" class="hidden" onchange="window.handleDriveFileSelect(event)">
-                        <button id="uploadFileBtn" onclick="document.getElementById('driveFileInput').click()" class="bg-secondary hover:bg-primary text-white px-4 py-2 rounded-lg transition-colors items-center text-sm md:text-base w-full md:w-auto flex justify-center shadow">
-                            <i class="fa-solid fa-cloud-arrow-up mx-2"></i> <span data-i18n="رفع ملف جديد">رفع ملف جديد</span>
+                        <button id="uploadFileBtn" onclick="document.getElementById('driveFileInput').click()" class="bg-secondary hover:bg-primary text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm font-bold shadow flex-1 md:flex-none justify-center">
+                            <i class="fa-solid fa-cloud-arrow-up mx-2"></i> رفع ملف
                         </button>
                     </div>
                 </div>
+
+                <!-- مسار التنقل Breadcrumbs -->
+                <div id="driveBreadcrumbs" class="flex flex-wrap items-center gap-2 mb-4 text-sm font-bold text-gray-600 dark:text-gray-300">
+                    <span class="cursor-pointer hover:text-secondary flex items-center gap-1" onclick="window.navigateToFolder(null)"><i class="fa-solid fa-house"></i> الرئيسية</span>
+                </div>
                 
-                <h3 class="font-bold text-gray-800 dark:text-gray-200 mb-3 border-b dark:border-gray-700 pb-2"><i class="fa-solid fa-thumbtack text-primary dark:text-secondary mx-2"></i><span data-i18n="الملفات المثبتة">الملفات المثبتة</span></h3>
+                <h3 id="pinnedFilesTitle" class="font-bold text-gray-800 dark:text-gray-200 mb-3 border-b dark:border-gray-700 pb-2"><i class="fa-solid fa-thumbtack text-primary dark:text-secondary mx-2"></i><span data-i18n="الملفات المثبتة">الملفات المثبتة في هذا المسار</span></h3>
                 <div id="pinnedFilesContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8"></div>
 
-                <h3 class="font-bold text-gray-800 dark:text-gray-200 mb-3 border-b dark:border-gray-700 pb-2"><i class="fa-regular fa-folder-open text-secondary mx-2"></i><span data-i18n="كل الملفات">كل الملفات</span></h3>
+                <h3 class="font-bold text-gray-800 dark:text-gray-200 mb-3 border-b dark:border-gray-700 pb-2"><i class="fa-regular fa-folder-open text-secondary mx-2"></i>المحتويات</h3>
                 <div id="allFilesContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
             </section>
 
             <section id="meetings" class="section-content hidden animate-fade-in p-4 md:p-0">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
                     <p class="text-sm md:text-base text-gray-600 dark:text-gray-300" data-i18n="إدارة الاجتماعات">إدارة وجدولة مكالمات الفيديو</p>
-                    <button id="createMeetingBtn" onclick="window.openCreateMeetingModal()" class="hidden bg-secondary hover:bg-primary text-white px-4 py-2 rounded-lg transition-colors items-center text-sm md:text-base w-full md:w-auto justify-center">
+                    <button id="createMeetingBtn" onclick="window.openCreateMeetingModal()" class="hidden bg-secondary hover:bg-primary text-white px-4 py-2 rounded-lg transition-colors items-center text-sm md:text-base w-full md:w-auto justify-center font-bold shadow">
                         <i class="fa-solid fa-video mx-2"></i> <span data-i18n="بدء / جدولة اجتماع">بدء / جدولة اجتماع</span>
                     </button>
                 </div>
@@ -667,20 +722,20 @@
                                 <div class="space-y-3">
                                     <div class="flex items-center justify-between border-b dark:border-gray-700 pb-2">
                                         <span class="text-xs font-bold text-gray-600 dark:text-gray-400">إشعارات المتدربين:</span>
-                                        <select id="colorTrainees" class="text-xs border rounded p-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                            <option value="red">أحمر</option><option value="green">أخضر</option><option value="blue">أزرق</option><option value="yellow">أصفر</option>
+                                        <select id="colorTrainees" class="text-xs border rounded p-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white font-bold">
+                                            <option value="red" class="text-red-500">أحمر</option><option value="green" class="text-green-500">أخضر</option><option value="blue" class="text-blue-500">أزرق</option><option value="yellow" class="text-yellow-500">أصفر</option>
                                         </select>
                                     </div>
                                     <div class="flex items-center justify-between border-b dark:border-gray-700 pb-2">
                                         <span class="text-xs font-bold text-gray-600 dark:text-gray-400">طلبات استلام التدريب:</span>
-                                        <select id="colorHandover" class="text-xs border rounded p-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                            <option value="red">أحمر</option><option value="green">أخضر</option><option value="blue">أزرق</option><option value="yellow">أصفر</option>
+                                        <select id="colorHandover" class="text-xs border rounded p-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white font-bold">
+                                            <option value="red" class="text-red-500">أحمر</option><option value="green" class="text-green-500">أخضر</option><option value="blue" class="text-blue-500">أزرق</option><option value="yellow" class="text-yellow-500">أصفر</option>
                                         </select>
                                     </div>
                                     <div class="flex items-center justify-between border-b dark:border-gray-700 pb-2">
                                         <span class="text-xs font-bold text-gray-600 dark:text-gray-400">الاجتماعات:</span>
-                                        <select id="colorMeetings" class="text-xs border rounded p-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                            <option value="red">أحمر</option><option value="green">أخضر</option><option value="blue">أزرق</option><option value="yellow">أصفر</option>
+                                        <select id="colorMeetings" class="text-xs border rounded p-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white font-bold">
+                                            <option value="red" class="text-red-500">أحمر</option><option value="green" class="text-green-500">أخضر</option><option value="blue" class="text-blue-500">أزرق</option><option value="yellow" class="text-yellow-500">أصفر</option>
                                         </select>
                                     </div>
                                 </div>
@@ -692,6 +747,26 @@
                 </div>
             </section>
 
+        </div>
+    </div>
+
+    <!-- Modals إنشاء مجلد -->
+    <div id="createFolderModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-sm overflow-hidden">
+            <div class="bg-indigo-600 text-white p-4 flex justify-between items-center">
+                <h3 class="font-bold text-base">إنشاء مجلد جديد</h3>
+                <button onclick="window.closeModal('createFolderModal')" class="hover:text-indigo-200"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <form id="createFolderForm" class="p-4 md:p-6 space-y-4" onsubmit="window.handleCreateFolder(event)">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">اسم المجلد</label>
+                    <input type="text" id="newFolderName" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-indigo-500 outline-none">
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="window.closeModal('createFolderModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-bold text-sm">إلغاء</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-bold text-sm shadow">إنشاء</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -728,15 +803,15 @@
                         <textarea id="traineeNotes" rows="3" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-amber-500 outline-none whitespace-pre-wrap"></textarea>
                     </div>
                     <div class="pt-4 flex justify-end gap-2">
-                        <button type="button" onclick="window.closeModal('traineeModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-bold">إلغاء</button>
-                        <button type="submit" class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-bold shadow">حفظ البيانات</button>
+                        <button type="button" onclick="window.closeModal('traineeModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-bold text-sm">إلغاء</button>
+                        <button type="submit" class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-bold text-sm shadow">حفظ البيانات</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- نافذة المواعيد وإنهاء التدريب المحدثة (تدعم الوقت الدقيق) -->
+    <!-- نافذة المواعيد وإنهاء التدريب (تدعم الوقت الدقيق) -->
     <div id="traineeSessionModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden">
             <div class="bg-blue-600 text-white p-4 flex justify-between items-center">
@@ -748,7 +823,7 @@
                 <input type="hidden" id="sessionNumber">
                 <div>
                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">تاريخ ووقت الموعد / الإنهاء</label>
-                    <input type="datetime-local" id="sessionDateTime" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-blue-500 outline-none">
+                    <input type="datetime-local" id="sessionDateTime" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-blue-500 outline-none" dir="ltr">
                 </div>
                 <div>
                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">معلومات إضافية عن ما تم إنجازه (اختياري)</label>
@@ -761,8 +836,8 @@
                     </label>
                 </div>
                 <div class="pt-4 flex justify-end gap-2">
-                    <button type="button" onclick="window.closeModal('traineeSessionModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-bold">إلغاء</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-bold shadow">حفظ الموعد</button>
+                    <button type="button" onclick="window.closeModal('traineeSessionModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-bold text-sm">إلغاء</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-bold text-sm shadow">حفظ الموعد</button>
                 </div>
             </form>
         </div>
@@ -862,8 +937,8 @@
                     <div id="meetingMembersSelection" class="border border-gray-200 dark:border-gray-600 rounded-lg p-2 max-h-40 overflow-y-auto space-y-1 bg-gray-50 dark:bg-gray-700"></div>
                 </div>
                 <div class="pt-4 flex justify-end space-x-2 space-x-reverse">
-                    <button type="button" onclick="window.closeModal('createMeetingModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm md:text-base" data-i18n="إلغاء">إلغاء</button>
-                    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm md:text-base" data-i18n="إنشاء الاجتماع">إنشاء الاجتماع</button>
+                    <button type="button" onclick="window.closeModal('createMeetingModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm md:text-base font-bold" data-i18n="إلغاء">إلغاء</button>
+                    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm md:text-base font-bold shadow" data-i18n="إنشاء الاجتماع">إنشاء الاجتماع</button>
                 </div>
             </form>
         </div>
@@ -1010,6 +1085,9 @@
         let currentUserData = null; 
         let globalUsers = []; 
         let globalFiles = []; 
+        let globalFolders = [];
+        let currentFolderId = null;
+        let folderHistory = [{id: null, name: 'الرئيسية'}];
         let globalMeetings = [];
         let globalAttendance = [];
         let globalLeaves = [];
@@ -1020,6 +1098,7 @@
         let groupReadTimestamps = {};
         
         let hasPunchedInToday = true; 
+        let seenBackgroundNotifIds = new Set();
 
         // إعدادات الإشعارات الافتراضية
         const defaultNotifPreferences = {
@@ -1060,6 +1139,11 @@
                     }
                     
                     loadNotificationSettingsToUI();
+
+                    // Request Notification Permission for Background Push
+                    if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+                        Notification.requestPermission();
+                    }
 
                 } catch(e) { console.error("Cache parsing error", e); }
             }
@@ -1205,8 +1289,27 @@
         };
 
         // ===============================================
-        // نظام الإشعارات (المعدل)
+        // نظام الإشعارات (المعدل Dropdown + Background)
         // ===============================================
+        
+        window.toggleNotifDropdown = () => {
+            const dropdown = document.getElementById('notifDropdownUI');
+            if(dropdown.classList.contains('hidden')) {
+                dropdown.classList.remove('hidden');
+                dropdown.style.visibility = 'visible';
+            } else {
+                dropdown.classList.add('hidden');
+            }
+        };
+
+        window.closeNotifDropdownIfOpen = (e) => {
+            const dropdown = document.getElementById('notifDropdownUI');
+            const btn = document.getElementById('headerNotifBtn');
+            if(!dropdown.classList.contains('hidden') && !dropdown.contains(e.target) && !btn.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        };
+
         window.sendSystemNotification = async (targetUid, title, body, type, link) => {
             try {
                 const docSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', targetUid));
@@ -1231,6 +1334,8 @@
         window.markAllNotifsAsRead = async () => {
             if(!currentUserData) return;
             let currentNotifs = currentUserData.notifications || [];
+            if(currentNotifs.every(n => n.read)) return; // Already read
+
             currentNotifs.forEach(n => n.read = true);
             try {
                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUserData.uid), { 
@@ -1240,41 +1345,81 @@
             } catch(e) { console.error(e); }
         };
 
+        window.deleteAllNotifs = async () => {
+            if(!currentUserData) return;
+            try {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUserData.uid), { 
+                    notifications: [] 
+                });
+                currentUserData.notifications = [];
+                renderNotifications([]);
+                window.toggleNotifDropdown();
+                showToast('تم مسح جميع الإشعارات', 'success');
+            } catch(e) { console.error(e); }
+        };
+
+        function checkBackgroundNotifications(notifsArray) {
+            if (!("Notification" in window) || Notification.permission !== "granted") return;
+            
+            notifsArray.forEach(notif => {
+                if (!notif.read && !seenBackgroundNotifIds.has(notif.id)) {
+                    seenBackgroundNotifIds.add(notif.id);
+                    // Show push notification
+                    const n = new Notification(notif.title, {
+                        body: notif.body,
+                        icon: 'https://quill.world/wp-content/uploads/2022/01/New-Project-10-1.png'
+                    });
+                    n.onclick = () => {
+                        window.focus();
+                        if(notif.link) window.location.hash = notif.link;
+                        window.markAllNotifsAsRead();
+                    };
+                }
+            });
+        }
+
         function renderNotifications(notifsArray) {
-            const list = document.getElementById('notificationsList');
-            list.innerHTML = '';
+            const listDropdown = document.getElementById('notifDropdownList');
+            const listSection = document.getElementById('notificationsList'); // Optional fallback
+            if(listDropdown) listDropdown.innerHTML = '';
+            if(listSection) listSection.innerHTML = '';
             
             if(!notifsArray || notifsArray.length === 0) {
-                list.innerHTML = '<p class="text-center text-gray-500 py-8">لا توجد إشعارات حالياً.</p>';
+                const emptyMsg = '<p class="text-center text-gray-500 py-8 text-sm">لا توجد إشعارات حالياً.</p>';
+                if(listDropdown) listDropdown.innerHTML = emptyMsg;
+                if(listSection) listSection.innerHTML = emptyMsg;
+                updateNotificationBadge(notifsArray);
                 return;
             }
 
             notifsArray.forEach(notif => {
-                const isReadClass = notif.read ? 'opacity-60 bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-800 border-l-4 border-secondary shadow-md';
                 const timeStr = new Date(notif.timestamp).toLocaleString('ar-EG', {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'});
                 
-                // تحديد اللون والأيقونة بناء على النوع والإعدادات
+                // تحديد اللون بناء على التفضيلات
                 const prefs = currentUserData.notificationPreferences || defaultNotifPreferences;
-                let colorClass = 'text-primary';
-                let iconClass = 'fa-bell';
+                let colorClass = 'text-primary border-primary';
+                let borderColor = 'border-primary';
                 
-                if(notif.type === 'trainees') { colorClass = `text-${prefs.colors.trainees}-500`; iconClass = 'fa-user-graduate'; }
-                if(notif.type === 'handover') { colorClass = `text-${prefs.colors.handover}-500`; iconClass = 'fa-handshake'; }
-                if(notif.type === 'meetings') { colorClass = `text-${prefs.colors.meetings}-500`; iconClass = 'fa-video'; }
+                if(notif.type === 'trainees') { colorClass = `text-${prefs.colors.trainees}-600 dark:text-${prefs.colors.trainees}-400`; borderColor = `border-${prefs.colors.trainees}-600`; }
+                if(notif.type === 'handover') { colorClass = `text-${prefs.colors.handover}-600 dark:text-${prefs.colors.handover}-400`; borderColor = `border-${prefs.colors.handover}-600`; }
+                if(notif.type === 'meetings') { colorClass = `text-${prefs.colors.meetings}-600 dark:text-${prefs.colors.meetings}-400`; borderColor = `border-${prefs.colors.meetings}-600`; }
 
-                list.innerHTML += `
-                    <div class="p-4 rounded-xl border dark:border-gray-700 transition cursor-pointer hover:shadow-lg ${isReadClass}" onclick="window.location.hash='${notif.link}'; window.markAllNotifsAsRead();">
-                        <div class="flex gap-3">
-                            <div class="mt-1 ${colorClass}"><i class="fa-solid ${iconClass} text-xl"></i></div>
-                            <div>
-                                <h4 class="font-bold text-gray-800 dark:text-gray-200 text-sm md:text-base">${notif.title}</h4>
-                                <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400 mt-1">${notif.body}</p>
-                                <p class="text-[10px] text-gray-400 mt-2 font-bold">${timeStr}</p>
-                            </div>
-                        </div>
+                const isReadClassDropdown = notif.read ? 'opacity-60 bg-gray-50 dark:bg-gray-800 border-transparent' : `bg-white dark:bg-gray-800 border-r-4 ${borderColor}`;
+                
+                const cardHtml = `
+                    <div class="p-3 rounded-lg border dark:border-gray-700 transition cursor-pointer hover:shadow-md mb-2 flex flex-col gap-1 ${isReadClassDropdown}" 
+                         onclick="window.location.hash='${notif.link}'; window.markAllNotifsAsRead(); window.toggleNotifDropdown();">
+                        <h4 class="font-bold text-sm ${colorClass}">${notif.title}</h4>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 leading-tight">${notif.body}</p>
+                        <span class="text-[10px] text-gray-400 mt-1">${timeStr}</span>
                     </div>
                 `;
+                
+                if(listDropdown) listDropdown.innerHTML += cardHtml;
+                if(listSection) listSection.innerHTML += cardHtml;
             });
+            
+            updateNotificationBadge(notifsArray);
         }
 
         function updateNotificationBadge(notifsArray) {
@@ -1299,7 +1444,7 @@
                     headerNum.innerText = text; headerNum.classList.remove('hidden');
                     navNum.innerText = text; navNum.classList.remove('hidden');
                 } else {
-                    // تحديد لون النقطة (أولويّة لآخر إشعار غير مقروء)
+                    // تحديد لون النقطة
                     const lastUnread = notifsArray.find(n => !n.read);
                     let color = 'bg-red-500'; // default
                     if(lastUnread) {
@@ -1308,7 +1453,6 @@
                         if(lastUnread.type === 'meetings') color = `bg-${prefs.colors.meetings}-500`;
                     }
                     
-                    // Reset classes and add the dynamic color
                     headerDot.className = `absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full ${color}`;
                     headerDot.innerHTML = `<span class="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping-slow ${color}"></span><span class="relative inline-flex rounded-full w-2.5 h-2.5 ${color}"></span>`;
                     headerDot.classList.remove('hidden');
@@ -1353,9 +1497,47 @@
         };
 
         // ===============================================
-        // 1. نظام المستندات 
+        // 1. نظام المستندات (مع المجلدات)
         // ===============================================
         const MAX_FILE_SIZE = 500 * 1024; 
+
+        window.handleCreateFolder = async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('newFolderName').value;
+            if(!name.trim()) return;
+            
+            try {
+                await addDoc(getStorageColRef('folders'), {
+                    name: name,
+                    parentId: currentFolderId,
+                    creatorId: currentUserData.uid,
+                    timestamp: Date.now()
+                });
+                window.closeModal('createFolderModal');
+                showToast('تم إنشاء المجلد', 'success');
+            } catch(err) { console.error(err); }
+        };
+
+        window.navigateToFolder = (folderId) => {
+            if (folderId === null) {
+                folderHistory = [{id: null, name: 'الرئيسية'}];
+                currentFolderId = null;
+            } else {
+                const folder = globalFolders.find(f => f.id === folderId);
+                if (folder) {
+                    const idx = folderHistory.findIndex(h => h.id === folderId);
+                    if (idx > -1) {
+                        // رجوع في المسار
+                        folderHistory = folderHistory.slice(0, idx + 1);
+                    } else {
+                        // دخول لمسار جديد
+                        folderHistory.push({ id: folder.id, name: folder.name });
+                    }
+                    currentFolderId = folderId;
+                }
+            }
+            renderDriveFiles();
+        };
 
         window.handleDriveFileSelect = (e) => {
             const file = e.target.files[0];
@@ -1377,6 +1559,7 @@
                         data: ev.target.result,
                         uploaderName: currentUserData.name,
                         uploaderId: currentUserData.uid,
+                        folderId: currentFolderId, // ربط الملف بالمجلد
                         pinned: false,
                         timestamp: Date.now()
                     });
@@ -1395,12 +1578,23 @@
             try { await updateDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'files', fileId), { pinned: !currentPinStatus }); } catch(e) { console.error(e); }
         };
 
-        window.deleteDriveFile = async (fileId, fileName) => {
-            if(confirm('هل أنت متأكد من حذف هذا الملف؟')) {
+        window.deleteDriveItem = async (id, isFolder, itemName) => {
+            const msg = isFolder ? 'هل أنت متأكد من حذف المجلد؟ سيتم حذف جميع محتوياته أيضاً.' : 'هل أنت متأكد من حذف هذا الملف؟';
+            if(confirm(msg)) {
                 try {
-                    await deleteDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'files', fileId));
-                    showToast('تم حذف الملف', 'success');
-                    window.logAction('حذف ملف', `تم حذف الملف: ${fileName}`);
+                    const col = isFolder ? 'folders' : 'files';
+                    await deleteDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', col, id));
+                    
+                    if (isFolder) {
+                        // الحذف العودي للملفات المرتبطة (مبسط)
+                        const filesToDelete = globalFiles.filter(f => f.folderId === id);
+                        for(let f of filesToDelete) {
+                            await deleteDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'files', f.id));
+                        }
+                    }
+
+                    showToast('تم الحذف', 'success');
+                    window.logAction(isFolder ? 'حذف مجلد' : 'حذف ملف', `تم الحذف: ${itemName}`);
                 } catch(e) { console.error(e); }
             }
         };
@@ -1408,16 +1602,52 @@
         function renderDriveFiles() {
             const allContainer = document.getElementById('allFilesContainer');
             const pinnedContainer = document.getElementById('pinnedFilesContainer');
+            const breadcrumbs = document.getElementById('driveBreadcrumbs');
+            
             allContainer.innerHTML = '';
             pinnedContainer.innerHTML = '';
+            breadcrumbs.innerHTML = '';
             
             const isCEO = currentUserData && currentUserData.role === 'CEO';
 
-            if(globalFiles.length === 0) {
-                allContainer.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد ملفات حالياً.</p>';
+            // مسار التنقل (Breadcrumbs)
+            folderHistory.forEach((h, index) => {
+                const isLast = index === folderHistory.length - 1;
+                breadcrumbs.innerHTML += `
+                    <span class="cursor-pointer flex items-center gap-1 ${isLast ? 'text-primary dark:text-secondary' : 'hover:text-secondary text-gray-500'}" onclick="window.navigateToFolder(${h.id ? `'${h.id}'` : null})">
+                        ${h.id === null ? '<i class="fa-solid fa-house"></i>' : ''} ${h.name}
+                    </span>
+                    ${!isLast ? '<i class="fa-solid fa-chevron-left text-[10px] text-gray-400 mt-1"></i>' : ''}
+                `;
+            });
+
+            // تصفية العناصر حسب المجلد الحالي
+            const currentFoldersList = globalFolders.filter(f => (f.parentId || null) === currentFolderId);
+            const currentFilesList = globalFiles.filter(f => (f.folderId || null) === currentFolderId);
+
+            if(currentFoldersList.length === 0 && currentFilesList.length === 0) {
+                allContainer.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">المجلد فارغ.</p>';
             }
 
-            globalFiles.forEach(f => {
+            // عرض المجلدات
+            currentFoldersList.forEach(f => {
+                const isOwner = f.creatorId === currentUserData.uid;
+                const canManage = isOwner || isCEO;
+                const deleteBtn = canManage ? `<button onclick="event.stopPropagation(); window.deleteDriveItem('${f.id}', true, '${f.name.replace(/'/g, "\\'")}')" class="text-red-400 hover:text-red-600 p-1"><i class="fa-solid fa-trash"></i></button>` : '';
+
+                allContainer.innerHTML += `
+                    <div onclick="window.navigateToFolder('${f.id}')" class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-xl p-4 shadow-sm hover:shadow-md transition cursor-pointer group flex flex-col h-full">
+                        <div class="flex justify-between items-start mb-2">
+                            <i class="fa-solid fa-folder text-indigo-500 text-3xl"></i>
+                            ${deleteBtn}
+                        </div>
+                        <h4 class="font-bold text-sm text-indigo-800 dark:text-indigo-200 truncate" title="${f.name}">${f.name}</h4>
+                    </div>
+                `;
+            });
+
+            // عرض الملفات
+            currentFilesList.forEach(f => {
                 let iconClass = 'fa-file text-gray-400';
                 if(f.type.startsWith('image/')) iconClass = 'fa-file-image text-blue-400';
                 else if(f.type.startsWith('video/')) iconClass = 'fa-file-video text-purple-400';
@@ -1427,7 +1657,7 @@
 
                 const isOwner = f.uploaderId === currentUserData.uid;
                 const canManage = isOwner || isCEO;
-                const deleteBtn = canManage ? `<button onclick="window.deleteDriveFile('${f.id}', '${f.name.replace(/'/g, "\\'")}')" class="text-red-400 hover:text-red-600 p-1" title="حذف"><i class="fa-solid fa-trash"></i></button>` : '';
+                const deleteBtn = canManage ? `<button onclick="window.deleteDriveItem('${f.id}', false, '${f.name.replace(/'/g, "\\'")}')" class="text-red-400 hover:text-red-600 p-1" title="حذف"><i class="fa-solid fa-trash"></i></button>` : '';
                 const pinBtnClass = canManage ? 'cursor-pointer hover:text-primary' : 'cursor-not-allowed opacity-50';
                 const pinBtnAction = canManage ? `onclick="window.togglePinFile('${f.id}', ${f.pinned})"` : '';
 
@@ -1449,7 +1679,8 @@
                 if(f.pinned) pinnedContainer.innerHTML += cardHtml;
                 allContainer.innerHTML += cardHtml;
             });
-            if(pinnedContainer.innerHTML === '') pinnedContainer.innerHTML = '<p class="col-span-full text-xs text-gray-400 italic">لا توجد ملفات مثبتة.</p>';
+            
+            document.getElementById('pinnedFilesTitle').classList.toggle('hidden', pinnedContainer.innerHTML === '');
         }
 
         function updateStorageProgress() {
@@ -2387,6 +2618,7 @@
         window.closeModal = (id) => {
             document.getElementById(id).classList.add('hidden');
             if(id === 'createMeetingModal') document.getElementById('createMeetingForm').reset();
+            if(id === 'createFolderModal') document.getElementById('createFolderForm').reset();
             if(id === 'leaveModal') {
                 document.getElementById('leaveForm').reset();
                 window.handleLeaveTypeChange(); 
@@ -2452,6 +2684,7 @@
             if(sectionId === 'attendance') renderEmpAttendanceView();
             if(sectionId === 'leaves') renderLeaves();
             if(sectionId === 'trainees') renderTrainees();
+            if(sectionId === 'drive') renderDriveFiles();
             if(sectionId === 'notifications' && currentUserData) {
                 renderNotifications(currentUserData.notifications || []);
                 window.markAllNotifsAsRead();
@@ -2461,7 +2694,7 @@
         window.addEventListener('hashchange', () => {
             if(!currentUserData) return;
             const hash = window.location.hash.replace('#', '');
-            const validSections = ['home-grid', 'attendance', 'leaves', 'drive', 'meetings', 'settings', 'expenses', 'trainees', 'notifications'];
+            const validSections = ['home-grid', 'attendance', 'leaves', 'drive', 'meetings', 'settings', 'expenses', 'trainees', 'notifications', 'office-inventory', 'warehouse-inventory'];
             
             if (!hasPunchedInToday && currentUserData.role !== 'CEO' && hash !== 'attendance') {
                 window.location.hash = 'attendance';
@@ -2482,9 +2715,8 @@
                     currentUserData.notificationPreferences = data.notificationPreferences || defaultNotifPreferences;
                     
                     updateNotificationBadge(currentUserData.notifications);
-                    if(window.location.hash === '#notifications') {
-                        renderNotifications(currentUserData.notifications);
-                    }
+                    renderNotifications(currentUserData.notifications);
+                    checkBackgroundNotifications(currentUserData.notifications);
                 }
             });
 
@@ -2515,9 +2747,17 @@
                 if(!document.getElementById('leaves').classList.contains('hidden')) renderLeaves();
             }, (error) => console.error(error));
 
+            // مستمع المجلدات
+            onSnapshot(getStorageColRef('folders'), (snapshot) => {
+                globalFolders = []; snapshot.forEach(d => globalFolders.push({ id: d.id, ...d.data() }));
+                if(!document.getElementById('drive').classList.contains('hidden')) renderDriveFiles();
+            }, (error) => console.error(error));
+
             onSnapshot(getStorageColRef('files'), (snapshot) => {
                 globalFiles = []; snapshot.forEach(d => globalFiles.push({ id: d.id, ...d.data() }));
-                globalFiles.sort((a,b) => b.timestamp - a.timestamp); renderDriveFiles(); updateStorageProgress();
+                globalFiles.sort((a,b) => b.timestamp - a.timestamp); 
+                updateStorageProgress();
+                if(!document.getElementById('drive').classList.contains('hidden')) renderDriveFiles();
             }, (error) => console.error(error));
 
             onSnapshot(getColRef('meetings'), (snapshot) => {
