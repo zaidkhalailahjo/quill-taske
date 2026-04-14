@@ -471,11 +471,15 @@
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
                     <p class="text-sm md:text-base text-blue-600 dark:text-blue-400 font-bold"><i class="fa-solid fa-robot mx-2"></i>إدارة الروبوتات والعملاء</p>
                     
-                    <div class="flex gap-2 w-full md:w-auto">
-                        <div class="search-wrapper flex-1 md:flex-none">
-                            <i class="fa-solid fa-search search-icon"></i>
-                            <input type="text" id="searchRobots" oninput="window.renderCurrentRobotsTab()" placeholder="بحث..." class="search-input">
+                    <div class="flex gap-2 w-full md:w-auto items-center flex-wrap">
+                        <div class="flex items-center gap-2 flex-1 md:flex-none">
+                            <div class="search-wrapper w-full">
+                                <i class="fa-solid fa-search search-icon"></i>
+                                <input type="text" id="searchRobots" oninput="window.renderCurrentRobotsTab()" placeholder="بحث..." class="search-input w-full">
+                            </div>
+                            <span id="robotsSearchCount" class="text-xs bg-secondary text-white px-2 py-1 rounded-lg font-bold hidden whitespace-nowrap shadow-sm"></span>
                         </div>
+                        
                         <button id="addRentalBtn" onclick="window.openAddRentalModal()" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-sm flex gap-2">
                             <i class="fa-solid fa-plus"></i> إضافة مستأجر
                         </button>
@@ -524,10 +528,13 @@
             <section id="office-inventory" class="section-content hidden animate-fade-in p-4 md:p-0">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
                     <p class="text-sm md:text-base text-purple-600 dark:text-purple-400 font-bold"><i class="fa-solid fa-desktop mx-2"></i>إدارة جرد المكتب</p>
-                    <div class="flex gap-2 w-full md:w-auto">
-                        <div class="search-wrapper flex-1 md:flex-none">
-                            <i class="fa-solid fa-search search-icon"></i>
-                            <input type="text" id="searchOfficeInventory" oninput="renderInventory('office')" placeholder="بحث (عربي/إنجليزي)..." class="search-input">
+                    <div class="flex gap-2 w-full md:w-auto items-center">
+                        <div class="flex items-center gap-2 flex-1 md:flex-none">
+                            <div class="search-wrapper w-full">
+                                <i class="fa-solid fa-search search-icon"></i>
+                                <input type="text" id="searchOfficeInventory" oninput="renderInventory('office')" placeholder="بحث (عربي/إنجليزي)..." class="search-input w-full">
+                            </div>
+                            <span id="officeSearchCount" class="text-xs bg-secondary text-white px-2 py-1 rounded-lg font-bold hidden whitespace-nowrap shadow-sm"></span>
                         </div>
                         <button onclick="window.openAddInventoryModal('office')" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-sm flex gap-2">
                             <i class="fa-solid fa-plus"></i> إضافة
@@ -555,10 +562,13 @@
             <section id="warehouse-inventory" class="section-content hidden animate-fade-in p-4 md:p-0">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
                     <p class="text-sm md:text-base text-orange-600 dark:text-orange-400 font-bold"><i class="fa-solid fa-boxes-stacked mx-2"></i>إدارة جرد المستودع</p>
-                    <div class="flex gap-2 w-full md:w-auto">
-                        <div class="search-wrapper flex-1 md:flex-none">
-                            <i class="fa-solid fa-search search-icon"></i>
-                            <input type="text" id="searchWarehouseInventory" oninput="renderInventory('warehouse')" placeholder="بحث (عربي/إنجليزي)..." class="search-input">
+                    <div class="flex gap-2 w-full md:w-auto items-center">
+                        <div class="flex items-center gap-2 flex-1 md:flex-none">
+                            <div class="search-wrapper w-full">
+                                <i class="fa-solid fa-search search-icon"></i>
+                                <input type="text" id="searchWarehouseInventory" oninput="renderInventory('warehouse')" placeholder="بحث (عربي/إنجليزي)..." class="search-input w-full">
+                            </div>
+                            <span id="warehouseSearchCount" class="text-xs bg-secondary text-white px-2 py-1 rounded-lg font-bold hidden whitespace-nowrap shadow-sm"></span>
                         </div>
                         <button onclick="window.openAddInventoryModal('warehouse')" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-sm flex gap-2">
                             <i class="fa-solid fa-plus"></i> إضافة
@@ -807,10 +817,13 @@
             <section id="trainees" class="section-content hidden animate-fade-in p-4 md:p-0">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
                     <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 font-bold">إدارة المتدربين ومتابعة تقدمهم</p>
-                    <div class="flex gap-2 w-full md:w-auto">
-                        <div class="search-wrapper flex-1 md:flex-none">
-                            <i class="fa-solid fa-search search-icon"></i>
-                            <input type="text" id="searchTrainees" oninput="renderTrainees()" placeholder="بحث عن متدرب..." class="search-input">
+                    <div class="flex gap-2 w-full md:w-auto items-center">
+                        <div class="flex items-center gap-2 flex-1 md:flex-none">
+                            <div class="search-wrapper w-full">
+                                <i class="fa-solid fa-search search-icon"></i>
+                                <input type="text" id="searchTrainees" oninput="renderTrainees()" placeholder="بحث عن متدرب..." class="search-input w-full">
+                            </div>
+                            <span id="traineesSearchCount" class="text-xs bg-secondary text-white px-2 py-1 rounded-lg font-bold hidden whitespace-nowrap shadow-sm"></span>
                         </div>
                         <button onclick="window.openAddTraineeModal()" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-sm flex gap-2">
                             <i class="fa-solid fa-user-plus"></i> إضافة
@@ -984,11 +997,11 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">تاريخ الاستئجار (من)</label>
-                            <input type="date" id="rentalFrom" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-blue-500 outline-none">
+                            <input type="datetime-local" id="rentalFrom" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-blue-500 outline-none" dir="ltr">
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">تاريخ الانتهاء (إلى)</label>
-                            <input type="date" id="rentalTo" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-blue-500 outline-none">
+                            <input type="datetime-local" id="rentalTo" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-blue-500 outline-none" dir="ltr">
                         </div>
                     </div>
                     <div>
@@ -1497,6 +1510,28 @@
             colors: { trainees: 'green', handover: 'yellow', meetings: 'blue' }
         };
 
+        // مساعدة في تنسيق التواريخ التي تأتي من datetime-local
+        function formatDateTimeStr(dtStr) {
+            if(!dtStr) return '---';
+            try {
+                const d = new Date(dtStr);
+                if(isNaN(d.getTime())) return dtStr;
+                return d.toLocaleString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            } catch(e) { return dtStr; }
+        }
+        
+        function updateSearchBadge(badgeId, count, searchTerm) {
+            const badge = document.getElementById(badgeId);
+            if(badge) {
+                if(searchTerm.trim() !== '') {
+                    badge.innerText = `النتائج: ${count}`;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             applyLanguageToDOM();
             const cachedUser = localStorage.getItem('quill_user_cache_services');
@@ -1760,6 +1795,8 @@
             // فلترة الروبوتات الموجودة في الشركة (وغير مؤجرة حالياً)
             const robots = globalRobots.filter(r => r.location === 'company' && !r.isRented && (r.name.toLowerCase().includes(searchTerm) || r.serialNumber.toLowerCase().includes(searchTerm)));
             
+            updateSearchBadge('robotsSearchCount', robots.length, searchTerm);
+
             if(robots.length === 0) {
                 cont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد روبوتات غير مؤجرة في الشركة حالياً.</p>'; return;
             }
@@ -1796,6 +1833,8 @@
             // فلترة الروبوتات الموجودة في المستودع (وغير مؤجرة حالياً)
             const robots = globalRobots.filter(r => r.location === 'warehouse' && !r.isRented && (r.name.toLowerCase().includes(searchTerm) || r.serialNumber.toLowerCase().includes(searchTerm)));
             
+            updateSearchBadge('robotsSearchCount', robots.length, searchTerm);
+
             if(robots.length === 0) {
                 cont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد روبوتات غير مؤجرة في المستودع حالياً.</p>'; return;
             }
@@ -1988,6 +2027,8 @@
             
             const clients = globalClients.filter(c => c.name.toLowerCase().includes(searchTerm) || (c.phone && c.phone.includes(searchTerm)));
 
+            updateSearchBadge('robotsSearchCount', clients.length, searchTerm);
+
             if(clients.length === 0) {
                 cont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد عملاء مسجلين بعد أو غير مطابقين للبحث.</p>';
                 return;
@@ -2054,6 +2095,8 @@
                 }
             });
 
+            updateSearchBadge('robotsSearchCount', soldRobots.length, searchTerm);
+
             if(soldRobots.length === 0) {
                 cont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد روبوتات مباعة مسجلة.</p>';
                 return;
@@ -2091,6 +2134,8 @@
             
             const activeRentals = globalRentals.filter(r => r.status === 'active' && r.clientName.toLowerCase().includes(searchTerm));
 
+            updateSearchBadge('robotsSearchCount', activeRentals.length, searchTerm);
+
             if(activeRentals.length === 0) {
                 cont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد روبوتات مستأجرة حالياً.</p>';
                 return;
@@ -2110,6 +2155,9 @@
                     robotsNamesHtml = names.map(n => `<span class="bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 px-2 py-0.5 rounded text-[10px] m-0.5 inline-block font-bold">${n}</span>`).join('');
                 }
 
+                const fromStr = formatDateTimeStr(r.fromDate);
+                const toStr = formatDateTimeStr(r.toDate);
+
                 cont.innerHTML += `
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-blue-200 dark:border-blue-900/50 flex flex-col h-full hover:shadow-md transition">
                         <div class="flex justify-between items-center mb-3 border-b dark:border-gray-700 pb-2">
@@ -2123,8 +2171,8 @@
                         </div>
                         
                         <div class="text-xs text-gray-600 dark:text-gray-300 space-y-2 mb-4 flex-1">
-                            <p class="flex justify-between bg-blue-50 dark:bg-gray-900 p-1.5 rounded text-blue-900 dark:text-blue-200"><span class="font-bold">الاستلام:</span> <span dir="ltr">${r.fromDate}</span></p>
-                            <p class="flex justify-between bg-blue-50 dark:bg-gray-900 p-1.5 rounded text-blue-900 dark:text-blue-200"><span class="font-bold">الانتهاء:</span> <span dir="ltr">${r.toDate}</span></p>
+                            <p class="flex justify-between bg-blue-50 dark:bg-gray-900 p-1.5 rounded text-blue-900 dark:text-blue-200"><span class="font-bold">الاستلام:</span> <span dir="ltr">${fromStr}</span></p>
+                            <p class="flex justify-between bg-blue-50 dark:bg-gray-900 p-1.5 rounded text-blue-900 dark:text-blue-200"><span class="font-bold">الانتهاء:</span> <span dir="ltr">${toStr}</span></p>
                             <div class="mt-2 pt-2 border-t dark:border-gray-700">
                                 <p class="text-[10px] font-bold text-gray-500 mb-1">الروبوتات المستأجرة:</p>
                                 <div>${robotsNamesHtml}</div>
@@ -2150,6 +2198,8 @@
             
             const endedRentals = globalRentals.filter(r => r.status === 'ended' && r.clientName.toLowerCase().includes(searchTerm));
 
+            updateSearchBadge('robotsSearchCount', endedRentals.length, searchTerm);
+
             if(endedRentals.length === 0) {
                 cont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد سجلات لاستئجارات سابقة.</p>';
                 return;
@@ -2168,6 +2218,7 @@
                     robotsNamesHtml = names.map(n => `<span class="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 px-2 py-0.5 rounded text-[10px] m-0.5 inline-block font-bold">${n}</span>`).join('');
                 }
 
+                const fromStr = formatDateTimeStr(r.fromDate);
                 const endedDateStr = r.endedAt ? new Date(r.endedAt).toLocaleDateString('ar-EG') : '---';
 
                 cont.innerHTML += `
@@ -2186,7 +2237,7 @@
                         </div>
                         
                         <div class="text-xs text-gray-500 dark:text-gray-400 space-y-2 mb-2 flex-1">
-                            <p class="flex justify-between p-1"><span class="font-bold">الاستلام:</span> <span dir="ltr">${r.fromDate}</span></p>
+                            <p class="flex justify-between p-1"><span class="font-bold">الاستلام:</span> <span dir="ltr">${fromStr}</span></p>
                             <p class="flex justify-between p-1"><span class="font-bold">تاريخ الإنهاء الفعلي:</span> <span dir="ltr">${endedDateStr}</span></p>
                             <div class="mt-2 pt-2 border-t dark:border-gray-700">
                                 <p class="text-[10px] font-bold text-gray-400 mb-1">الروبوتات المستأجرة:</p>
@@ -3185,9 +3236,7 @@
             const activeList = document.getElementById('activeMeetingsList');
             const pastList = document.getElementById('pastMeetingsList');
             const searchTerm = document.getElementById('searchMeetings')?.value.toLowerCase() || '';
-            activeList.innerHTML = ''; pastList.innerHTML = '';
-            
-            let hasPast = false, hasActive = false;
+            activeList.innerHTML = '';let hasPast = false, hasActive = false;
 
             globalMeetings.forEach(meeting => {
                 const isInvited = meeting.invitedUsers.includes(currentUserData.uid) || currentUserData.role === 'CEO';
@@ -3477,6 +3526,9 @@
                 )
             );
 
+            // تحديث العداد
+            updateSearchBadge(location === 'office' ? 'officeSearchCount' : 'warehouseSearchCount', locationItems.length, searchTerm);
+
             locationItems.forEach(item => {
                 const dateStr = new Date(item.timestamp).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' });
                 const icon = item.itemType === 'robot' ? 'fa-robot' : 'fa-microchip';
@@ -3748,6 +3800,9 @@
                 (t.phone && t.phone.toLowerCase().includes(searchTerm)) ||
                 (t.notes && t.notes.toLowerCase().includes(searchTerm))
             );
+
+            // تحديث العداد
+            updateSearchBadge('traineesSearchCount', filteredTrainees.length, searchTerm);
 
             filteredTrainees.forEach(t => {
                 const isMyTrainee = t.trainers && t.trainers.includes(currentUserData.uid);
