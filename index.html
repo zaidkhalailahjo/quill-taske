@@ -100,6 +100,34 @@
             display: flex !important; /* Keep flex structure but hide visually via JS logic */
             visibility: hidden;
         }
+        
+        .search-input {
+            width: 100%;
+            max-width: 300px;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            outline: none;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+        .dark .search-input {
+            background-color: #374151;
+            border-color: #4b5563;
+            color: white;
+        }
+        .search-input:focus {
+            border-color: #00839b;
+            box-shadow: 0 0 0 1px #00839b;
+        }
+        .search-wrapper { position: relative; }
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 h-screen overflow-hidden flex relative transition-colors duration-300">
@@ -314,13 +342,13 @@
 
         <div class="flex-1 overflow-y-auto p-0 md:p-6 bg-gray-50 dark:bg-gray-900 relative" id="mainScrollArea" onclick="closeNotifDropdownIfOpen(event)">
             
+            <!-- قسم الرئيسية -->
             <section id="home-grid" class="section-content animate-fade-in p-4 md:p-10 max-w-6xl mx-auto">
                 <div class="mb-6 flex justify-between items-end">
                     <div class="text-right">
                         <h2 class="text-3xl font-bold text-gray-800 dark:text-white" data-i18n="الخدمات والمستندات">الخدمات والمستندات</h2>
                         <p class="text-gray-500 dark:text-gray-400 text-sm mt-2" data-i18n="اختر التطبيق الذي تود العمل عليه">اختر التطبيق الذي تود العمل عليه</p>
                     </div>
-                    <!-- زر سحب تفاصيل النظام للمدير -->
                     <div id="ceoExportSection" class="hidden">
                         <button onclick="window.openModal('exportModal')" class="bg-primary hover:bg-secondary text-white px-5 py-2.5 rounded-xl transition-colors font-bold shadow-md flex items-center gap-2">
                             <i class="fa-solid fa-file-export"></i> سحب تفاصيل النظام
@@ -328,7 +356,6 @@
                     </div>
                 </div>
 
-                <!-- زر تسجيل الانصراف السريع من الرئيسية -->
                 <div id="homePunchOutContainer" class="hidden mb-6">
                     <button onclick="window.punchOut()" class="w-full md:w-auto bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center justify-center gap-2">
                         <i class="fa-solid fa-person-walking-arrow-right"></i> تسجيل الانصراف (إنهاء الدوام)
@@ -336,8 +363,6 @@
                 </div>
                 
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="homeGridContainer">
-                    
-                    <!-- تطبيقات الدومين الحالي (الداخلية) -->
                     <div onclick="window.location.hash='attendance'" class="app-card hover:border-indigo-200 group">
                         <div class="app-icon-container bg-indigo-50 text-indigo-500 group-hover:scale-110 transition-transform">
                             <i class="fa-solid fa-user-clock"></i>
@@ -380,7 +405,6 @@
                         <span class="font-bold text-gray-800 dark:text-gray-200">المصاريف والنثريات</span>
                     </div>
 
-                    <!-- أقسام الجرد الجديدة -->
                     <div onclick="window.location.hash='office-inventory'" class="app-card hover:border-purple-200 group relative">
                         <div class="app-icon-container bg-purple-50 text-purple-500 group-hover:scale-110 transition-transform">
                             <i class="fa-solid fa-desktop"></i>
@@ -395,7 +419,6 @@
                         <span class="font-bold text-gray-800 dark:text-gray-200">جرد المستودع</span>
                     </div>
 
-                    <!-- روابط لتطبيقات خارجية (الدومين الرئيسي) -->
                     <a href="https://quill.farah-snacks.store/#tasks" class="app-card hover:border-emerald-200 group relative">
                         <div class="app-icon-container bg-emerald-50 text-emerald-500 group-hover:scale-110 transition-transform">
                             <i class="fa-solid fa-list-check"></i>
@@ -428,49 +451,71 @@
                 </div>
             </section>
             
-            <!-- أقسام الجرد الجديدة -->
+            <!-- جرد المكتب -->
             <section id="office-inventory" class="section-content hidden animate-fade-in p-4 md:p-0">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
                     <p class="text-sm md:text-base text-purple-600 dark:text-purple-400 font-bold"><i class="fa-solid fa-desktop mx-2"></i>إدارة جرد المكتب</p>
-                    <button onclick="window.openAddInventoryModal('office')" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-sm flex gap-2">
-                        <i class="fa-solid fa-plus"></i> إضافة محتويات
-                    </button>
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <div class="search-wrapper flex-1 md:flex-none">
+                            <i class="fa-solid fa-search search-icon"></i>
+                            <input type="text" id="searchOfficeInventory" oninput="renderInventory('office')" placeholder="بحث (عربي/إنجليزي)..." class="search-input">
+                        </div>
+                        <button onclick="window.openAddInventoryModal('office')" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-sm flex gap-2">
+                            <i class="fa-solid fa-plus"></i> إضافة
+                        </button>
+                    </div>
                 </div>
 
-                <div class="flex gap-4 border-b border-gray-200 dark:border-gray-700 mb-6">
-                    <button onclick="window.switchInventoryTab('office', 'active')" id="tabOfficeActive" class="py-2 px-4 font-bold text-sm border-b-2 border-purple-600 text-purple-600 dark:text-purple-400">آخر جرد</button>
-                    <button onclick="window.switchInventoryTab('office', 'past')" id="tabOfficePast" class="py-2 px-4 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">جرد قديم</button>
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-gray-200 dark:border-gray-700 mb-6">
+                    <div class="flex gap-4 w-full md:w-auto">
+                        <button onclick="window.switchInventoryTab('office', 'active')" id="tabOfficeActive" class="py-2 px-4 font-bold text-sm border-b-2 border-purple-600 text-purple-600 dark:text-purple-400">آخر جرد</button>
+                        <button onclick="window.switchInventoryTab('office', 'past')" id="tabOfficePast" class="py-2 px-4 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">جرد قديم</button>
+                    </div>
+                    <!-- زر النقل المجمع للقديم (يظهر فقط في التاب النشط) -->
+                    <div id="bulkMoveOfficeContainer" class="w-full md:w-auto pb-2 md:pb-0">
+                        <button onclick="window.moveAllToOldInventory('office')" class="w-full md:w-auto bg-gray-500 hover:bg-gray-600 text-white px-4 py-1.5 rounded-lg transition-colors text-xs font-bold shadow-sm flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-boxes-packing"></i> نقل الكل للجرد القديم
+                        </button>
+                    </div>
                 </div>
 
-                <div id="officeActiveContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <!-- سيتم تعبئتها بواسطة JS -->
-                </div>
-                <div id="officePastContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <!-- سيتم تعبئتها بواسطة JS -->
-                </div>
+                <div id="officeActiveContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                <div id="officePastContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
             </section>
 
+            <!-- جرد المستودع -->
             <section id="warehouse-inventory" class="section-content hidden animate-fade-in p-4 md:p-0">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
                     <p class="text-sm md:text-base text-orange-600 dark:text-orange-400 font-bold"><i class="fa-solid fa-boxes-stacked mx-2"></i>إدارة جرد المستودع</p>
-                    <button onclick="window.openAddInventoryModal('warehouse')" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-sm flex gap-2">
-                        <i class="fa-solid fa-plus"></i> إضافة محتويات
-                    </button>
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <div class="search-wrapper flex-1 md:flex-none">
+                            <i class="fa-solid fa-search search-icon"></i>
+                            <input type="text" id="searchWarehouseInventory" oninput="renderInventory('warehouse')" placeholder="بحث (عربي/إنجليزي)..." class="search-input">
+                        </div>
+                        <button onclick="window.openAddInventoryModal('warehouse')" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-sm flex gap-2">
+                            <i class="fa-solid fa-plus"></i> إضافة
+                        </button>
+                    </div>
                 </div>
 
-                <div class="flex gap-4 border-b border-gray-200 dark:border-gray-700 mb-6">
-                    <button onclick="window.switchInventoryTab('warehouse', 'active')" id="tabWarehouseActive" class="py-2 px-4 font-bold text-sm border-b-2 border-orange-600 text-orange-600 dark:text-orange-400">آخر جرد</button>
-                    <button onclick="window.switchInventoryTab('warehouse', 'past')" id="tabWarehousePast" class="py-2 px-4 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">جرد قديم</button>
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-gray-200 dark:border-gray-700 mb-6">
+                    <div class="flex gap-4 w-full md:w-auto">
+                        <button onclick="window.switchInventoryTab('warehouse', 'active')" id="tabWarehouseActive" class="py-2 px-4 font-bold text-sm border-b-2 border-orange-600 text-orange-600 dark:text-orange-400">آخر جرد</button>
+                        <button onclick="window.switchInventoryTab('warehouse', 'past')" id="tabWarehousePast" class="py-2 px-4 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">جرد قديم</button>
+                    </div>
+                    <!-- زر النقل المجمع للقديم -->
+                    <div id="bulkMoveWarehouseContainer" class="w-full md:w-auto pb-2 md:pb-0">
+                        <button onclick="window.moveAllToOldInventory('warehouse')" class="w-full md:w-auto bg-gray-500 hover:bg-gray-600 text-white px-4 py-1.5 rounded-lg transition-colors text-xs font-bold shadow-sm flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-boxes-packing"></i> نقل الكل للجرد القديم
+                        </button>
+                    </div>
                 </div>
 
-                <div id="warehouseActiveContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <!-- سيتم تعبئتها بواسطة JS -->
-                </div>
-                <div id="warehousePastContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <!-- سيتم تعبئتها بواسطة JS -->
-                </div>
+                <div id="warehouseActiveContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                <div id="warehousePastContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
             </section>
 
+            <!-- الحضور والانصراف -->
             <section id="attendance" class="section-content hidden animate-fade-in p-4 md:p-0">
                 <div class="flex justify-between items-center mb-4 md:mb-6">
                     <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 font-bold" data-i18n="سجل الحضور والانصراف">سجل الحضور والانصراف اليومي</p>
@@ -498,11 +543,17 @@
                 </div>
 
                 <div id="ceoAttendanceView" class="hidden">
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mb-6 flex flex-col md:flex-row gap-4 items-center">
-                        <label class="font-bold text-gray-700 dark:text-gray-300">اختر الموظف:</label>
-                        <select id="attendanceEmpSelect" onchange="window.renderSelectedEmpAttendance()" class="flex-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2 focus:outline-none focus:border-secondary">
-                            <option value="">-- اختر موظف لعرض سجله --</option>
-                        </select>
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
+                        <div class="flex items-center gap-2 w-full md:w-auto">
+                            <label class="font-bold text-gray-700 dark:text-gray-300">الموظف:</label>
+                            <select id="attendanceEmpSelect" onchange="window.renderSelectedEmpAttendance()" class="flex-1 md:w-64 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2 focus:outline-none focus:border-secondary">
+                                <option value="">-- اختر موظف --</option>
+                            </select>
+                        </div>
+                        <div class="search-wrapper w-full md:w-auto">
+                            <i class="fa-solid fa-search search-icon"></i>
+                            <input type="text" id="searchAttendance" oninput="window.renderSelectedEmpAttendance()" placeholder="بحث في السجل..." class="search-input w-full">
+                        </div>
                     </div>
                     
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden overflow-x-auto">
@@ -523,21 +574,28 @@
                 </div>
             </section>
 
+            <!-- الإجازات -->
             <section id="leaves" class="section-content hidden animate-fade-in p-4 md:p-0">
-                <div class="flex justify-between items-center mb-4 md:mb-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
                     <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 font-bold" data-i18n="طلبات الإجازات">طلبات الإجازات والمغادرات</p>
-                    <button id="reqLeaveBtn" onclick="window.openModal('leaveModal')" class="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm font-bold shadow-sm">
-                        <i class="fa-solid fa-plus mx-2"></i> تقديم طلب إجازة
-                    </button>
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <div class="search-wrapper flex-1 md:flex-none">
+                            <i class="fa-solid fa-search search-icon"></i>
+                            <input type="text" id="searchLeaves" oninput="renderLeaves()" placeholder="بحث في الطلبات..." class="search-input">
+                        </div>
+                        <button id="reqLeaveBtn" onclick="window.openModal('leaveModal')" class="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm font-bold shadow-sm">
+                            <i class="fa-solid fa-plus mx-2"></i> طلب
+                        </button>
+                    </div>
                 </div>
 
                 <div id="myLeaveBalances" class="hidden grid grid-cols-2 gap-4 mb-6">
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border-t-4 border-indigo-500 shadow-sm text-center">
-                        <h4 class="font-bold text-gray-700 dark:text-gray-300 mb-1 text-sm"><i class="fa-solid fa-calendar-day text-indigo-500 mx-1"></i> رصيد الإجازات المتبقي</h4>
+                        <h4 class="font-bold text-gray-700 dark:text-gray-300 mb-1 text-sm"><i class="fa-solid fa-calendar-day text-indigo-500 mx-1"></i> رصيد الإجازات</h4>
                         <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400" id="balDaysTxt">14 <span class="text-sm font-normal">يوم</span></p>
                     </div>
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border-t-4 border-teal-500 shadow-sm text-center">
-                        <h4 class="font-bold text-gray-700 dark:text-gray-300 mb-1 text-sm"><i class="fa-solid fa-clock text-teal-500 mx-1"></i> رصيد المغادرات المتبقي</h4>
+                        <h4 class="font-bold text-gray-700 dark:text-gray-300 mb-1 text-sm"><i class="fa-solid fa-clock text-teal-500 mx-1"></i> رصيد المغادرات</h4>
                         <p class="text-2xl font-bold text-teal-600 dark:text-teal-400" id="balHoursTxt">20 <span class="text-sm font-normal">ساعة</span></p>
                     </div>
                 </div>
@@ -561,8 +619,8 @@
                 </div>
             </section>
 
+            <!-- المستندات -->
             <section id="drive" class="section-content hidden animate-fade-in p-4 md:p-0">
-                <!-- شريط المساحة -->
                 <div class="mb-6 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
                     <div class="flex justify-between text-sm mb-2 font-bold text-gray-700 dark:text-gray-300">
                         <span data-i18n="المساحة المستخدمة">المساحة المستخدمة</span>
@@ -575,19 +633,22 @@
                 </div>
 
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
-                    <p class="text-sm md:text-base text-gray-600 dark:text-gray-300" data-i18n="مشاركة الملفات">إدارة المستندات (الحد الأقصى 500KB للملف)</p>
-                    <div class="flex gap-2 w-full md:w-auto">
+                    <p class="text-sm md:text-base text-gray-600 dark:text-gray-300" data-i18n="مشاركة الملفات">إدارة المستندات</p>
+                    <div class="flex flex-wrap gap-2 w-full md:w-auto">
+                        <div class="search-wrapper flex-1 md:flex-none w-full md:w-auto">
+                            <i class="fa-solid fa-search search-icon"></i>
+                            <input type="text" id="searchDrive" oninput="renderDriveFiles()" placeholder="بحث في المجلد..." class="search-input">
+                        </div>
                         <button onclick="window.openModal('createFolderModal')" class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm font-bold shadow flex-1 md:flex-none justify-center">
-                            <i class="fa-solid fa-folder-plus mx-2"></i> مجلد جديد
+                            <i class="fa-solid fa-folder-plus mx-2"></i> مجلد
                         </button>
                         <input type="file" id="driveFileInput" class="hidden" onchange="window.handleDriveFileSelect(event)">
                         <button id="uploadFileBtn" onclick="document.getElementById('driveFileInput').click()" class="bg-secondary hover:bg-primary text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm font-bold shadow flex-1 md:flex-none justify-center">
-                            <i class="fa-solid fa-cloud-arrow-up mx-2"></i> رفع ملف
+                            <i class="fa-solid fa-cloud-arrow-up mx-2"></i> ملف
                         </button>
                     </div>
                 </div>
 
-                <!-- مسار التنقل Breadcrumbs -->
                 <div id="driveBreadcrumbs" class="flex flex-wrap items-center gap-2 mb-4 text-sm font-bold text-gray-600 dark:text-gray-300">
                     <span class="cursor-pointer hover:text-secondary flex items-center gap-1" onclick="window.navigateToFolder(null)"><i class="fa-solid fa-house"></i> الرئيسية</span>
                 </div>
@@ -599,12 +660,19 @@
                 <div id="allFilesContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
             </section>
 
+            <!-- الاجتماعات -->
             <section id="meetings" class="section-content hidden animate-fade-in p-4 md:p-0">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
                     <p class="text-sm md:text-base text-gray-600 dark:text-gray-300" data-i18n="إدارة الاجتماعات">إدارة وجدولة مكالمات الفيديو</p>
-                    <button id="createMeetingBtn" onclick="window.openCreateMeetingModal()" class="hidden bg-secondary hover:bg-primary text-white px-4 py-2 rounded-lg transition-colors items-center text-sm md:text-base w-full md:w-auto justify-center font-bold shadow">
-                        <i class="fa-solid fa-video mx-2"></i> <span data-i18n="بدء / جدولة اجتماع">بدء / جدولة اجتماع</span>
-                    </button>
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <div class="search-wrapper flex-1 md:flex-none">
+                            <i class="fa-solid fa-search search-icon"></i>
+                            <input type="text" id="searchMeetings" oninput="renderMeetings()" placeholder="بحث عن اجتماع..." class="search-input">
+                        </div>
+                        <button id="createMeetingBtn" onclick="window.openCreateMeetingModal()" class="hidden bg-secondary hover:bg-primary text-white px-4 py-2 rounded-lg transition-colors items-center text-sm md:text-base w-full md:w-auto justify-center font-bold shadow">
+                            <i class="fa-solid fa-video mx-2"></i> <span data-i18n="بدء / جدولة اجتماع">بدء / جدولة اجتماع</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="space-y-6">
@@ -620,9 +688,14 @@
                 </div>
             </section>
 
+            <!-- المصاريف -->
             <section id="expenses" class="section-content hidden animate-fade-in p-4 md:p-0">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
                     <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 font-bold">سجل المصاريف والنثريات (خاص بالمالية والمدير)</p>
+                    <div class="search-wrapper w-full md:w-auto">
+                        <i class="fa-solid fa-search search-icon"></i>
+                        <input type="text" id="searchExpenses" oninput="renderExpenses()" placeholder="بحث في المصاريف..." class="search-input">
+                    </div>
                 </div>
 
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mb-6">
@@ -663,36 +736,37 @@
                 </div>
             </section>
 
-            <!-- قسم المتدربين -->
+            <!-- المتدربين -->
             <section id="trainees" class="section-content hidden animate-fade-in p-4 md:p-0">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
                     <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 font-bold">إدارة المتدربين ومتابعة تقدمهم</p>
-                    <button onclick="window.openAddTraineeModal()" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-sm flex gap-2">
-                        <i class="fa-solid fa-user-plus"></i> إضافة متدرب جديد
-                    </button>
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <div class="search-wrapper flex-1 md:flex-none">
+                            <i class="fa-solid fa-search search-icon"></i>
+                            <input type="text" id="searchTrainees" oninput="renderTrainees()" placeholder="بحث عن متدرب..." class="search-input">
+                        </div>
+                        <button onclick="window.openAddTraineeModal()" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-sm flex gap-2">
+                            <i class="fa-solid fa-user-plus"></i> إضافة
+                        </button>
+                    </div>
                 </div>
 
                 <div class="flex gap-4 border-b border-gray-200 dark:border-gray-700 mb-6">
-                    <button onclick="window.switchTraineesTab('active')" id="tabTraineesActive" class="py-2 px-4 font-bold text-sm border-b-2 border-amber-500 text-amber-600 dark:text-amber-400">المتدربين الحاليين</button>
-                    <button onclick="window.switchTraineesTab('past')" id="tabTraineesPast" class="py-2 px-4 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">المتدربين السابقين</button>
+                    <button onclick="window.switchTraineesTab('active')" id="tabTraineesActive" class="py-2 px-4 font-bold text-sm border-b-2 border-amber-500 text-amber-600 dark:text-amber-400">الحاليين</button>
+                    <button onclick="window.switchTraineesTab('past')" id="tabTraineesPast" class="py-2 px-4 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">السابقين</button>
                 </div>
 
-                <div id="activeTraineesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <!-- سيتم تعبئتها بالجافاسكربت -->
-                </div>
-
-                <div id="pastTraineesContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <!-- سيتم تعبئتها بالجافاسكربت -->
-                </div>
+                <div id="activeTraineesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                <div id="pastTraineesContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
             </section>
 
+            <!-- الإعدادات -->
             <section id="settings" class="section-content hidden animate-fade-in p-4 md:p-0">
                 <div class="flex justify-between items-center mb-4 md:mb-6">
                     <p class="text-sm md:text-base text-gray-600 dark:text-gray-300" data-i18n="إعدادات الحساب">إعدادات الحساب والملف الشخصي</p>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                    <!-- معلومات الحساب -->
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
                         <h3 class="font-bold text-primary dark:text-secondary mb-6 border-b border-gray-100 dark:border-gray-700 pb-3 text-lg"><i class="fa-solid fa-user-gear mx-2"></i><span data-i18n="معلومات الحساب">معلومات الحساب الأساسية</span></h3>
                         
@@ -724,13 +798,12 @@
                         </div>
                     </div>
 
-                    <!-- إعدادات الإشعارات (الميزة الجديدة) -->
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
                         <h3 class="font-bold text-primary dark:text-secondary mb-6 border-b border-gray-100 dark:border-gray-700 pb-3 text-lg"><i class="fa-solid fa-bell mx-2"></i>إعدادات الإشعارات</h3>
                         
                         <form id="notificationSettingsForm" class="space-y-4">
                             <div>
-                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">شكل مؤشر الإشعارات غير المقروءة</label>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">شكل مؤشر الإشعارات</label>
                                 <div class="flex gap-4">
                                     <label class="flex items-center gap-2 cursor-pointer p-2 border rounded-lg flex-1 hover:bg-gray-50 dark:hover:bg-gray-700 transition dark:border-gray-600">
                                         <input type="radio" name="notifStyle" value="number" class="text-primary focus:ring-primary h-4 w-4">
@@ -753,7 +826,7 @@
                                         </select>
                                     </div>
                                     <div class="flex items-center justify-between border-b dark:border-gray-700 pb-2">
-                                        <span class="text-xs font-bold text-gray-600 dark:text-gray-400">طلبات استلام التدريب:</span>
+                                        <span class="text-xs font-bold text-gray-600 dark:text-gray-400">طلبات الاستلام:</span>
                                         <select id="colorHandover" class="text-xs border rounded p-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white font-bold">
                                             <option value="red" class="text-red-500">أحمر</option><option value="green" class="text-green-500">أخضر</option><option value="blue" class="text-blue-500">أزرق</option><option value="yellow" class="text-yellow-500">أصفر</option>
                                         </select>
@@ -874,7 +947,7 @@
         </div>
     </div>
 
-    <!-- Modals الخاصة بالمتدربين -->
+    <!-- Modals المتدربين -->
     <div id="traineeModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
             <div class="bg-amber-500 text-white p-4 flex justify-between items-center flex-shrink-0">
@@ -898,9 +971,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">من سيدربه من الموظفين؟</label>
-                        <div id="traineeTrainersList" class="border border-gray-200 dark:border-gray-600 rounded-lg p-2 max-h-32 overflow-y-auto space-y-1 bg-gray-50 dark:bg-gray-700">
-                            <!-- JS will populate checkboxes here -->
-                        </div>
+                        <div id="traineeTrainersList" class="border border-gray-200 dark:border-gray-600 rounded-lg p-2 max-h-32 overflow-y-auto space-y-1 bg-gray-50 dark:bg-gray-700"></div>
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">معلومات إضافية عن المتدرب</label>
@@ -915,7 +986,7 @@
         </div>
     </div>
 
-    <!-- نافذة المواعيد وإنهاء التدريب (تدعم الوقت الدقيق) -->
+    <!-- نافذة المواعيد وإنهاء التدريب -->
     <div id="traineeSessionModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden">
             <div class="bg-blue-600 text-white p-4 flex justify-between items-center">
@@ -930,7 +1001,7 @@
                     <input type="datetime-local" id="sessionDateTime" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-blue-500 outline-none" dir="ltr">
                 </div>
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">معلومات إضافية عن ما تم إنجازه (اختياري)</label>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">معلومات إضافية عن ما تم إنجازه</label>
                     <textarea id="sessionNotes" rows="3" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-blue-500 outline-none whitespace-pre-wrap"></textarea>
                 </div>
                 <div class="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
@@ -946,9 +1017,8 @@
             </form>
         </div>
     </div>
-    <!-- نهاية Modals المتدربين -->
 
-    <!-- باقي Modals ... -->
+    <!-- باقي Modals -->
     <div id="leaveModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden">
             <div class="bg-pink-600 text-white p-4 flex justify-between items-center">
@@ -1030,7 +1100,7 @@
             <form id="createMeetingForm" class="p-4 md:p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1" data-i18n="عنوان الاجتماع">عنوان الاجتماع</label>
-                    <input type="text" id="newMeetingTitle" required placeholder="مثال: مناقشة المشروع الجديد" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-green-500 focus:outline-none">
+                    <input type="text" id="newMeetingTitle" required placeholder="مثال: مناقشة المشروع" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-green-500 focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1" data-i18n="وقت الاجتماع">وقت الاجتماع (اتركه فارغاً للبدء فوراً)</label>
@@ -1070,9 +1140,6 @@
         import { getAuth, onAuthStateChanged, signOut, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        // ----------------------------------------------------
-        // 1. قاعدة البيانات الأساسية 
-        // ----------------------------------------------------
         const firebaseConfig = {
             apiKey: "AIzaSyCfoP0rgX8WZthQVP_AeZcxDHHCllgu3TM",
             authDomain: "quill-world.firebaseapp.com",
@@ -1087,9 +1154,6 @@
         const db = getFirestore(app);
         const appId = 'quill-world-system';
 
-        // ----------------------------------------------------
-        // 2. قاعدة البيانات الثانوية المخصصة للـ Drive 
-        // ----------------------------------------------------
         const firebaseConfigStorage = {
             apiKey: "AIzaSyBjPerebbHAtkKWJV_LFkoaL-15oTNHRdg",
             authDomain: "quill-worl.firebaseapp.com",
@@ -1199,13 +1263,12 @@
         let globalTasks = []; 
         let globalExpenses = []; 
         let globalTrainees = []; 
-        let globalInventory = []; // بيانات الجرد (مكتب + مستودع)
+        let globalInventory = []; 
         let groupReadTimestamps = {};
         
         let hasPunchedInToday = true; 
         let seenBackgroundNotifIds = new Set();
 
-        // إعدادات الإشعارات الافتراضية
         const defaultNotifPreferences = {
             style: 'number',
             colors: { trainees: 'green', handover: 'yellow', meetings: 'blue' }
@@ -1245,7 +1308,6 @@
                     
                     loadNotificationSettingsToUI();
 
-                    // Request Notification Permission for Background Push
                     if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
                         Notification.requestPermission();
                     }
@@ -1254,9 +1316,7 @@
             }
         });
 
-        // ===============================================
-        // ميزة سحب تفاصيل النظام الشاملة
-        // ===============================================
+        // تصدير النظام للمدير
         window.exportSystemData = (format) => {
             if(!currentUserData || currentUserData.role !== 'CEO') return;
 
@@ -1393,10 +1453,7 @@
             } catch(e) { console.error("Error logging action", e); }
         };
 
-        // ===============================================
-        // نظام الإشعارات (المعدل Dropdown + Background)
-        // ===============================================
-        
+        // الإشعارات
         window.toggleNotifDropdown = () => {
             const dropdown = document.getElementById('notifDropdownUI');
             if(dropdown.classList.contains('hidden')) {
@@ -1424,8 +1481,8 @@
                         id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
                         title: title,
                         body: body,
-                        type: type, // e.g., 'trainees', 'handover', 'meetings'
-                        link: link, // e.g., 'trainees', 'meetings'
+                        type: type,
+                        link: link,
                         read: false,
                         timestamp: Date.now()
                     });
@@ -1439,7 +1496,7 @@
         window.markAllNotifsAsRead = async () => {
             if(!currentUserData) return;
             let currentNotifs = currentUserData.notifications || [];
-            if(currentNotifs.every(n => n.read)) return; // Already read
+            if(currentNotifs.every(n => n.read)) return; 
 
             currentNotifs.forEach(n => n.read = true);
             try {
@@ -1469,7 +1526,6 @@
             notifsArray.forEach(notif => {
                 if (!notif.read && !seenBackgroundNotifIds.has(notif.id)) {
                     seenBackgroundNotifIds.add(notif.id);
-                    // Show push notification
                     const n = new Notification(notif.title, {
                         body: notif.body,
                         icon: 'https://quill.world/wp-content/uploads/2022/01/New-Project-10-1.png'
@@ -1485,22 +1541,17 @@
 
         function renderNotifications(notifsArray) {
             const listDropdown = document.getElementById('notifDropdownList');
-            const listSection = document.getElementById('notificationsList'); // Optional fallback
             if(listDropdown) listDropdown.innerHTML = '';
-            if(listSection) listSection.innerHTML = '';
             
             if(!notifsArray || notifsArray.length === 0) {
                 const emptyMsg = '<p class="text-center text-gray-500 py-8 text-sm">لا توجد إشعارات حالياً.</p>';
                 if(listDropdown) listDropdown.innerHTML = emptyMsg;
-                if(listSection) listSection.innerHTML = emptyMsg;
                 updateNotificationBadge(notifsArray);
                 return;
             }
 
             notifsArray.forEach(notif => {
                 const timeStr = new Date(notif.timestamp).toLocaleString('ar-EG', {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'});
-                
-                // تحديد اللون بناء على التفضيلات
                 const prefs = currentUserData.notificationPreferences || defaultNotifPreferences;
                 let colorClass = 'text-primary border-primary';
                 let borderColor = 'border-primary';
@@ -1521,7 +1572,6 @@
                 `;
                 
                 if(listDropdown) listDropdown.innerHTML += cardHtml;
-                if(listSection) listSection.innerHTML += cardHtml;
             });
             
             updateNotificationBadge(notifsArray);
@@ -1531,10 +1581,8 @@
             const prefs = currentUserData.notificationPreferences || defaultNotifPreferences;
             const unreadCount = notifsArray ? notifsArray.filter(n => !n.read).length : 0;
             
-            // Header Badges
             const headerNum = document.getElementById('headerNotifBadge');
             const headerDot = document.getElementById('headerNotifDot');
-            // Sidebar Badges
             const navNum = document.getElementById('navNotifBadgeNum');
             const navDot = document.getElementById('navNotifBadgeDot');
             const mobileMenuBadge = document.getElementById('mobileMenuBadge');
@@ -1549,9 +1597,8 @@
                     headerNum.innerText = text; headerNum.classList.remove('hidden');
                     navNum.innerText = text; navNum.classList.remove('hidden');
                 } else {
-                    // تحديد لون النقطة
                     const lastUnread = notifsArray.find(n => !n.read);
-                    let color = 'bg-red-500'; // default
+                    let color = 'bg-red-500'; 
                     if(lastUnread) {
                         if(lastUnread.type === 'trainees') color = `bg-${prefs.colors.trainees}-500`;
                         if(lastUnread.type === 'handover') color = `bg-${prefs.colors.handover}-500`;
@@ -1596,16 +1643,12 @@
                 });
                 currentUserData.notificationPreferences = newPrefs;
                 localStorage.setItem('quill_user_cache_services', JSON.stringify(currentUserData));
-                updateNotificationBadge(currentUserData.notifications); // تحديث فوري
+                updateNotificationBadge(currentUserData.notifications); 
                 showToast('تم حفظ تفضيلات الإشعارات', 'success');
             } catch(e) { console.error(e); }
         };
 
-        // ===============================================
-        // 1. نظام المستندات (مع المجلدات)
-        // ===============================================
-        const MAX_FILE_SIZE = 500 * 1024; 
-
+        // إدارة المستندات والمجلدات
         window.handleCreateFolder = async (e) => {
             e.preventDefault();
             const name = document.getElementById('newFolderName').value;
@@ -1632,10 +1675,8 @@
                 if (folder) {
                     const idx = folderHistory.findIndex(h => h.id === folderId);
                     if (idx > -1) {
-                        // رجوع في المسار
                         folderHistory = folderHistory.slice(0, idx + 1);
                     } else {
-                        // دخول لمسار جديد
                         folderHistory.push({ id: folder.id, name: folder.name });
                     }
                     currentFolderId = folderId;
@@ -1664,7 +1705,7 @@
                         data: ev.target.result,
                         uploaderName: currentUserData.name,
                         uploaderId: currentUserData.uid,
-                        folderId: currentFolderId, // ربط الملف بالمجلد
+                        folderId: currentFolderId,
                         pinned: false,
                         timestamp: Date.now()
                     });
@@ -1691,7 +1732,6 @@
                     await deleteDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', col, id));
                     
                     if (isFolder) {
-                        // الحذف العودي للملفات المرتبطة (مبسط)
                         const filesToDelete = globalFiles.filter(f => f.folderId === id);
                         for(let f of filesToDelete) {
                             await deleteDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'files', f.id));
@@ -1704,10 +1744,11 @@
             }
         };
 
-        function renderDriveFiles() {
+        window.renderDriveFiles = () => {
             const allContainer = document.getElementById('allFilesContainer');
             const pinnedContainer = document.getElementById('pinnedFilesContainer');
             const breadcrumbs = document.getElementById('driveBreadcrumbs');
+            const searchTerm = document.getElementById('searchDrive')?.value.toLowerCase() || '';
             
             allContainer.innerHTML = '';
             pinnedContainer.innerHTML = '';
@@ -1715,7 +1756,6 @@
             
             const isCEO = currentUserData && currentUserData.role === 'CEO';
 
-            // مسار التنقل (Breadcrumbs)
             folderHistory.forEach((h, index) => {
                 const isLast = index === folderHistory.length - 1;
                 breadcrumbs.innerHTML += `
@@ -1726,15 +1766,20 @@
                 `;
             });
 
-            // تصفية العناصر حسب المجلد الحالي
-            const currentFoldersList = globalFolders.filter(f => (f.parentId || null) === currentFolderId);
-            const currentFilesList = globalFiles.filter(f => (f.folderId || null) === currentFolderId);
+            // تطبيق الفلترة بالبحث
+            const currentFoldersList = globalFolders.filter(f => 
+                (f.parentId || null) === currentFolderId && 
+                f.name.toLowerCase().includes(searchTerm)
+            );
+            const currentFilesList = globalFiles.filter(f => 
+                (f.folderId || null) === currentFolderId &&
+                f.name.toLowerCase().includes(searchTerm)
+            );
 
             if(currentFoldersList.length === 0 && currentFilesList.length === 0) {
-                allContainer.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">المجلد فارغ.</p>';
+                allContainer.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">المجلد فارغ أو لا توجد نتائج مطابقة.</p>';
             }
 
-            // عرض المجلدات
             currentFoldersList.forEach(f => {
                 const isOwner = f.creatorId === currentUserData.uid;
                 const canManage = isOwner || isCEO;
@@ -1751,7 +1796,6 @@
                 `;
             });
 
-            // عرض الملفات
             currentFilesList.forEach(f => {
                 let iconClass = 'fa-file text-gray-400';
                 if(f.type.startsWith('image/')) iconClass = 'fa-file-image text-blue-400';
@@ -1786,7 +1830,7 @@
             });
             
             document.getElementById('pinnedFilesTitle').classList.toggle('hidden', pinnedContainer.innerHTML === '');
-        }
+        };
 
         function updateStorageProgress() {
             const currentStorage = globalFiles.reduce((acc, f) => acc + (f.size || 0), 0);
@@ -1800,9 +1844,7 @@
             else { bar.className = "bg-green-500 h-full"; document.getElementById('storageWarning').classList.add('hidden'); }
         }
 
-        // ===============================================
-        // 2. الحضور والانصراف
-        // ===============================================
+        // الحضور والانصراف
         function getTodayDateString() {
             const d = new Date();
             return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -1871,7 +1913,7 @@
             } catch(e) { console.error(e); }
         };
 
-        function renderEmpAttendanceView() {
+        window.renderEmpAttendanceView = () => {
             if(!currentUserData) return;
             document.getElementById('currentDateStr').innerText = new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             
@@ -1910,18 +1952,23 @@
                     if(homePunchOutContainer) homePunchOutContainer.classList.add('hidden');
                 }
             }
-        }
+        };
 
         window.renderSelectedEmpAttendance = () => {
             const select = document.getElementById('attendanceEmpSelect');
             const empId = select.value;
+            const searchTerm = document.getElementById('searchAttendance')?.value.toLowerCase() || '';
             const list = document.getElementById('attendanceRecordsList');
             list.innerHTML = '';
             
             if(!empId) { list.innerHTML = '<tr><td colspan="4" class="p-4 text-center">اختر موظفاً</td></tr>'; return; }
 
-            const empRecords = globalAttendance.filter(a => a.uid === empId).sort((a, b) => b.date.localeCompare(a.date));
-            if(empRecords.length === 0) { list.innerHTML = '<tr><td colspan="4" class="p-4 text-center">لا يوجد سجل</td></tr>'; return; }
+            const empRecords = globalAttendance.filter(a => 
+                a.uid === empId && 
+                a.date.toLowerCase().includes(searchTerm) // يتيح البحث بالتاريخ
+            ).sort((a, b) => b.date.localeCompare(a.date));
+            
+            if(empRecords.length === 0) { list.innerHTML = '<tr><td colspan="4" class="p-4 text-center">لا توجد نتائج</td></tr>'; return; }
 
             empRecords.forEach(r => {
                 const pIn = r.punchIn ? new Date(r.punchIn).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}) : '-';
@@ -1949,9 +1996,7 @@
             });
         };
 
-        // ===============================================
-        // 3. الإجازات وتتبع الرصيد (14 يوم - 20 ساعة)
-        // ===============================================
+        // الإجازات
         window.handleLeaveTypeChange = () => {
             const val = document.getElementById('leaveType').value;
             const fromInput = document.getElementById('leaveFrom');
@@ -2046,8 +2091,9 @@
             window.openModal('leaveDetailsModal');
         };
 
-        function renderLeaves() {
+        window.renderLeaves = () => {
             const list = document.getElementById('leavesList');
+            const searchTerm = document.getElementById('searchLeaves')?.value.toLowerCase() || '';
             list.innerHTML = '';
             const isCEO = currentUserData && currentUserData.role === 'CEO';
             
@@ -2063,8 +2109,15 @@
                 document.getElementById('balHoursTxt').innerHTML = `${myBalances.hoursLeft} <span class="text-sm font-normal">ساعة</span>`;
             }
 
-            const filteredLeaves = isCEO ? globalLeaves : globalLeaves.filter(l => l.uid === currentUserData.uid);
-            if(filteredLeaves.length === 0) { list.innerHTML = `<tr><td colspan="${isCEO ? 7 : 6}" class="p-4 text-center text-gray-500">لا توجد طلبات</td></tr>`; return; }
+            const filteredLeaves = globalLeaves.filter(l => {
+                const matchUser = isCEO ? true : l.uid === currentUserData.uid;
+                const matchSearch = l.name.toLowerCase().includes(searchTerm) || 
+                                    l.type.toLowerCase().includes(searchTerm) || 
+                                    (l.reason && l.reason.toLowerCase().includes(searchTerm));
+                return matchUser && matchSearch;
+            });
+
+            if(filteredLeaves.length === 0) { list.innerHTML = `<tr><td colspan="${isCEO ? 7 : 6}" class="p-4 text-center text-gray-500">لا توجد طلبات مطابقة</td></tr>`; return; }
 
             filteredLeaves.forEach(l => {
                 let fromStr, toStr;
@@ -2113,11 +2166,9 @@
                     </tr>
                 `;
             });
-        }
+        };
 
-        // ===============================================
-        // 4. الاجتماعات (مع زر الحذف للمدير)
-        // ===============================================
+        // الاجتماعات
         window.openCreateMeetingModal = () => {
             const container = document.getElementById('meetingMembersSelection');
             container.innerHTML = '';
@@ -2247,9 +2298,10 @@
             } catch(e) { console.error(e); }
         }
 
-        function renderMeetings() {
+        window.renderMeetings = () => {
             const activeList = document.getElementById('activeMeetingsList');
             const pastList = document.getElementById('pastMeetingsList');
+            const searchTerm = document.getElementById('searchMeetings')?.value.toLowerCase() || '';
             activeList.innerHTML = ''; pastList.innerHTML = '';
             
             let hasPast = false, hasActive = false;
@@ -2257,6 +2309,8 @@
             globalMeetings.forEach(meeting => {
                 const isInvited = meeting.invitedUsers.includes(currentUserData.uid) || currentUserData.role === 'CEO';
                 if(!isInvited) return;
+                
+                if(!meeting.title.toLowerCase().includes(searchTerm)) return;
 
                 const isCEO = currentUserData.role === 'CEO';
                 let timeStr = meeting.scheduledFor ? new Date(meeting.scheduledFor).toLocaleString('ar-EG') : 'الآن';
@@ -2330,13 +2384,11 @@
                     `;
                 }
             });
-            if(!hasActive) activeList.innerHTML = '<p class="text-sm text-gray-400 text-center col-span-full p-4">لا يوجد اجتماعات حالياً.</p>';
-            if(!hasPast) pastList.innerHTML = '<p class="text-sm text-gray-400 text-center p-4">لا يوجد سجلات سابقة.</p>';
-        }
+            if(!hasActive) activeList.innerHTML = '<p class="text-sm text-gray-400 text-center col-span-full p-4">لا يوجد اجتماعات حالياً مطابقة للبحث.</p>';
+            if(!hasPast) pastList.innerHTML = '<p class="text-sm text-gray-400 text-center p-4">لا يوجد سجلات سابقة مطابقة للبحث.</p>';
+        };
 
-        // ===============================================
-        // 5. قسم المالية والنثريات
-        // ===============================================
+        // النثريات والمصاريف
         window.handleExpenseSubmit = async (e) => {
             e.preventDefault();
             if(!currentUserData || (currentUserData.role !== 'CEO' && currentUserData.role !== 'accountant')) return;
@@ -2361,17 +2413,23 @@
             }
         };
 
-        function renderExpenses() {
+        window.renderExpenses = () => {
             const list = document.getElementById('expensesList');
+            const searchTerm = document.getElementById('searchExpenses')?.value.toLowerCase() || '';
             if(!list) return;
             list.innerHTML = '';
             
-            if(globalExpenses.length === 0) {
-                list.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">لا يوجد سجلات نثريات</td></tr>';
+            const filteredExpenses = globalExpenses.filter(exp => 
+                exp.desc.toLowerCase().includes(searchTerm) || 
+                exp.addedBy.toLowerCase().includes(searchTerm)
+            );
+
+            if(filteredExpenses.length === 0) {
+                list.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">لا يوجد سجلات مطابقة للبحث</td></tr>';
                 return;
             }
 
-            globalExpenses.forEach(exp => {
+            filteredExpenses.forEach(exp => {
                 list.innerHTML += `
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 border-b dark:border-gray-700">
                         <td class="p-3 text-sm" dir="ltr">${exp.date}</td>
@@ -2384,16 +2442,15 @@
                     </tr>
                 `;
             });
-        }
+        };
 
-        // ===============================================
-        // 6. الجرد (المكتب / المستودع) - الميزة الجديدة
-        // ===============================================
+        // الجرد (المكتب / المستودع)
         window.switchInventoryTab = (location, tab) => {
             const activeBtn = document.getElementById(`tab${location.charAt(0).toUpperCase() + location.slice(1)}Active`);
             const pastBtn = document.getElementById(`tab${location.charAt(0).toUpperCase() + location.slice(1)}Past`);
             const activeContainer = document.getElementById(`${location}ActiveContainer`);
             const pastContainer = document.getElementById(`${location}PastContainer`);
+            const bulkMoveBtnContainer = document.getElementById(`bulkMove${location.charAt(0).toUpperCase() + location.slice(1)}Container`);
             const color = location === 'office' ? 'purple' : 'orange';
 
             if(tab === 'active') {
@@ -2401,18 +2458,20 @@
                 pastBtn.className = "py-2 px-4 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300";
                 activeContainer.classList.remove('hidden');
                 pastContainer.classList.add('hidden');
+                if(bulkMoveBtnContainer) bulkMoveBtnContainer.classList.remove('hidden');
             } else {
                 pastBtn.className = `py-2 px-4 font-bold text-sm border-b-2 border-${color}-600 text-${color}-600 dark:text-${color}-400`;
                 activeBtn.className = "py-2 px-4 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300";
                 pastContainer.classList.remove('hidden');
                 activeContainer.classList.add('hidden');
+                if(bulkMoveBtnContainer) bulkMoveBtnContainer.classList.add('hidden');
             }
         };
 
         window.openAddInventoryModal = (location) => {
             document.getElementById('invLocation').value = location;
             document.getElementById('inventoryForm').reset();
-            window.handleInvTypeChange(); // ضبط الحقول
+            window.handleInvTypeChange(); 
             window.openModal('inventoryModal');
         };
 
@@ -2421,14 +2480,12 @@
             if(type === 'robot') {
                 document.getElementById('invRobotFields').classList.remove('hidden');
                 document.getElementById('invPartFields').classList.add('hidden');
-                // require attributes
                 document.getElementById('invRobotName').required = true;
                 document.getElementById('invRobotSerial').required = true;
                 document.getElementById('invPartName').required = false;
             } else {
                 document.getElementById('invRobotFields').classList.add('hidden');
                 document.getElementById('invPartFields').classList.remove('hidden');
-                // require attributes
                 document.getElementById('invRobotName').required = false;
                 document.getElementById('invRobotSerial').required = false;
                 document.getElementById('invPartName').required = true;
@@ -2439,8 +2496,8 @@
             e.preventDefault();
             if(!currentUserData) return;
 
-            const location = document.getElementById('invLocation').value; // office or warehouse
-            const type = document.getElementById('invItemType').value; // robot or part
+            const location = document.getElementById('invLocation').value; 
+            const type = document.getElementById('invItemType').value; 
             
             let data = {
                 location: location,
@@ -2454,7 +2511,7 @@
                 data.name = document.getElementById('invRobotName').value;
                 data.serialNumber = document.getElementById('invRobotSerial').value;
                 data.status = document.getElementById('invRobotStatus').value;
-                data.quantity = 1; // الروبوت دائماً 1
+                data.quantity = 1; 
             } else {
                 data.name = document.getElementById('invPartName').value;
                 data.quantity = document.getElementById('invPartQty').value;
@@ -2479,6 +2536,31 @@
             }
         };
 
+        // ميزة نقل الجرد بالكامل
+        window.moveAllToOldInventory = async (location) => {
+            const locationName = location === 'office' ? 'المكتب' : 'المستودع';
+            if(confirm(`هل أنت متأكد من نقل جميع محتويات الجرد الحالي لـ (${locationName}) إلى الجرد القديم؟`)) {
+                showToast('جاري النقل...', 'info');
+                const itemsToMove = globalInventory.filter(i => i.location === location && !i.isOld);
+                
+                if(itemsToMove.length === 0) {
+                    showToast('لا يوجد شيء لنقله', 'warning');
+                    return;
+                }
+
+                try {
+                    await Promise.all(itemsToMove.map(item => 
+                        updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', item.id), { isOld: true })
+                    ));
+                    showToast('تم النقل بنجاح', 'success');
+                    window.logAction('جرد شامل', `تم نقل جميع جرد ${locationName} إلى القديم`);
+                } catch(e) { 
+                    console.error(e); 
+                    showToast('حدث خطأ أثناء النقل', 'error');
+                }
+            }
+        };
+
         window.deleteInventoryItem = async (id) => {
             if(currentUserData.role !== 'CEO') return;
             if(confirm('هل أنت متأكد من الحذف النهائي؟')) {
@@ -2489,9 +2571,12 @@
             }
         };
 
-        function renderInventory(location) {
+        window.renderInventory = (location) => {
             const activeCont = document.getElementById(`${location}ActiveContainer`);
             const pastCont = document.getElementById(`${location}PastContainer`);
+            const searchTermInputId = location === 'office' ? 'searchOfficeInventory' : 'searchWarehouseInventory';
+            const searchTerm = document.getElementById(searchTermInputId)?.value.toLowerCase() || '';
+
             if(!activeCont || !pastCont) return;
 
             activeCont.innerHTML = '';
@@ -2501,7 +2586,14 @@
             let hasPast = false;
 
             const colorClass = location === 'office' ? 'purple' : 'orange';
-            const locationItems = globalInventory.filter(i => i.location === location);
+            const locationItems = globalInventory.filter(i => 
+                i.location === location && 
+                (
+                    i.name.toLowerCase().includes(searchTerm) || 
+                    (i.serialNumber && i.serialNumber.toLowerCase().includes(searchTerm)) ||
+                    i.status.toLowerCase().includes(searchTerm)
+                )
+            );
 
             locationItems.forEach(item => {
                 const dateStr = new Date(item.timestamp).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' });
@@ -2545,15 +2637,11 @@
                 }
             });
 
-            if(!hasActive) activeCont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد عناصر في الجرد الأخير.</p>';
-            if(!hasPast) pastCont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد عناصر في الجرد القديم.</p>';
-        }
+            if(!hasActive) activeCont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا توجد نتائج في الجرد الأخير.</p>';
+            if(!hasPast) pastCont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا توجد نتائج في الجرد القديم.</p>';
+        };
 
-
-        // ===============================================
-        // 7. نظام المتدربين (المطور)
-        // ===============================================
-        
+        // المتدربين
         window.switchTraineesTab = (tab) => {
             const activeBtn = document.getElementById('tabTraineesActive');
             const pastBtn = document.getElementById('tabTraineesPast');
@@ -2641,7 +2729,6 @@
                     });
                     showToast('تمت إضافة المتدرب بنجاح', 'success');
                     
-                    // إشعار المدربين المعينين
                     trainers.forEach(uid => {
                         if(uid !== currentUserData.uid) {
                             window.sendSystemNotification(uid, 'متدرب جديد', `تم تعيينك كمدرب للمتدرب: ${name}`, 'trainees', 'trainees');
@@ -2652,7 +2739,6 @@
             } catch(e) { console.error(e); showToast('حدث خطأ', 'error'); }
         });
 
-        // طلب استلام التدريب بدلاً من الاستلام الفوري
         window.requestTakeOverTraining = async (id) => {
             if(!currentUserData) return;
             const trainee = globalTrainees.find(t => t.id === id);
@@ -2675,7 +2761,6 @@
                     });
                     showToast('تم إرسال الطلب للمدربين الحاليين', 'success');
                     
-                    // إرسال إشعارات للمدربين الحاليين
                     trainee.trainers.forEach(uid => {
                         window.sendSystemNotification(uid, 'طلب استلام تدريب', `يرغب ${currentUserData.name} باستلام تدريب ${trainee.name} بدلاً منك.`, 'handover', 'trainees');
                     });
@@ -2683,7 +2768,6 @@
             }
         };
 
-        // موافقة أو رفض طلب استلام التدريب
         window.resolveHandover = async (traineeId, requesterUid, actionType) => {
             if(!currentUserData) return;
             const trainee = globalTrainees.find(t => t.id === traineeId);
@@ -2695,8 +2779,8 @@
             try {
                 if(actionType === 'approve') {
                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'trainees', traineeId), {
-                        trainers: [requesterUid], // يصبح هو المدرب الوحيد
-                        handoverRequests: [] // تفريغ باقي الطلبات
+                        trainers: [requesterUid], 
+                        handoverRequests: [] 
                     });
                     showToast('تمت الموافقة وتم نقل المتدرب', 'success');
                     window.sendSystemNotification(requesterUid, 'تمت الموافقة', `وافق ${currentUserData.name} على طلبك لاستلام تدريب ${trainee.name}. أنت المدرب الآن.`, 'handover', 'trainees');
@@ -2721,7 +2805,6 @@
             document.getElementById('sessionNotes').value = '';
             document.getElementById('sessionFinishTraining').checked = false;
             
-            // وضع التاريخ والوقت الحالي كافتراضي في الـ input
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             document.getElementById('sessionDateTime').value = now.toISOString().slice(0,16);
@@ -2757,7 +2840,7 @@
                 let updateData = { sessions: sessions };
                 if(isFinished) {
                     updateData.status = 'completed';
-                    updateData.completedAt = timestampFromInput; // استخدام الوقت المدخل للإغلاق
+                    updateData.completedAt = timestampFromInput; 
                 }
                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'trainees', id), updateData);
                 window.closeModal('traineeSessionModal');
@@ -2765,9 +2848,11 @@
             } catch(e) { console.error(e); }
         });
 
-        function renderTrainees() {
+        window.renderTrainees = () => {
             const activeCont = document.getElementById('activeTraineesContainer');
             const pastCont = document.getElementById('pastTraineesContainer');
+            const searchTerm = document.getElementById('searchTrainees')?.value.toLowerCase() || '';
+
             if(!activeCont || !pastCont || !currentUserData) return;
 
             activeCont.innerHTML = '';
@@ -2776,7 +2861,13 @@
             let hasActive = false;
             let hasPast = false;
 
-            globalTrainees.forEach(t => {
+            const filteredTrainees = globalTrainees.filter(t => 
+                t.name.toLowerCase().includes(searchTerm) || 
+                (t.phone && t.phone.toLowerCase().includes(searchTerm)) ||
+                (t.notes && t.notes.toLowerCase().includes(searchTerm))
+            );
+
+            filteredTrainees.forEach(t => {
                 const isMyTrainee = t.trainers && t.trainers.includes(currentUserData.uid);
                 
                 let trainersNames = 'غير محدد';
@@ -2792,7 +2883,6 @@
                 let sessionsHtml = '';
                 if(t.sessions && t.sessions.length > 0) {
                     sessionsHtml = `<div class="mt-3 border-t dark:border-gray-700 pt-2"><p class="text-[10px] font-bold text-gray-500 mb-1">المواعيد السابقة:</p><div class="space-y-1 max-h-24 overflow-y-auto pr-1">`;
-                    // ترتيب الجلسات من الأحدث للأقدم
                     const sortedSessions = [...t.sessions].sort((a,b) => b.timestamp - a.timestamp);
                     sortedSessions.forEach(s => {
                         const sTime = new Date(s.timestamp).toLocaleString('ar-EG', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
@@ -2808,7 +2898,6 @@
                 if(t.status === 'active') {
                     hasActive = true;
                     
-                    // تخصيص الأزرار بناءً على دور المستخدم
                     let trainerBadgeHtml = '';
                     let actionBtnsHtml = '';
                     let handoverRequestsHtml = '';
@@ -2820,7 +2909,6 @@
                             <button onclick="window.openTraineeSessionModal('${t.id}')" class="flex-1 text-xs bg-blue-50 hover:bg-blue-100 text-blue-600 py-2 rounded font-bold transition shadow-sm">إضافة موعد (${sessionsCount + 1})</button>
                         `;
                         
-                        // عرض طلبات الاستلام للمدرب الحالي
                         if (t.handoverRequests && t.handoverRequests.length > 0) {
                             handoverRequestsHtml = `<div class="mt-2 bg-yellow-50 dark:bg-yellow-900/20 p-2 rounded border border-yellow-200 dark:border-yellow-800">
                                 <p class="text-[10px] font-bold text-yellow-700 dark:text-yellow-500 mb-1">طلبات استلام التدريب بدلاً منك:</p>
@@ -2869,7 +2957,6 @@
                     `;
                 } else {
                     hasPast = true;
-                    // تعديل لقراءة الوقت الدقيق للإغلاق إذا كان متوفراً
                     let compDate = '';
                     if(t.completedAt) {
                         compDate = new Date(t.completedAt).toLocaleString('ar-EG', {year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
@@ -2891,14 +2978,11 @@
                 }
             });
 
-            if(!hasActive) activeCont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد متدربين حالياً.</p>';
-            if(!hasPast) pastCont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد متدربين سابقين.</p>';
-        }
+            if(!hasActive) activeCont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد متدربين حالياً مطابقين للبحث.</p>';
+            if(!hasPast) pastCont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد متدربين سابقين مطابقين للبحث.</p>';
+        };
 
-
-        // ===============================================
-        // 8. التوجيه (Routing) والقفل
-        // ===============================================
+        // التوجيه (Routing) والقفل
         window.openModal = (id) => document.getElementById(id).classList.remove('hidden');
         window.closeModal = (id) => {
             document.getElementById(id).classList.add('hidden');
@@ -2967,12 +3051,14 @@
             
             if(window.innerWidth < 768) { document.getElementById('sidebar').classList.add('translate-x-full'); document.getElementById('mobileOverlay').classList.add('hidden'); }
             
-            if(sectionId === 'attendance') renderEmpAttendanceView();
-            if(sectionId === 'leaves') renderLeaves();
-            if(sectionId === 'trainees') renderTrainees();
-            if(sectionId === 'drive') renderDriveFiles();
-            if(sectionId === 'office-inventory') renderInventory('office');
-            if(sectionId === 'warehouse-inventory') renderInventory('warehouse');
+            if(sectionId === 'attendance') window.renderEmpAttendanceView();
+            if(sectionId === 'leaves') window.renderLeaves();
+            if(sectionId === 'trainees') window.renderTrainees();
+            if(sectionId === 'drive') window.renderDriveFiles();
+            if(sectionId === 'office-inventory') window.renderInventory('office');
+            if(sectionId === 'warehouse-inventory') window.renderInventory('warehouse');
+            if(sectionId === 'meetings') window.renderMeetings();
+            if(sectionId === 'expenses') window.renderExpenses();
         };
 
         window.addEventListener('hashchange', () => {
@@ -2991,7 +3077,6 @@
 
         // 🔴 مستمعات قاعدة البيانات
         function startDatabaseListeners() {
-            // مستمع بيانات المستخدم (بما فيها الإشعارات)
             onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUserData.uid), (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
@@ -3012,61 +3097,58 @@
                         if (u.role !== 'CEO') select.innerHTML += `<option value="${u.uid}">${u.name}</option>`;
                     });
                 }
-                if(window.location.hash === '#trainees') renderTrainees();
+                if(window.location.hash === '#trainees') window.renderTrainees();
             }, (error) => console.error(error));
 
             onSnapshot(getColRef('attendance'), (snapshot) => {
                 globalAttendance = []; snapshot.forEach(d => globalAttendance.push({ id: d.id, ...d.data() }));
                 if(!document.getElementById('attendance').classList.contains('hidden')) {
-                    renderEmpAttendanceView();
+                    window.renderEmpAttendanceView();
                     if(currentUserData.role === 'CEO') window.renderSelectedEmpAttendance();
                 } else {
-                    renderEmpAttendanceView();
+                    window.renderEmpAttendanceView();
                 }
             }, (error) => console.error(error));
 
             onSnapshot(getColRef('leaves'), (snapshot) => {
                 globalLeaves = []; snapshot.forEach(d => globalLeaves.push({ id: d.id, ...d.data() }));
                 globalLeaves.sort((a,b) => b.timestamp - a.timestamp); 
-                if(!document.getElementById('leaves').classList.contains('hidden')) renderLeaves();
+                if(!document.getElementById('leaves').classList.contains('hidden')) window.renderLeaves();
             }, (error) => console.error(error));
 
-            // مستمع المجلدات
             onSnapshot(getStorageColRef('folders'), (snapshot) => {
                 globalFolders = []; snapshot.forEach(d => globalFolders.push({ id: d.id, ...d.data() }));
-                if(!document.getElementById('drive').classList.contains('hidden')) renderDriveFiles();
+                if(!document.getElementById('drive').classList.contains('hidden')) window.renderDriveFiles();
             }, (error) => console.error(error));
 
             onSnapshot(getStorageColRef('files'), (snapshot) => {
                 globalFiles = []; snapshot.forEach(d => globalFiles.push({ id: d.id, ...d.data() }));
                 globalFiles.sort((a,b) => b.timestamp - a.timestamp); 
                 updateStorageProgress();
-                if(!document.getElementById('drive').classList.contains('hidden')) renderDriveFiles();
+                if(!document.getElementById('drive').classList.contains('hidden')) window.renderDriveFiles();
             }, (error) => console.error(error));
 
             onSnapshot(getColRef('meetings'), (snapshot) => {
                 globalMeetings = []; snapshot.forEach(d => globalMeetings.push({ id: d.id, ...d.data() }));
-                globalMeetings.sort((a,b) => b.timestamp - a.timestamp); renderMeetings();
+                globalMeetings.sort((a,b) => b.timestamp - a.timestamp); 
+                window.renderMeetings();
             }, (error) => console.error(error));
 
-            // مستمع المتدربين
             onSnapshot(getColRef('trainees'), (snapshot) => {
                 globalTrainees = [];
                 snapshot.forEach(doc => globalTrainees.push({id: doc.id, ...doc.data()}));
                 globalTrainees.sort((a,b) => b.timestamp - a.timestamp);
-                if(window.location.hash === '#trainees') renderTrainees();
+                if(window.location.hash === '#trainees') window.renderTrainees();
             }, (error) => console.error(error));
 
-            // مستمع الجرد
             onSnapshot(getColRef('inventory'), (snapshot) => {
                 globalInventory = [];
                 snapshot.forEach(doc => globalInventory.push({id: doc.id, ...doc.data()}));
                 globalInventory.sort((a,b) => b.timestamp - a.timestamp);
-                if(window.location.hash === '#office-inventory') renderInventory('office');
-                if(window.location.hash === '#warehouse-inventory') renderInventory('warehouse');
+                if(window.location.hash === '#office-inventory') window.renderInventory('office');
+                if(window.location.hash === '#warehouse-inventory') window.renderInventory('warehouse');
             }, (error) => console.error(error));
 
-            // مستمع المهام (للإشعارات الخارجية)
             onSnapshot(getColRef('tasks'), (snapshot) => {
                 if(!currentUserData) return;
                 let pendingTasks = 0;
@@ -3083,7 +3165,6 @@
                 });
             }, (error) => console.error(error));
 
-            // مستمع المجموعات والمحادثات (للإشعارات الخارجية)
             onSnapshot(getColRef('groups'), (gSnap) => {
                 if(!currentUserData) return;
                 globalGroups = [{ id: 'global', members: [] }];
@@ -3122,14 +3203,11 @@
                     globalExpenses = [];
                     snapshot.forEach(doc => globalExpenses.push({id: doc.id, ...doc.data()}));
                     globalExpenses.sort((a,b) => b.timestamp - a.timestamp);
-                    renderExpenses();
+                    window.renderExpenses();
                 }, (error) => console.error(error));
             }
         }
 
-        // ===============================================
-        // تهيئة النظام والمصادقة
-        // ===============================================
         onAuthStateChanged(auth, async (user) => {
             document.getElementById('loadingScreen').classList.add('hidden');
             
@@ -3213,7 +3291,7 @@
             loadNotificationSettingsToUI();
             startDatabaseListeners();
             
-            window.logAction('تسجيل دخول', `سجل ${currentUserData.name} الدخول لخدمات النظام (الدومين الثاني)`);
+            window.logAction('تسجيل دخول', `سجل ${currentUserData.name} الدخول لخدمات النظام`);
             window.dispatchEvent(new Event('hashchange'));
         }
 
