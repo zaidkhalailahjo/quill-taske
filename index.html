@@ -251,7 +251,8 @@
                 <h2 id="page-title" class="text-lg md:text-xl font-bold text-primary dark:text-secondary hidden md:block" data-i18n="الرئيسية">الرئيسية - التطبيقات</h2>
             </div>
 
-            <div class="flex items-center flex-row-reverse z-10 font-bold text-2xl text-primary dark:text-white gap-2">
+            <!-- النقر على اللوجو يرجع للرئيسية -->
+            <div class="flex items-center flex-row-reverse z-10 font-bold text-2xl text-primary dark:text-white gap-2 cursor-pointer hover:opacity-80 transition" onclick="window.location.hash='home-grid'" title="الصفحة الرئيسية">
                 <img src="https://quill.world/wp-content/uploads/2022/01/New-Project-9-1-1.png" alt="Logo" class="h-8 md:h-10 object-contain block dark:hidden">
                 <img src="https://quill.world/wp-content/uploads/2022/01/New-Project-10-1.png" alt="Logo" class="h-8 md:h-10 object-contain hidden dark:block">
             </div>
@@ -260,7 +261,7 @@
         <div id="mobileOverlay" class="fixed inset-0 bg-black/50 z-20 hidden md:hidden transition-opacity no-print" onclick="window.toggleSidebar()"></div>
         <aside id="sidebar" class="fixed inset-y-0 right-0 transform translate-x-full transition duration-300 ease-in-out w-64 bg-primary dark:bg-gray-800 text-white flex flex-col shadow-xl z-30 flex-shrink-0 md:hidden no-print">
             <div class="p-6 flex items-center justify-between border-b border-white/10 dark:border-gray-700">
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.hash='home-grid'; window.toggleSidebar();">
                     <img src="https://quill.world/wp-content/uploads/2022/01/New-Project-10-1.png" alt="Logo" class="h-8 object-contain">
                     <span class="text-xs text-gray-400 font-bold mt-2">Services</span>
                 </div>
@@ -481,11 +482,11 @@
                         <button id="addClientBtn" onclick="window.openAddClientModal()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-sm flex gap-2">
                             <i class="fa-solid fa-user-plus"></i> إضافة عميل
                         </button>
-                        <button id="addRobotCompanyBtn" onclick="window.openAddRobotModal('company')" class="hidden bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-sm flex gap-2">
-                            <i class="fa-solid fa-plus"></i> إضافة روبوت
+                        <button id="addRobotCompanyBtn" onclick="window.openAddRobotModal('company')" class="hidden bg-gradient-to-r from-teal-500 to-teal-700 hover:from-teal-600 hover:to-teal-800 text-white px-5 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-md flex gap-2">
+                            <i class="fa-solid fa-plus-circle"></i> إضافة روبوت للشركة
                         </button>
-                        <button id="addRobotWarehouseBtn" onclick="window.openAddRobotModal('warehouse')" class="hidden bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-sm flex gap-2">
-                            <i class="fa-solid fa-plus"></i> إضافة روبوت
+                        <button id="addRobotWarehouseBtn" onclick="window.openAddRobotModal('warehouse')" class="hidden bg-gradient-to-r from-orange-500 to-orange-700 hover:from-orange-600 hover:to-orange-800 text-white px-5 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-md flex gap-2">
+                            <i class="fa-solid fa-plus-circle"></i> إضافة روبوت للمستودع
                         </button>
                     </div>
                 </div>
@@ -516,11 +517,7 @@
                 <div id="inCompanyContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                 <div id="inWarehouseContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                 <div id="pastRentersContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-                
-                <div id="soldContainer" class="hidden text-center py-10 text-gray-500">
-                    <i class="fa-solid fa-cart-shopping text-4xl mb-3 text-gray-300"></i>
-                    <p class="font-bold">قسم الروبوتات المباعة (بانتظار التفاصيل للبرمجة)</p>
-                </div>
+                <div id="soldContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
             </section>
 
             <!-- جرد المكتب -->
@@ -922,7 +919,7 @@
     <!-- نافذة إضافة/تعديل روبوت (مكتب أو مستودع) -->
     <div id="addRobotModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden flex flex-col">
-            <div id="addRobotHeader" class="text-white p-4 flex justify-between items-center flex-shrink-0">
+            <div id="addRobotHeader" class="text-white p-4 flex justify-between items-center flex-shrink-0 bg-teal-600">
                 <h3 class="font-bold text-base md:text-lg" id="addRobotTitle">إضافة روبوت جديد</h3>
                 <button onclick="window.closeModal('addRobotModal')" class="hover:text-gray-200"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
@@ -958,7 +955,7 @@
                     
                     <div class="pt-4 flex justify-end gap-2 border-t dark:border-gray-700">
                         <button type="button" onclick="window.closeModal('addRobotModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-bold text-sm">إلغاء</button>
-                        <button type="submit" id="saveRobotBtn" class="px-4 py-2 text-white rounded-lg transition-colors font-bold text-sm shadow">حفظ الروبوت</button>
+                        <button type="submit" id="saveRobotBtn" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-bold text-sm shadow">حفظ الروبوت</button>
                     </div>
                 </form>
             </div>
@@ -996,7 +993,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">اختر الروبوتات المراد تأجيرها</label>
-                        <p class="text-[10px] text-gray-500 mb-2">الروبوتات التي تظهر هي المتوفرة في المكتب والمستودع وغير المؤجرة حالياً.</p>
+                        <p class="text-[10px] text-gray-500 mb-2">الروبوتات التي تظهر هي المتوفرة في الشركة والمستودع وغير المؤجرة حالياً.</p>
                         <div id="rentalRobotsSelection" class="border border-gray-200 dark:border-gray-600 rounded-lg p-2 max-h-40 overflow-y-auto space-y-1 bg-gray-50 dark:bg-gray-700"></div>
                     </div>
                     <div>
@@ -1052,10 +1049,17 @@
                             <input type="email" id="clientEmail" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-indigo-500 outline-none text-right" dir="ltr">
                         </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">معلومات الروبوتات (الاسم، الرقم التسلسلي، تاريخ البيع/الاستئجار)</label>
-                        <textarea id="clientPastRentalsInfo" rows="3" placeholder="مثال: Ketty bot - الرقم: 12345 - تم الاستئجار في 2024/01/01" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-indigo-500 outline-none whitespace-pre-wrap"></textarea>
+                    
+                    <div class="border border-gray-200 dark:border-gray-600 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/50">
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">روبوتات العميل (إيجار / بيع)</label>
+                        <div id="clientRobotsList" class="space-y-2 mb-2 max-h-40 overflow-y-auto pr-1">
+                            <!-- Dynamic robot rows go here -->
+                        </div>
+                        <button type="button" onclick="window.addClientRobotRow()" class="text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 px-3 py-1.5 rounded hover:bg-indigo-200 dark:hover:bg-indigo-800 font-bold transition">
+                            <i class="fa-solid fa-plus mx-1"></i> إضافة روبوت
+                        </button>
                     </div>
+
                     <div>
                         <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">تفاصيل وملاحظات إضافية</label>
                         <textarea id="clientNotes" rows="2" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-indigo-500 outline-none whitespace-pre-wrap"></textarea>
@@ -1486,6 +1490,7 @@
         let hasPunchedInToday = true; 
         let seenBackgroundNotifIds = new Set();
         let currentRobotsTab = 'rentedNow'; // التاب الافتراضي للروبوتات
+        const MAX_FILE_SIZE = 500 * 1024; // 500KB - تم تعريف الحد الأقصى للملفات لتفادي المشكلة
 
         const defaultNotifPreferences = {
             style: 'number',
@@ -1583,6 +1588,7 @@
             if(currentRobotsTab === 'inCompany') renderCompanyRobots();
             if(currentRobotsTab === 'inWarehouse') renderWarehouseRobots();
             if(currentRobotsTab === 'pastRenters') renderPastRenters();
+            if(currentRobotsTab === 'sold') renderSoldRobots();
         };
 
         // رفع وتغيير لوجو العميل
@@ -1612,6 +1618,24 @@
             }
         });
 
+        // إضافة صف روبوت للعميل
+        window.addClientRobotRow = (name='', serial='', date='', type='rent') => {
+            const container = document.getElementById('clientRobotsList');
+            const row = document.createElement('div');
+            row.className = "flex flex-wrap gap-2 items-center bg-gray-50 dark:bg-gray-800 p-2 rounded border border-gray-200 dark:border-gray-700 client-robot-row transition-all";
+            row.innerHTML = `
+                <input type="text" placeholder="اسم الروبوت" value="${name}" class="cr-name flex-1 border dark:border-gray-600 rounded px-2 py-1 text-xs outline-none dark:bg-gray-900 dark:text-white font-bold" list="robotNamesList">
+                <input type="text" placeholder="الرقم التسلسلي" value="${serial}" class="cr-serial w-24 border dark:border-gray-600 rounded px-2 py-1 text-xs outline-none dark:bg-gray-900 dark:text-white" dir="ltr">
+                <input type="date" value="${date}" class="cr-date w-32 border dark:border-gray-600 rounded px-2 py-1 text-xs outline-none dark:bg-gray-900 dark:text-white text-gray-600">
+                <select class="cr-type border dark:border-gray-600 rounded px-2 py-1 text-xs outline-none dark:bg-gray-900 dark:text-white font-bold">
+                    <option value="rent" ${type==='rent'?'selected':''}>إيجار</option>
+                    <option value="buy" ${type==='buy'?'selected':''}>بيع</option>
+                </select>
+                <button type="button" onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-700 px-2 py-1 rounded bg-red-50 dark:bg-red-900/30 transition"><i class="fa-solid fa-xmark"></i></button>
+            `;
+            container.appendChild(row);
+        };
+
         // فتح نافذة العميل
         window.openAddClientModal = (id = null) => {
             document.getElementById('clientForm').reset();
@@ -1619,6 +1643,7 @@
             document.getElementById('clientLogoBase64').value = '';
             document.getElementById('clientId').value = '';
             document.getElementById('clientModalTitle').innerText = 'إضافة عميل جديد';
+            document.getElementById('clientRobotsList').innerHTML = '';
 
             if(id) {
                 const c = globalClients.find(x => x.id === id);
@@ -1628,7 +1653,6 @@
                     document.getElementById('clientName').value = c.name;
                     document.getElementById('clientPhone').value = c.phone || '';
                     document.getElementById('clientEmail').value = c.email || '';
-                    document.getElementById('clientPastRentalsInfo').value = c.pastRentalsInfo || '';
                     document.getElementById('clientNotes').value = c.notes || '';
                     if(c.logo) {
                         document.getElementById('clientLogoBase64').value = c.logo;
@@ -1638,7 +1662,16 @@
                             document.getElementById('clientLogoUrl').value = c.logo;
                         }
                     }
+                    if(c.clientRobots && c.clientRobots.length > 0) {
+                        c.clientRobots.forEach(cr => {
+                            window.addClientRobotRow(cr.name, cr.serial, cr.date, cr.type);
+                        });
+                    } else {
+                        window.addClientRobotRow(); // Add one empty row by default
+                    }
                 }
+            } else {
+                window.addClientRobotRow(); // Add one empty row by default for new clients
             }
             window.openModal('addClientModal');
         };
@@ -1648,12 +1681,22 @@
             e.preventDefault();
             if(!currentUserData) return;
             const id = document.getElementById('clientId').value;
+            
+            // جمع الروبوتات من الحقول المضافة
+            const robotRows = document.querySelectorAll('.client-robot-row');
+            const clientRobots = Array.from(robotRows).map(row => ({
+                name: row.querySelector('.cr-name').value.trim(),
+                serial: row.querySelector('.cr-serial').value.trim(),
+                date: row.querySelector('.cr-date').value,
+                type: row.querySelector('.cr-type').value
+            })).filter(r => r.name !== ''); // تجاهل الحقول الفارغة بدون اسم
+            
             const data = {
-                name: document.getElementById('clientName').value,
+                name: document.getElementById('clientName').value.trim(),
                 phone: document.getElementById('clientPhone').value,
                 email: document.getElementById('clientEmail').value,
                 logo: document.getElementById('clientLogoBase64').value,
-                pastRentalsInfo: document.getElementById('clientPastRentalsInfo').value,
+                clientRobots: clientRobots,
                 notes: document.getElementById('clientNotes').value,
                 timestamp: Date.now()
             };
@@ -1714,21 +1757,21 @@
             cont.innerHTML = '';
             const searchTerm = document.getElementById('searchRobots').value.toLowerCase();
             
-            const robots = globalRobots.filter(r => r.location === 'company' && (r.name.toLowerCase().includes(searchTerm) || r.serialNumber.toLowerCase().includes(searchTerm)));
+            // فلترة الروبوتات الموجودة في الشركة (وغير مؤجرة حالياً)
+            const robots = globalRobots.filter(r => r.location === 'company' && !r.isRented && (r.name.toLowerCase().includes(searchTerm) || r.serialNumber.toLowerCase().includes(searchTerm)));
             
             if(robots.length === 0) {
-                cont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد روبوتات في الشركة حالياً.</p>'; return;
+                cont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد روبوتات غير مؤجرة في الشركة حالياً.</p>'; return;
             }
 
             robots.forEach(r => {
                 const statusColor = r.status === 'جديد' ? 'text-green-500' : (r.status === 'معطل' ? 'text-red-500' : 'text-yellow-500');
-                const isRentedHtml = r.isRented ? '<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold">مؤجر حالياً</span>' : '<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold">متوفر</span>';
                 
                 cont.innerHTML += `
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col h-full hover:shadow-md transition">
                         <div class="flex justify-between items-start mb-3 border-b dark:border-gray-700 pb-2">
                             <h3 class="font-bold text-lg text-teal-700 dark:text-teal-400"><i class="fa-solid fa-robot mx-1"></i> ${r.name}</h3>
-                            ${isRentedHtml}
+                            <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold">متوفر في الشركة</span>
                         </div>
                         <div class="text-xs text-gray-600 dark:text-gray-300 space-y-2 mb-4">
                             <p class="flex justify-between"><span>الرقم التسلسلي:</span> <span class="font-bold" dir="ltr">${r.serialNumber}</span></p>
@@ -1736,8 +1779,8 @@
                             <p class="flex justify-between"><span>أضيف بواسطة:</span> <span>${r.addedBy}</span></p>
                             <p class="flex justify-between text-gray-400 pt-2 border-t dark:border-gray-700 text-[10px]"><span>التاريخ:</span> <span>${new Date(r.timestamp).toLocaleDateString('ar-EG')}</span></p>
                         </div>
-                        <div class="mt-auto pt-2 text-left">
-                            <button onclick="window.deleteRobot('${r.id}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-gray-700 px-2 py-1 rounded transition text-[10px] font-bold"><i class="fa-solid fa-trash mx-1"></i> حذف</button>
+                        <div class="mt-auto pt-2 text-left border-t dark:border-gray-700">
+                            <button onclick="window.deleteRobot('${r.id}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-gray-700 px-2 py-1 rounded transition text-[10px] font-bold mt-2"><i class="fa-solid fa-trash mx-1"></i> حذف الروبوت</button>
                         </div>
                     </div>
                 `;
@@ -1750,21 +1793,21 @@
             cont.innerHTML = '';
             const searchTerm = document.getElementById('searchRobots').value.toLowerCase();
             
-            const robots = globalRobots.filter(r => r.location === 'warehouse' && (r.name.toLowerCase().includes(searchTerm) || r.serialNumber.toLowerCase().includes(searchTerm)));
+            // فلترة الروبوتات الموجودة في المستودع (وغير مؤجرة حالياً)
+            const robots = globalRobots.filter(r => r.location === 'warehouse' && !r.isRented && (r.name.toLowerCase().includes(searchTerm) || r.serialNumber.toLowerCase().includes(searchTerm)));
             
             if(robots.length === 0) {
-                cont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد روبوتات في المستودع حالياً.</p>'; return;
+                cont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد روبوتات غير مؤجرة في المستودع حالياً.</p>'; return;
             }
 
             robots.forEach(r => {
                 const statusColor = r.status === 'جديد' ? 'text-green-500' : (r.status === 'معطل' ? 'text-red-500' : 'text-yellow-500');
-                const isRentedHtml = r.isRented ? '<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold">مؤجر حالياً</span>' : '<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold">متوفر</span>';
                 
                 cont.innerHTML += `
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col h-full hover:shadow-md transition">
                         <div class="flex justify-between items-start mb-3 border-b dark:border-gray-700 pb-2">
                             <h3 class="font-bold text-lg text-orange-700 dark:text-orange-400"><i class="fa-solid fa-robot mx-1"></i> ${r.name}</h3>
-                            ${isRentedHtml}
+                            <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold">متوفر في المستودع</span>
                         </div>
                         <div class="text-xs text-gray-600 dark:text-gray-300 space-y-2 mb-4">
                             <p class="flex justify-between"><span>الرقم التسلسلي:</span> <span class="font-bold" dir="ltr">${r.serialNumber}</span></p>
@@ -1772,8 +1815,8 @@
                             <p class="flex justify-between"><span>أضيف بواسطة:</span> <span>${r.addedBy}</span></p>
                             <p class="flex justify-between text-gray-400 pt-2 border-t dark:border-gray-700 text-[10px]"><span>التاريخ:</span> <span>${new Date(r.timestamp).toLocaleDateString('ar-EG')}</span></p>
                         </div>
-                        <div class="mt-auto pt-2 text-left">
-                            <button onclick="window.deleteRobot('${r.id}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-gray-700 px-2 py-1 rounded transition text-[10px] font-bold"><i class="fa-solid fa-trash mx-1"></i> حذف</button>
+                        <div class="mt-auto pt-2 text-left border-t dark:border-gray-700">
+                            <button onclick="window.deleteRobot('${r.id}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-gray-700 px-2 py-1 rounded transition text-[10px] font-bold mt-2"><i class="fa-solid fa-trash mx-1"></i> حذف الروبوت</button>
                         </div>
                     </div>
                 `;
@@ -1926,6 +1969,16 @@
             }
         };
 
+        // حذف استئجار سابق
+        window.deleteRental = async (id) => {
+            if(confirm('هل أنت متأكد من حذف هذا السجل نهائياً؟')) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rentals', id));
+                    showToast('تم حذف السجل بنجاح', 'success');
+                } catch(e) { console.error(e); }
+            }
+        };
+
         // عرض العملاء
         function renderClients() {
             const cont = document.getElementById('clientsContainer');
@@ -1944,6 +1997,21 @@
                 const logoHtml = c.logo ? `<img src="${c.logo}" class="w-12 h-12 rounded-full object-cover border border-gray-200 dark:border-gray-600 bg-white">` : `<div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-500 flex items-center justify-center text-xl font-bold"><i class="fa-solid fa-user-tie"></i></div>`;
                 const phoneHtml = c.phone ? `<a href="tel:${c.phone}" class="hover:text-indigo-500 transition">${c.phone}</a>` : 'لا يوجد رقم';
                 
+                let robotsInfoHtml = '';
+                if(c.clientRobots && c.clientRobots.length > 0) {
+                    robotsInfoHtml = `<div class="bg-indigo-50 dark:bg-indigo-900/20 p-2 rounded mt-2 border border-indigo-100 dark:border-indigo-800">
+                        <p class="font-bold text-indigo-800 dark:text-indigo-300 text-[10px] mb-1">الروبوتات المسجلة للعميل:</p>
+                        <div class="space-y-1">`;
+                    c.clientRobots.forEach(cr => {
+                        const typeLabel = cr.type === 'buy' ? '<span class="text-green-600 font-bold bg-green-100 px-1 rounded">شراء</span>' : '<span class="text-blue-600 font-bold bg-blue-100 px-1 rounded">إيجار</span>';
+                        robotsInfoHtml += `<div class="text-[10px] bg-white dark:bg-gray-800 p-1 rounded shadow-sm flex justify-between items-center">
+                            <span><b>${cr.name}</b> <span class="text-gray-400">(${cr.serial || 'بلا رقم'})</span></span>
+                            <div class="flex gap-2 items-center"><span>${cr.date || 'لا يوجد تاريخ'}</span> ${typeLabel}</div>
+                        </div>`;
+                    });
+                    robotsInfoHtml += `</div></div>`;
+                }
+
                 cont.innerHTML += `
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col h-full hover:shadow-md transition group">
                         <div class="flex items-center gap-3 mb-3 border-b dark:border-gray-700 pb-3">
@@ -1955,16 +2023,59 @@
                         </div>
                         <div class="text-xs text-gray-600 dark:text-gray-300 space-y-2 mb-4 flex-1">
                             ${c.email ? `<p><i class="fa-solid fa-envelope text-gray-400 mx-1"></i> ${c.email}</p>` : ''}
-                            ${c.pastRentalsInfo ? `
-                                <div class="bg-indigo-50 dark:bg-indigo-900/20 p-2 rounded mt-2">
-                                    <p class="font-bold text-indigo-800 dark:text-indigo-300 text-[10px] mb-1">معلومات الروبوتات:</p>
-                                    <p class="text-[10px] whitespace-pre-wrap">${c.pastRentalsInfo}</p>
-                                </div>
-                            ` : ''}
-                            ${c.notes ? `<p class="text-[10px] text-gray-500 mt-2">${c.notes}</p>` : ''}
+                            ${robotsInfoHtml}
+                            ${c.notes ? `<p class="text-[10px] text-gray-500 mt-2 p-2 bg-gray-50 dark:bg-gray-900 rounded">${c.notes}</p>` : ''}
                         </div>
                         <div class="pt-3 border-t dark:border-gray-700 flex gap-2 mt-auto">
                             <button onclick="window.openAddClientModal('${c.id}')" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs py-1.5 rounded font-bold transition"><i class="fa-solid fa-pen mx-1"></i> تعديل</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // عرض الروبوتات المباعة (من قائمة العملاء)
+        function renderSoldRobots() {
+            const cont = document.getElementById('soldContainer');
+            if(!cont) return;
+            cont.innerHTML = '';
+            const searchTerm = document.getElementById('searchRobots').value.toLowerCase();
+            
+            let soldRobots = [];
+            globalClients.forEach(c => {
+                if(c.clientRobots && c.clientRobots.length > 0) {
+                    c.clientRobots.forEach(cr => {
+                        if(cr.type === 'buy') {
+                            if(cr.name.toLowerCase().includes(searchTerm) || c.name.toLowerCase().includes(searchTerm) || (cr.serial && cr.serial.toLowerCase().includes(searchTerm))) {
+                                soldRobots.push({ clientName: c.name, logo: c.logo, ...cr });
+                            }
+                        }
+                    });
+                }
+            });
+
+            if(soldRobots.length === 0) {
+                cont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا يوجد روبوتات مباعة مسجلة.</p>';
+                return;
+            }
+
+            soldRobots.forEach(r => {
+                const logoHtml = r.logo ? `<img src="${r.logo}" class="w-6 h-6 rounded-full object-cover border border-gray-200">` : `<i class="fa-solid fa-user-tie text-gray-400"></i>`;
+                
+                cont.innerHTML += `
+                    <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 rounded-xl shadow-sm flex flex-col hover:shadow-md transition">
+                        <div class="flex justify-between items-start mb-3 border-b dark:border-gray-700 pb-2">
+                            <h3 class="font-bold text-lg text-gray-800 dark:text-white"><i class="fa-solid fa-cart-shopping text-gray-400 mx-1"></i> ${r.name}</h3>
+                            <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold">مباع</span>
+                        </div>
+                        <div class="text-xs text-gray-600 dark:text-gray-300 space-y-2 mb-4">
+                            <p class="flex justify-between"><span>الرقم التسلسلي:</span> <span class="font-bold" dir="ltr">${r.serial || '---'}</span></p>
+                            <p class="flex justify-between"><span>تاريخ البيع:</span> <span>${r.date || '---'}</span></p>
+                            <div class="flex items-center gap-2 mt-2 p-2 bg-white dark:bg-gray-700 rounded border dark:border-gray-600">
+                                <span class="text-gray-500 text-[10px]">العميل:</span>
+                                ${logoHtml}
+                                <span class="font-bold text-sm">${r.clientName}</span>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -2068,7 +2179,10 @@
                                     <h3 class="font-bold text-sm text-gray-700 dark:text-gray-300 line-through decoration-gray-400">${r.clientName}</h3>
                                 </div>
                             </div>
-                            <span class="text-[10px] bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400 px-2 py-1 rounded font-bold">منتهي</span>
+                            <span class="text-[10px] bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400 px-2 py-1 rounded font-bold flex gap-2 items-center">
+                                منتهي
+                                <button onclick="window.deleteRental('${r.id}')" class="text-red-500 hover:text-red-700 transition" title="حذف السجل"><i class="fa-solid fa-trash"></i></button>
+                            </span>
                         </div>
                         
                         <div class="text-xs text-gray-500 dark:text-gray-400 space-y-2 mb-2 flex-1">
@@ -2170,7 +2284,6 @@
         };
 
         let currentMeetingId = null;
-        const MAX_GLOBAL_STORAGE = 15 * 1024 * 1024; 
         let jitsiApi = null; 
 
         function formatBytes(bytes, decimals = 2) {
@@ -3306,7 +3419,6 @@
             }
         };
 
-        // ميزة نقل الجرد بالكامل
         window.moveAllToOldInventory = async (location) => {
             const locationName = location === 'office' ? 'المكتب' : 'المستودع';
             if(confirm(`هل أنت متأكد من نقل جميع محتويات الجرد الحالي لـ (${locationName}) إلى الجرد القديم؟`)) {
