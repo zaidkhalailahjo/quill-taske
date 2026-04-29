@@ -6,7 +6,7 @@ window.renderNotices = () => {
     if(!list) return;
     list.innerHTML = '';
     
-    const isCEO = window.currentUserData && window.currentUserData.role ===
+    const isCEO = window.currentUserData && window.currentUserData.role === 'CEO';
     const canPost = window.currentUserData && window.currentUserData.permissions?.canNotices;
     
     const addNoticeBtn = document.getElementById('addNoticeBtn');
