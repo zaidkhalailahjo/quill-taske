@@ -1,9 +1,9 @@
-// dashboard-employees.js
+// js/dashboard-employees.js
 import { db, appId, doc, updateDoc, deleteDoc } from './firebase-config.js';
 
 window.updateDashboardStats = () => {
     const statEmp = document.getElementById('stat-employees');
-    if(statEmp) statEmp.innerText = window.globalUsers.filter(u => u.status !== 'pending' && u.status !== 'rejected').length;
+    if(statEmp) statEmp.innerText = window.globalUsers.length;
     
     const statTasks = document.getElementById('stat-tasks');
     if(statTasks) statTasks.innerText = window.globalTasks.length;
@@ -16,15 +16,14 @@ window.renderEmployees = () => {
     const list = document.getElementById('employeesList');
     const pendingList = document.getElementById('pendingEmployeesList');
     const pendingContainer = document.getElementById('pendingEmployeesContainer');
-    
     if(!list) return;
+    
     const isCEO = window.currentUserData && window.currentUserData.role === 'CEO';
     list.innerHTML = '';
     
     if (pendingList && pendingContainer) {
         pendingList.innerHTML = '';
         const pendingUsers = window.globalUsers.filter(u => u.status === 'pending');
-        
         if (isCEO && pendingUsers.length > 0) {
             pendingContainer.classList.remove('hidden');
             pendingUsers.forEach(emp => {
@@ -45,7 +44,7 @@ window.renderEmployees = () => {
                     </tr>
                 `;
             });
-        } else if (pendingContainer) {
+        } else {
             pendingContainer.classList.add('hidden');
         }
     }
@@ -98,7 +97,7 @@ window.deleteEmployee = async (id, name) => {
     if(window.currentUserData.role !== 'CEO') return;
     if(confirm('هل أنت متأكد من حذف هذا الموظف؟')) {
         await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', id)).catch(e => console.error(e));
-        window.logAction('حذف موظف', `تم حذف الموظف: ${name}`);
+        if(window.logAction) window.logAction('حذف موظف', `تم حذف الموظف: ${name}`);
     }
 };
 
@@ -107,10 +106,11 @@ window.renderLogs = () => {
     if(!list) return;
     list.innerHTML = '';
     
-    if(window.globalLogs.length === 0) {
+    if(!window.globalLogs || window.globalLogs.length === 0) {
         list.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-gray-500 dark:text-gray-400">لا يوجد سجلات حتى الآن.</td></tr>`;
         return;
     }
+
     window.globalLogs.forEach(log => {
         const timestamp = log.timestamp || 0;
         const dateObj = new Date(timestamp);
@@ -125,6 +125,7 @@ window.renderLogs = () => {
         if(actionText.includes('انصراف')) icon = 'fa-person-walking-arrow-right text-red-500';
         if(actionText.includes('مهمة')) icon = 'fa-check text-green-500';
         if(actionText.includes('حذف') || actionText.includes('مسح')) icon = 'fa-trash text-red-500';
+        if(actionText.includes('عميل')) icon = 'fa-address-book text-lime-500';
         
         list.innerHTML += `
             <tr class="hover:bg-gray-50 dark:bg-gray-800 transition">
