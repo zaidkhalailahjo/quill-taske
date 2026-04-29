@@ -179,7 +179,6 @@
                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1" data-i18n="الوظيفة (الدور)">الوظيفة (الدور)</label>
                     <select id="setupRole" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2 focus:outline-none focus:border-secondary">
                         <option value="" disabled selected>-- اختر وظيفتك --</option>
-                        <option value="CEO">CEO (المدير)</option>
                         <option value="technical team supervisor">Technical Team Supervisor</option>
                         <option value="Technical Engineer">Technical Engineer</option>
                         <option value="accountant">Accountant</option>
@@ -709,30 +708,8 @@
 
             <!-- المستندات -->
             <section id="drive" class="section-content hidden animate-fade-in p-4 md:p-0">
-                <!-- شرح ربط جوجل درايف للعميل -->
-                <div class="mb-4 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-200 dark:border-blue-800 text-sm">
-                    <h4 class="font-bold text-blue-800 dark:text-blue-300 mb-2"><i class="fa-brands fa-google-drive mx-1"></i> معلومات حول ربط Google Drive</h4>
-                    <p class="text-blue-700 dark:text-blue-400 mb-2">لربط النظام بشكل مباشر مع Google Drive وتخطي مساحة قاعدة البيانات الحالية، يجب عمل الآتي:</p>
-                    <ol class="list-decimal list-inside text-blue-600 dark:text-blue-400 space-y-1 pr-2">
-                        <li>إنشاء سكريبت على <b>Google Apps Script</b> ليعمل كوسيط (API) يستقبل الملف ويخزنه في المجلد الخاص بك.</li>
-                        <li>استخدام كود السكريبت (Web App URL) وإرسال الملفات من النظام إليه بطريقة `POST`.</li>
-                        <li>نظراً لأن النظام الحالي مصمم للعمل من خلال واجهة المستخدم فقط (بدون سيرفر Backend كـ Node.js)، فإن طريقة Google Apps Script هي الطريقة الآمنة الوحيدة لحماية مفاتيح التشفير الخاصة بك.</li>
-                    </ol>
-                    <p class="text-xs text-blue-500 mt-2">ملاحظة: النظام حالياً يستخدم Firebase Storage لرفع الملفات، مع وضع حد 500KB للملف الواحد للحفاظ على السلاسة وعدم استهلاك المساحة بسرعة.</p>
-                </div>
-
-                <div class="mb-6 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                    <div class="flex justify-between text-sm mb-2 font-bold text-gray-700 dark:text-gray-300">
-                        <span data-i18n="المساحة المستخدمة">المساحة المستخدمة</span>
-                        <span id="storageText">0 MB / 15 MB</span>
-                    </div>
-                    <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-3 border border-gray-200 dark:border-gray-600 overflow-hidden">
-                        <div id="storageBar" class="bg-green-500 h-full transition-all duration-500 w-0"></div>
-                    </div>
-                    <p id="storageWarning" class="text-xs text-red-500 mt-2 font-bold hidden"><i class="fa-solid fa-triangle-exclamation"></i> لا يمكن رفع ملفات جديدة، المساحة ممتلئة!</p>
-                </div>
-
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
+                
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3 mt-4">
                     <p class="text-sm md:text-base text-gray-600 dark:text-gray-300" data-i18n="مشاركة الملفات">إدارة المستندات</p>
                     <div class="flex flex-wrap gap-2 w-full md:w-auto">
                         <div class="search-wrapper flex-1 md:flex-none w-full md:w-auto">
@@ -744,7 +721,7 @@
                         </button>
                         <input type="file" id="driveFileInput" class="hidden" onchange="window.handleDriveFileSelect(event)">
                         <button id="uploadFileBtn" onclick="document.getElementById('driveFileInput').click()" class="bg-secondary hover:bg-primary text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm font-bold shadow flex-1 md:flex-none justify-center">
-                            <i class="fa-solid fa-cloud-arrow-up mx-2"></i> ملف
+                            <i class="fa-solid fa-cloud-arrow-up mx-2"></i> رفع ملف للدرايف
                         </button>
                     </div>
                 </div>
@@ -1444,21 +1421,12 @@
         const db = getFirestore(app);
         const appId = 'quill-world-system';
 
-        const firebaseConfigStorage = {
-            apiKey: "AIzaSyBjPerebbHAtkKWJV_LFkoaL-15oTNHRdg",
-            authDomain: "quill-worl.firebaseapp.com",
-            projectId: "quill-worl",
-            storageBucket: "quill-worl.firebasestorage.app",
-            messagingSenderId: "192227363160",
-            appId: "1:192227363160:web:59a620429b4bfdfb7cfd2d",
-            measurementId: "G-NLY5LN0830"
-        };
-        const appStorage = initializeApp(firebaseConfigStorage, "StorageApp");
-        const dbStorage = getFirestore(appStorage);
-
         const EMAILJS_SERVICE_ID_2 = 'service_cf5myn4'; 
         const EMAILJS_TEMPLATE_MEETING = 'template_j95rjoh'; 
         const EMAILJS_PUBLIC_KEY_2 = 'V9oeJRZybd-4PFBdz';
+
+        // ⚠️ يجب وضع رابط الـ Google Apps Script الذي نسخته هنا ⚠️
+        const GOOGLE_DRIVE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzffAWkWFXZ5qesE7-_i1SSufvUlowRDxT7F53Uc_Q-lgY2q8dLiGWY4LAC5jaQ6Ad2/exec";
 
         const i18nDict = {
             "الخدمات والمستندات": "Services & Documents",
@@ -1475,7 +1443,7 @@
             "الوظيفة (الدور)": "Role",
             "الدخول للنظام": "Enter System",
             "المساحة المستخدمة": "Used Storage",
-            "مشاركة الملفات": "Share Important Files (Max 500KB)",
+            "مشاركة الملفات": "Share Important Files",
             "رفع ملف جديد": "Upload New File",
             "الملفات المثبتة": "Pinned Files",
             "كل الملفات": "All Files",
@@ -1486,7 +1454,7 @@
             "إعدادات الحساب": "Account Settings",
             "معلومات الحساب": "Basic Info",
             "تغيير الصورة": "Change Avatar",
-            "اختر صورة تعبر عنك": "Choose an image (Max 500KB)",
+            "اختر صورة تعبر عنك": "Choose an image",
             "اختيار صورة": "Choose Image",
             "تطبيقات خارجية": "Other Apps",
             "الحضور والانصراف": "Attendance",
@@ -1576,21 +1544,20 @@
         let hasPunchedInToday = true; 
         let seenBackgroundNotifIds = new Set();
         let currentRobotsTab = 'rentedNow'; 
-        const MAX_FILE_SIZE = 500 * 1024; // 500KB
-        const MAX_GLOBAL_STORAGE = 15 * 1024 * 1024; // 15MB 
+        const MAX_FILE_SIZE = 50 * 1024 * 1024; // تم رفع الحد الأقصى إلى 50MB لأننا نستخدم جوجل درايف
 
         const defaultNotifPreferences = {
             style: 'number',
             colors: { trainees: 'green', handover: 'yellow', meetings: 'blue' }
         };
 
-        function formatDateTimeStr(dtStr) {
-            if(!dtStr) return '---';
-            try {
-                const d = new Date(dtStr);
-                if(isNaN(d.getTime())) return dtStr;
-                return d.toLocaleString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-            } catch(e) { return dtStr; }
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
         }
         
         function updateSearchBadge(badgeId, count, searchTerm) {
@@ -1607,6 +1574,18 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             applyLanguageToDOM();
+            
+            // تفعيل الإرسال بزر Enter في المحادثات
+            const chatInput = document.getElementById('leaveChatInput');
+            if (chatInput) {
+                chatInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        window.sendLeaveComment();
+                    }
+                });
+            }
+
             const cachedUser = localStorage.getItem('quill_user_cache_services');
             if (cachedUser) {
                 try {
@@ -2101,7 +2080,7 @@
                 }
 
                 cont.innerHTML += `
-                    <divclass="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col h-full hover:shadow-md transition group">
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col h-full hover:shadow-md transition group">
                         <div class="flex items-center gap-3 mb-3 border-b dark:border-gray-700 pb-3">
                             ${logoHtml}
                             <div>
@@ -2292,7 +2271,6 @@
         }
         // -----------------------------------------------------------
 
-
         window.exportSystemData = (format) => {
             if(!currentUserData || currentUserData.role !== 'CEO') return;
 
@@ -2382,317 +2360,65 @@
         let currentMeetingId = null;
         let jitsiApi = null; 
 
-        function formatBytes(bytes, decimals = 2) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const dm = decimals < 0 ? 0 : decimals;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-        }
+        // دالة الرفع المباشر لجوجل درايف
+        window.handleDriveFileSelect = async (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
 
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            let colorClass = type === 'success' ? 'bg-green-500' : (type === 'warning' ? 'bg-secondary' : (type === 'error' ? 'bg-red-500' : 'bg-primary'));
-            let icon = type === 'success' ? 'fa-check' : (type === 'warning' ? 'fa-bell' : (type === 'error' ? 'fa-xmark' : 'fa-info-circle'));
-
-            toast.className = `toast-enter ${colorClass} text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 text-sm md:text-base w-max`;
-            toast.innerHTML = `<i class="fa-solid ${icon}"></i><span class="font-bold">${message}</span>`;
-            
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.classList.replace('toast-enter', 'toast-leave');
-                setTimeout(() => toast.remove(), 500);
-            }, 4000);
-        }
-
-        window.checkSystemPassword = () => {
-            if(document.getElementById('sysPasswordInput').value === '1112021') {
-                document.getElementById('systemPasswordScreen').classList.add('hidden');
-                document.getElementById('loginScreen').classList.remove('hidden');
-            } else {
-                document.getElementById('sysPassError').classList.remove('hidden');
-            }
-        };
-
-        function getColRef(colName) { return collection(db, 'artifacts', appId, 'public', 'data', colName); }
-        function getStorageColRef(colName) { return collection(dbStorage, 'artifacts', appId, 'public', 'data', colName); }
-
-        window.logAction = async (action, details) => {
-            if(!currentUserData) return;
-            try {
-                await addDoc(getColRef('logs'), {
-                    action: action,
-                    details: details,
-                    userName: currentUserData.name,
-                    uid: currentUserData.uid,
-                    timestamp: Date.now()
-                });
-            } catch(e) { console.error("Error logging action", e); }
-        };
-
-        // الإشعارات
-        window.toggleNotifDropdown = () => {
-            const dropdown = document.getElementById('notifDropdownUI');
-            if(dropdown.classList.contains('hidden')) {
-                dropdown.classList.remove('hidden');
-                dropdown.style.visibility = 'visible';
-            } else {
-                dropdown.classList.add('hidden');
-            }
-        };
-
-        window.closeNotifDropdownIfOpen = (e) => {
-            const dropdown = document.getElementById('notifDropdownUI');
-            const btn = document.getElementById('headerNotifBtn');
-            if(!dropdown.classList.contains('hidden') && !dropdown.contains(e.target) && !btn.contains(e.target)) {
-                dropdown.classList.add('hidden');
-            }
-        };
-
-        window.sendSystemNotification = async (targetUid, title, body, type, link) => {
-            try {
-                const docSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', targetUid));
-                if (docSnap.exists()) {
-                    let currentNotifs = docSnap.data().notifications || [];
-                    currentNotifs.unshift({
-                        id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
-                        title: title,
-                        body: body,
-                        type: type,
-                        link: link,
-                        read: false,
-                        timestamp: Date.now()
-                    });
-                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', targetUid), { 
-                        notifications: currentNotifs.slice(0, 50) 
-                    });
-                }
-            } catch(e) { console.error('Error sending notification', e); }
-        };
-
-        window.markAllNotifsAsRead = async () => {
-            if(!currentUserData) return;
-            let currentNotifs = currentUserData.notifications || [];
-            if(currentNotifs.every(n => n.read)) return; 
-
-            currentNotifs.forEach(n => n.read = true);
-            try {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUserData.uid), { 
-                    notifications: currentNotifs 
-                });
-                renderNotifications(currentNotifs);
-            } catch(e) { console.error(e); }
-        };
-
-        window.deleteAllNotifs = async () => {
-            if(!currentUserData) return;
-            try {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUserData.uid), { 
-                    notifications: [] 
-                });
-                currentUserData.notifications = [];
-                renderNotifications([]);
-                window.toggleNotifDropdown();
-                showToast('تم مسح جميع الإشعارات', 'success');
-            } catch(e) { console.error(e); }
-        };
-
-        function checkBackgroundNotifications(notifsArray) {
-            if (!("Notification" in window) || Notification.permission !== "granted") return;
-            
-            notifsArray.forEach(notif => {
-                if (!notif.read && !seenBackgroundNotifIds.has(notif.id)) {
-                    seenBackgroundNotifIds.add(notif.id);
-                    const n = new Notification(notif.title, {
-                        body: notif.body,
-                        icon: 'https://quill.world/wp-content/uploads/2022/01/New-Project-10-1.png'
-                    });
-                    n.onclick = () => {
-                        window.focus();
-                        if(notif.link) window.location.hash = notif.link;
-                        window.markAllNotifsAsRead();
-                    };
-                }
-            });
-        }
-
-        function renderNotifications(notifsArray) {
-            const listDropdown = document.getElementById('notifDropdownList');
-            if(listDropdown) listDropdown.innerHTML = '';
-            
-            if(!notifsArray || notifsArray.length === 0) {
-                const emptyMsg = '<p class="text-center text-gray-500 py-8 text-sm">لا توجد إشعارات حالياً.</p>';
-                if(listDropdown) listDropdown.innerHTML = emptyMsg;
-                updateNotificationBadge(notifsArray);
+            if (GOOGLE_DRIVE_WEB_APP_URL === "أضف_رابط_سكربت_جوجل_هنا" || GOOGLE_DRIVE_WEB_APP_URL.trim() === "") {
+                showToast('عذراً، يجب وضع رابط Google Apps Script في الكود أولاً كمالك النظام ليعمل الرفع لـ Drive.', 'error');
+                e.target.value = '';
                 return;
             }
 
-            notifsArray.forEach(notif => {
-                const timeStr = new Date(notif.timestamp).toLocaleString('ar-EG', {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'});
-                const prefs = currentUserData.notificationPreferences || defaultNotifPreferences;
-                let colorClass = 'text-primary border-primary';
-                let borderColor = 'border-primary';
-                
-                if(notif.type === 'trainees') { colorClass = `text-${prefs.colors.trainees}-600 dark:text-${prefs.colors.trainees}-400`; borderColor = `border-${prefs.colors.trainees}-600`; }
-                if(notif.type === 'handover') { colorClass = `text-${prefs.colors.handover}-600 dark:text-${prefs.colors.handover}-400`; borderColor = `border-${prefs.colors.handover}-600`; }
-                if(notif.type === 'meetings') { colorClass = `text-${prefs.colors.meetings}-600 dark:text-${prefs.colors.meetings}-400`; borderColor = `border-${prefs.colors.meetings}-600`; }
-
-                const isReadClassDropdown = notif.read ? 'opacity-60 bg-gray-50 dark:bg-gray-800 border-transparent' : `bg-white dark:bg-gray-800 border-r-4 ${borderColor}`;
-                
-                const cardHtml = `
-                    <div class="p-3 rounded-lg border dark:border-gray-700 transition cursor-pointer hover:shadow-md mb-2 flex flex-col gap-1 ${isReadClassDropdown}" 
-                         onclick="window.location.hash='${notif.link}'; window.markAllNotifsAsRead(); window.toggleNotifDropdown();">
-                        <h4 class="font-bold text-sm ${colorClass}">${escapeHTML(notif.title)}</h4>
-                        <p class="text-xs text-gray-600 dark:text-gray-400 leading-tight">${escapeHTML(notif.body)}</p>
-                        <span class="text-[10px] text-gray-400 mt-1">${timeStr}</span>
-                    </div>
-                `;
-                
-                if(listDropdown) listDropdown.innerHTML += cardHtml;
-            });
-            
-            updateNotificationBadge(notifsArray);
-        }
-
-        function updateNotificationBadge(notifsArray) {
-            const prefs = currentUserData.notificationPreferences || defaultNotifPreferences;
-            const unreadCount = notifsArray ? notifsArray.filter(n => !n.read).length : 0;
-            
-            const headerNum = document.getElementById('headerNotifBadge');
-            const headerDot = document.getElementById('headerNotifDot');
-            const navNum = document.getElementById('navNotifBadgeNum');
-            const navDot = document.getElementById('navNotifBadgeDot');
-            const mobileMenuBadge = document.getElementById('mobileMenuBadge');
-
-            [headerNum, headerDot, navNum, navDot, mobileMenuBadge].forEach(el => el.classList.add('hidden'));
-
-            if (unreadCount > 0) {
-                mobileMenuBadge.classList.remove('hidden');
-                
-                if (prefs.style === 'number') {
-                    const text = unreadCount > 99 ? '+99' : unreadCount;
-                    headerNum.innerText = text; headerNum.classList.remove('hidden');
-                    navNum.innerText = text; navNum.classList.remove('hidden');
-                } else {
-                    const lastUnread = notifsArray.find(n => !n.read);
-                    let color = 'bg-red-500'; 
-                    if(lastUnread) {
-                        if(lastUnread.type === 'trainees') color = `bg-${prefs.colors.trainees}-500`;
-                        if(lastUnread.type === 'handover') color = `bg-${prefs.colors.handover}-500`;
-                        if(lastUnread.type === 'meetings') color = `bg-${prefs.colors.meetings}-500`;
-                    }
-                    
-                    headerDot.className = `absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full ${color}`;
-                    headerDot.innerHTML = `<span class="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping-slow ${color}"></span><span class="relative inline-flex rounded-full w-2.5 h-2.5 ${color}"></span>`;
-                    headerDot.classList.remove('hidden');
-
-                    navDot.className = `absolute left-6 w-2.5 h-2.5 rounded-full ${color}`;
-                    navDot.innerHTML = `<span class="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping-slow ${color}"></span><span class="relative inline-flex rounded-full w-2.5 h-2.5 ${color}"></span>`;
-                    navDot.classList.remove('hidden');
-                }
+            if(file.size > MAX_FILE_SIZE) { 
+                showToast('حجم الملف كبير جداً. الحد الأقصى 50 ميجابايت للعملية الواحدة.', 'warning'); 
+                e.target.value = ''; 
+                return; 
             }
-        }
-
-        function loadNotificationSettingsToUI() {
-            if(!currentUserData) return;
-            const prefs = currentUserData.notificationPreferences || defaultNotifPreferences;
-            
-            document.querySelector(`input[name="notifStyle"][value="${prefs.style}"]`).checked = true;
-            document.getElementById('colorTrainees').value = prefs.colors.trainees;
-            document.getElementById('colorHandover').value = prefs.colors.handover;
-            document.getElementById('colorMeetings').value = prefs.colors.meetings;
-        }
-
-        window.saveNotificationSettings = async () => {
-            if(!currentUserData) return;
-            const style = document.querySelector('input[name="notifStyle"]:checked').value;
-            const colors = {
-                trainees: document.getElementById('colorTrainees').value,
-                handover: document.getElementById('colorHandover').value,
-                meetings: document.getElementById('colorMeetings').value
-            };
-            
-            const newPrefs = { style, colors };
-            
-            try {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUserData.uid), {
-                    notificationPreferences: newPrefs
-                });
-                currentUserData.notificationPreferences = newPrefs;
-                localStorage.setItem('quill_user_cache_services', JSON.stringify(currentUserData));
-                updateNotificationBadge(currentUserData.notifications); 
-                showToast('تم حفظ تفضيلات الإشعارات', 'success');
-            } catch(e) { console.error(e); }
-        };
-
-        // إدارة المستندات والمجلدات
-        window.handleCreateFolder = async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('newFolderName').value;
-            if(!name.trim()) return;
-            
-            try {
-                await addDoc(getStorageColRef('folders'), {
-                    name: name,
-                    parentId: currentFolderId,
-                    creatorId: currentUserData.uid,
-                    timestamp: Date.now()
-                });
-                window.closeModal('createFolderModal');
-                showToast('تم إنشاء المجلد', 'success');
-            } catch(err) { console.error(err); }
-        };
-
-        window.navigateToFolder = (folderId) => {
-            if (folderId === null) {
-                folderHistory = [{id: null, name: 'الرئيسية'}];
-                currentFolderId = null;
-            } else {
-                const folder = globalFolders.find(f => f.id === folderId);
-                if (folder) {
-                    const idx = folderHistory.findIndex(h => h.id === folderId);
-                    if (idx > -1) {
-                        folderHistory = folderHistory.slice(0, idx + 1);
-                    } else {
-                        folderHistory.push({ id: folder.id, name: folder.name });
-                    }
-                    currentFolderId = folderId;
-                }
-            }
-            renderDriveFiles();
-        };
-
-        window.handleDriveFileSelect = (e) => {
-            const file = e.target.files[0];
-            if(!file) return;
-            if(file.size > MAX_FILE_SIZE) { showToast('الحد الأقصى للرفع هو 500 كيلوبايت للحفاظ على المساحة.', 'warning'); e.target.value = ''; return; }
-
-            const currentStorage = globalFiles.reduce((acc, f) => acc + (f.size || 0), 0);
-            if(currentStorage + file.size > MAX_GLOBAL_STORAGE) { showToast('المساحة ممتلئة!', 'warning'); e.target.value = ''; return; }
 
             const sizeStr = formatBytes(file.size);
             const reader = new FileReader();
+            
             reader.onload = async (ev) => {
                 try {
-                    await addDoc(getStorageColRef('files'), {
-                        name: file.name,
-                        type: file.type || 'unknown',
-                        size: file.size, 
-                        sizeStr: sizeStr,
-                        data: ev.target.result,
-                        uploaderName: currentUserData.name,
-                        uploaderId: currentUserData.uid,
-                        folderId: currentFolderId,
-                        pinned: false,
-                        timestamp: Date.now()
+                    showToast('جاري رفع الملف إلى درايف الخاص بك... الرجاء الانتظار قليلاً', 'info');
+                    
+                    const base64Data = ev.target.result.split(',')[1];
+                    
+                    // إرسال كـ Text/Plain لتجنب مشاكل الـ CORS في جوجل سكربت
+                    const response = await fetch(GOOGLE_DRIVE_WEB_APP_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            name: file.name,
+                            mimeType: file.type || 'application/octet-stream',
+                            data: base64Data
+                        })
                     });
-                    showToast('تم رفع الملف بنجاح!', 'success');
-                    window.logAction('رفع ملف', `تم رفع ملف جديد: ${file.name}`);
+                    
+                    const result = await response.json();
+                    
+                    if (result.status === 'success') {
+                        await addDoc(getColRef('files'), {
+                            name: file.name,
+                            type: file.type || 'unknown',
+                            size: file.size, 
+                            sizeStr: sizeStr,
+                            data: result.url, // الرابط المباشر من جوجل درايف
+                            uploaderName: currentUserData.name,
+                            uploaderId: currentUserData.uid,
+                            folderId: currentFolderId,
+                            pinned: false,
+                            timestamp: Date.now()
+                        });
+                        showToast('تم رفع الملف بنجاح!', 'success');
+                        window.logAction('رفع ملف', `تم رفع ملف جديد لـ Drive: ${file.name}`);
+                    } else {
+                        throw new Error(result.message || 'فشل الرفع');
+                    }
                 } catch (err) {
                     console.error(err);
-                    showToast('حدث خطأ أثناء الرفع.', 'warning');
+                    showToast('حدث خطأ أثناء الرفع.', 'error');
                 }
                 e.target.value = '';
             };
@@ -2700,10 +2426,10 @@
         };
 
         window.togglePinFile = async (fileId, currentPinStatus) => {
-            try { await updateDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'files', fileId), { pinned: !currentPinStatus }); } catch(e) { console.error(e); }
+            try { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'files', fileId), { pinned: !currentPinStatus }); } catch(e) { console.error(e); }
         };
 
-        // --- حل مشكلة حذف المجلدات ---
+        // دالة مسح المجلدات من الجذور
         window.deleteDriveItem = async (id, isFolder, itemName) => {
             const msg = isFolder ? 'هل أنت متأكد من حذف المجلد؟ سيتم حذف جميع محتوياته أيضاً (ملفات ومجلدات فرعية).' : 'هل أنت متأكد من حذف هذا الملف؟';
             if(confirm(msg)) {
@@ -2711,7 +2437,7 @@
                     if (isFolder) {
                         await recursivelyDeleteFolder(id);
                     } else {
-                        await deleteDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'files', id));
+                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'files', id));
                     }
                     showToast('تم الحذف بنجاح', 'success');
                     window.logAction(isFolder ? 'حذف مجلد' : 'حذف ملف', `تم الحذف: ${decodeURIComponent(itemName)}`);
@@ -2720,20 +2446,16 @@
         };
 
         async function recursivelyDeleteFolder(folderId) {
-            // Delete all files inside this folder
             const filesToDelete = globalFiles.filter(f => f.folderId === folderId);
             for(let f of filesToDelete) {
-                await deleteDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'files', f.id));
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'files', f.id));
             }
-            // Find child folders and delete them recursively
             const childFolders = globalFolders.filter(f => f.parentId === folderId);
             for(let cf of childFolders) {
                 await recursivelyDeleteFolder(cf.id);
             }
-            // Finally delete the target folder itself
-            await deleteDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'folders', folderId));
+            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'folders', folderId));
         }
-        // ---------------------------------
 
         window.renderDriveFiles = () => {
             const allContainer = document.getElementById('allFilesContainer');
@@ -2812,7 +2534,7 @@
                         <p class="text-[10px] text-gray-400 mb-3">${f.sizeStr} • بواسطة ${escapeHTML(f.uploaderName)}</p>
                         
                         <div class="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700 flex justify-between">
-                            <a href="${f.data}" download="${escapeHTML(f.name)}" class="text-secondary hover:text-primary text-sm font-bold flex items-center gap-1"><i class="fa-solid fa-download"></i> تحميل</a>
+                            <a href="${f.data}" target="_blank" class="text-secondary hover:text-primary text-sm font-bold flex items-center gap-1"><i class="fa-solid fa-arrow-up-right-from-square"></i> فتح درايف</a>
                             ${deleteBtn}
                         </div>
                     </div>
@@ -2825,15 +2547,7 @@
         };
 
         function updateStorageProgress() {
-            const currentStorage = globalFiles.reduce((acc, f) => acc + (f.size || 0), 0);
-            const percentage = (currentStorage / MAX_GLOBAL_STORAGE) * 100;
-            document.getElementById('storageText').innerText = `${formatBytes(currentStorage)} / ${formatBytes(MAX_GLOBAL_STORAGE)}`;
-            const bar = document.getElementById('storageBar');
-            bar.style.width = `${percentage}%`;
-            
-            if(percentage > 90) { bar.className = "bg-red-500 h-full"; document.getElementById('storageWarning').classList.remove('hidden'); } 
-            else if(percentage > 70) { bar.className = "bg-yellow-500 h-full"; document.getElementById('storageWarning').classList.add('hidden'); } 
-            else { bar.className = "bg-green-500 h-full"; document.getElementById('storageWarning').classList.add('hidden'); }
+            // تم التعطيل - المساحة الآن تعتمد بالكامل على 5TB الخاص بدرايف
         }
 
         // الحضور والانصراف
@@ -2893,7 +2607,6 @@
             try {
                 const record = globalAttendance.find(a => a.uid === currentUserData.uid && a.date === today);
                 if(record) {
-                    // --- حل مشكلة الانصراف المزدوج ---
                     if (record.status === 'completed') {
                          showToast('لقد قمت بتسجيل الانصراف مسبقاً', 'info');
                          return;
@@ -3003,7 +2716,7 @@
                 return;
             }
             if(file.size > MAX_FILE_SIZE) {
-                showToast('حجم المرفق يجب ألا يتجاوز 500 كيلوبايت لضمان سرعة النظام.', 'error');
+                showToast('حجم المرفق يجب ألا يتجاوز 50 ميجابايت.', 'error');
                 e.target.value = '';
                 return;
             }
