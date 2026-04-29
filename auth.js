@@ -14,7 +14,7 @@ export const AppState = {
     SYSTEM_PASSWORD: '1112021'
 };
 
-window.checkSystemPassword = () =
+window.checkSystemPassword = () => {
     const input = document.getElementById('sysPasswordInput');
     const screen = document.getElementById('systemPasswordScreen');
     if(!input || !screen) return;
