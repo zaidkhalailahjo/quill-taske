@@ -12,7 +12,7 @@ window.updateDashboardStats = () => {
     if(statComp) statComp.innerText = window.globalTasks.filter(t => t.status === 'completed').length;
 };
 
-window.renderEmployees = () 
+window.renderEmployees = () => {
     const list = document.getElementById('employeesList');
     const pendingList = document.getElementById('pendingEmployeesList');
     const pendingContainer = document.getElementById('pendingEmployeesContainer');
