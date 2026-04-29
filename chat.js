@@ -9,8 +9,7 @@ let currentGroupId = 'global';
 
 // استماع لرسائل الدردشة
 export function startChatListener() {
-    const chatRef = collection(db, 'artifacts', appId, 'public', 'data', 'chat');
-    // جلب آخر 150 رسالة لتجنب تحميل المتصفح
+    const chatRef = collection(db, 'artifacts', appId, 'public', 'data',جلب آخر 150 رسالة لتجنب تحميل المتصفح
     const q = query(chatRef, orderBy('timestamp', 'desc'), limit(150));
     
     onSnapshot(q, (snapshot) => {
