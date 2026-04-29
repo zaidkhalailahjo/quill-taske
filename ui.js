@@ -5,7 +5,7 @@ export function showToast(message, type = 'info') {
     const container = document.getElementById('toastContainer');
     if (!container) return;
     const toast = document.createElement('div');
-    let colorClass = type === 'success' ? 'bg-green-500' : (type === 'warning' ? 'bg-secondary' : (type === 'error' ? 'bg-red-500' : 'bg-primary'));
+    let colorClass = type === 'success' ? 'bg-green-500' : (type === 'warning' ? 'bg-scondary' : (type === 'error' ? 'bg-red-500' : 'bg-primary'));
     let icon = type === 'success' ? 'fa-check' : (type === 'warning' ? 'fa-bell' : (type === 'error' ? 'fa-xmark' : 'fa-info-circle'));
     toast.className = `toast-enter ${colorClass} text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 text-sm md:text-base w-max z-[100]`;
     toast.innerHTML = `<i class="fa-solid ${icon}"></i><span class="font-bold">${message}</span>`;
