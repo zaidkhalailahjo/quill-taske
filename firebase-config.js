@@ -18,5 +18,6 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const appId = 'quill-world-system';
 
+// هذا السطر هو الذي كان يسبب المشكلة (تم تصحيحه وإضافة كل الدوال)
 export { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut, signInWithCustomToken, signInAnonymously };
 export { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, getDoc, setDoc, query, orderBy, limit, where };
