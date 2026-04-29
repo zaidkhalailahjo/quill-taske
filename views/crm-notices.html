@@ -1,1 +1,16 @@
-
+<div class="animate-fade-in">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-4">
+        <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 font-bold">قاعدة بيانات العملاء (CRM)</p>
+        <div class="flex items-center gap-3 w-full md:w-auto">
+            <div class="relative w-full md:w-64">
+                <input type="text" id="crmSearchInput" onkeyup="window.filterCRM()" placeholder="بحث باسم العميل..." class="border border-gray-200 rounded-lg pl-3 pr-10 py-2 w-full focus:outline-none focus:border-lime-500 shadow-sm">
+                <i class="fa-solid fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+            <button onclick="window.openClientModal()" class="bg-lime-600 hover:bg-lime-700 text-white px-4 py-2 rounded-lg font-bold shadow-sm whitespace-nowrap">
+                <i class="fa-solid fa-user-plus mx-2"></i> إضافة عميل
+            </button>
+        </div>
+    </div>
+    <div id="crmList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        </div>
+</div>
