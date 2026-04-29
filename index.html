@@ -29,6 +29,20 @@
         <p class="text-primary dark:text-secondary font-bold text-lg">جاري إعداد بيئة العمل واسترجاع البيانات...</p>
     </div>
 
+    <div id="loadingScreen" class="fixed inset-0 bg-white dark:bg-gray-900 z-50 flex flex-col items-center justify-center">
+        <div class="loader mb-4"></div>
+        <p class="text-primary dark:text-secondary font-bold text-lg">جاري إعداد بيئة العمل واسترجاع البيانات...</p>
+    </div>
+
+    <script>
+        setTimeout(() => {
+            const loader = document.getElementById('loadingScreen');
+            if(loader && !loader.classList.contains('hidden')) { 
+                loader.classList.add('hidden'); 
+            }
+        }, 5000);
+    </script>
+
     <div id="systemPasswordScreen" class="fixed inset-0 bg-primary z-[45] hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-md text-center">
             <img src="https://quill.world/wp-content/uploads/2022/01/New-Project-9-1-1.png" class="h-12 md:h-16 mx-auto mb-6 object-contain block dark:hidden">
