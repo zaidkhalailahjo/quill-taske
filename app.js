@@ -1,64 +1,107 @@
 // js/app.js
-import { db, appId, collection, doc, setDoc, onSnapshot } from './firebase-config.js';
+import { AppState } from './auth.js';
+import { showToast } from './ui.js';
 
-window.globalUsers = [];
-window.globalTasks = [];
-window.globalLogs = [];
-window.globalChat = [];
-window.globalGroups = [{ id: 'global', name: 'الدردشة العامة', members: [] }]; 
-window.globalNotices = [];
-window.globalCRM = [];
-window.globalAttendance = [];
+// دالة تهيئة النظام (تُستدعى من auth.js بعد نجاح تسجيل الدخول)
+window.initWorkspace = (userData) => {
+    // 1. تعبئة بيانات المستخدم في الواجهة
+    document.getElementById('userName').innerText = userData.name;
+    document.getElementById('userRole').innerText = userData.role;
+    document.getElementById('userAvatar').src = userData.photoURL;
 
-window.getColRef = (colName) => collection(db, 'artifacts', appId, 'public', 'data', colName);
+    // 2. إدارة الصلاحيات في القائمة الجانبية (Sidebar)
+    setupPermissions(userData);
 
-window.logAction = async (action, details) => {
-    if(!window.currentUserData) return;
-    try {
-        await addDoc(window.getColRef('logs'), {
-            action: action, details: details, userName: window.currentUserData.name,
-            uid: window.currentUserData.uid, timestamp: Date.now()
-        });
-    } catch(e) { console.error("Error logging action", e); }
+    // 3. بدء التنقل (Routing) بناءً على الرابط الحالي
+    handleHashChange();
+    
+    // 4. استماع لتغيرات الرابط (Hash) لتنقل سلس بدون إعادة تحميل الصفحة
+    window.addEventListener('hashchange', handleHashChange);
+    
+    // ملاحظة: هنا سنستدعي لاحقاً دوال استماع قاعدة البيانات من باقي الملفات
+    // مثل: startTasksListener(); startCRMListener();
 };
 
-window.startDatabaseListeners = () => {
-    // 1. المستخدمين والموظفين
-    onSnapshot(window.getColRef('users'), (snapshot) => {
-        window.globalUsers = [];
-        snapshot.forEach(docSnap => {
-            const uData = { id: docSnap.id, ...docSnap.data() };
-            window.globalUsers.push(uData);
-            if(window.currentUserData && uData.id === window.currentUserData.uid) {
-                window.currentUserData = uData;
-            }
-        });
-        if(typeof window.updateUIWithUserData === 'function') window.updateUIWithUserData();
-        if(typeof window.renderEmployees === 'function') window.renderEmployees();
-        if(typeof window.updateDashboardStats === 'function') window.updateDashboardStats();
-    }, (error) => { console.error(error); });
+function setupPermissions(userData) {
+    const isCEO = userData.role === 'CEO';
+    const p = userData.permissions || {};
 
-    // 2. سجل النظام (اللوق) للمدير
-    onSnapshot(window.getColRef('logs'), (snapshot) => {
-        window.globalLogs = [];
-        snapshot.forEach(docSnap => window.globalLogs.push({ id: docSnap.id, ...docSnap.data() }));
-        window.globalLogs.sort((a,b) => b.timestamp - a.timestamp);
-        if(typeof window.renderLogs === 'function') window.renderLogs();
-    });
+    // إظهار/إخفاء عناصر لوحة تحكم المدير
+    toggleElement('grid-dashboard', isCEO);
+    toggleElement('nav-dashboard-btn', isCEO);
+    toggleElement('grid-employees', isCEO);
+    toggleElement('nav-employees-btn', isCEO);
+    toggleElement('ceoExportSection', isCEO);
+    toggleElement('ceoAttendanceView', isCEO);
 
-    // 3. الدردشة
-    onSnapshot(window.getColRef('chat'), (snapshot) => {
-        window.globalChat = [];
-        snapshot.forEach(docSnap => window.globalChat.push({ id: docSnap.id, ...docSnap.data() }));
-        window.globalChat.sort((a,b) => a.timestamp - b.timestamp);
-        if(typeof window.renderChat === 'function') window.renderChat();
-    });
+    // المصاريف (للمدير والمحاسب)
+    const canExpenses = isCEO || userData.role === 'accountant' || p.canExpenses;
+    toggleElement('nav-expenses-btn', canExpenses, 'flex');
+    toggleElement('grid-expenses', canExpenses);
+}
 
-    // 4. المهام
-    onSnapshot(window.getColRef('tasks'), (snapshot) => {
-        window.globalTasks = [];
-        snapshot.forEach(docSnap => window.globalTasks.push({ id: docSnap.id, ...docSnap.data() }));
-        if(typeof window.renderTasks === 'function') window.renderTasks();
-        if(typeof window.updateDashboardStats === 'function') window.updateDashboardStats();
+function toggleElement(id, condition, displayType = 'block') {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (condition) {
+        el.classList.remove('hidden');
+        if(displayType === 'flex') el.style.display = 'flex';
+    } else {
+        el.classList.add('hidden');
+    }
+}
+
+// دالة الـ Router الأساسية (تتحكم في إخفاء وإظهار الأقسام)
+function handleHashChange() {
+    if (!AppState.currentUserData) return;
+    
+    const hash = window.location.hash.replace('#', '') || 'home-grid';
+    const validSections = ['home-grid', 'dashboard', 'employees', 'tasks', 'chat', 'settings', 'crm-management', 'attendance', 'leaves', 'robots', 'renters', 'office-inventory', 'warehouse-inventory', 'expenses'];
+    
+    let targetSection = validSections.includes(hash) ? hash : 'home-grid';
+
+    // حماية الصفحات: منع الموظف من دخول صفحة المدير
+    if (AppState.currentUserData.role !== 'CEO' && ['dashboard', 'employees'].includes(targetSection)) {
+        targetSection = 'home-grid';
+        showToast('ليس لديك صلاحية للوصول لهذه الصفحة', 'warning');
+    }
+
+    showSection(targetSection);
+}
+
+function showSection(sectionId) {
+    // إخفاء كل الأقسام
+    document.querySelectorAll('.section-content').forEach(s => s.classList.add('hidden'));
+    
+    // إظهار القسم المطلوب
+    const targetEl = document.getElementById(sectionId);
+    if (targetEl) targetEl.classList.remove('hidden');
+
+    // تفعيل زر التراجع للرئيسية إذا لم نكن في الرئيسية
+    const backBtn = document.getElementById('backToHomeBtn');
+    const pageTitle = document.getElementById('page-title');
+    if (sectionId === 'home-grid') {
+        if(backBtn) backBtn.classList.add('hidden');
+        if(pageTitle) pageTitle.classList.remove('hidden');
+    } else {
+        if(backBtn) backBtn.classList.remove('hidden');
+        if(pageTitle) pageTitle.classList.add('hidden');
+    }
+
+    // تلوين الزر النشط في القائمة الجانبية
+    document.querySelectorAll('.nav-btn').forEach(b => {
+        b.classList.remove('bg-secondary', 'text-white');
+        b.classList.add('text-gray-300');
     });
-};
+    const activeBtn = document.querySelector(`.nav-btn[data-section="${sectionId}"]`);
+    if (activeBtn) {
+        activeBtn.classList.remove('text-gray-300');
+        activeBtn.classList.add('bg-secondary', 'text-white');
+    }
+
+    // إغلاق القائمة الجانبية في الجوال بعد اختيار قسم
+    if (window.innerWidth < 768 && sectionId !== 'chat') {
+        document.getElementById('sidebar')?.classList.add('translate-x-full');
+        document.getElementById('mobileOverlay')?.classList.add('hidden');
+    }
+}
