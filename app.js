@@ -1,4 +1,3 @@
-// js/app.js
 import { db, appId } from './firebase-config.js';
 import { collection, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 import { AppState } from './auth.js';
