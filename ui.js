@@ -32,6 +32,35 @@ window.toggleSidebar = () => {
     document.getElementById('mobileOverlay').classList.toggle('hidden');
 };
 
+// الدالة المسؤولة عن التعرف على الموظف والمدير وتحديث الواجهة
+window.updateUIWithUserData = () => {
+    if(!window.currentUserData) return;
+    
+    // 1. تحديث الاسم والصورة في الهيدر
+    const userNameEl = document.getElementById('userName');
+    const userRoleEl = document.getElementById('userRole');
+    const userAvatarEl = document.getElementById('userAvatar');
+    
+    if(userNameEl) userNameEl.innerText = window.currentUserData.name;
+    if(userRoleEl) userRoleEl.innerText = window.currentUserData.role;
+    if(userAvatarEl) userAvatarEl.src = window.currentUserData.photoURL;
+    
+    // 2. فحص صلاحيات المدير وإخفاء/إظهار الأقسام
+    const isCEO = window.currentUserData.role === 'CEO';
+    
+    if(isCEO) {
+        document.getElementById('nav-dashboard-btn')?.classList.remove('hidden');
+        document.getElementById('nav-employees-btn')?.classList.remove('hidden');
+        document.getElementById('nav-logs-btn')?.classList.remove('hidden');
+        document.getElementById('ceoExportSection')?.classList.remove('hidden');
+    } else {
+        document.getElementById('nav-dashboard-btn')?.classList.add('hidden');
+        document.getElementById('nav-employees-btn')?.classList.add('hidden');
+        document.getElementById('nav-logs-btn')?.classList.add('hidden');
+        document.getElementById('ceoExportSection')?.classList.add('hidden');
+    }
+};
+
 window.checkPunchInLock = () => {
     if(window.currentUserData && window.currentUserData.role !== 'CEO' && !window.hasPunchedInToday) {
         document.getElementById('mainNavigationMenu').classList.add('hidden');
@@ -74,15 +103,17 @@ window.showSection = (sectionId) => {
         activeBtn.classList.add('bg-secondary', 'text-white');
     }
     
-    if(window.innerWidth < 768) { window.toggleSidebar(); window.toggleSidebar(); } // لإغلاق القائمة في الموبايل بشكل نظيف
+    if(window.innerWidth < 768) { 
+        document.getElementById('sidebar').classList.add('translate-x-full'); 
+        document.getElementById('mobileOverlay').classList.add('hidden'); 
+    }
 };
 
 window.addEventListener('hashchange', () => {
     if(!window.currentUserData) return;
     const hash = window.location.hash.replace('#', '');
-    const validSections = ['home-grid', 'attendance', 'crm-management', 'robots', 'renters', 'tasks', 'leaves'];
+    const validSections = ['home-grid', 'attendance', 'crm-management', 'robots', 'renters', 'tasks', 'leaves', 'chat', 'drive', 'meetings', 'trainees', 'office-inventory', 'warehouse-inventory', 'expenses', 'employees', 'dashboard', 'settings', 'notices', 'my-profile', 'logs'];
     
-    // التحقق الصارم من القفل
     if (!window.hasPunchedInToday && window.currentUserData.role !== 'CEO' && hash !== 'attendance') {
         window.location.hash = 'attendance';
         window.showToast('عذراً، يجب تسجيل الحضور أولاً لفتح تطبيقات النظام.', 'warning');
