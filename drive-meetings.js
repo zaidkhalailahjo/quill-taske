@@ -14,8 +14,7 @@ window.handleCreateFolder = async (e) => {
         });
         window.closeModal('createFolderModal');
         window.showToast('تم إنشاء المجلد', 'success');
-    } catch(err) { console.error(err); 
-                  
+    } catch(err) { console.error(err); }
 };
 
 window.navigateToFolder = (folderId) => {
