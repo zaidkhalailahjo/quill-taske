@@ -1,11 +1,10 @@
 // js/chat.js
-import { db, appId, doc, updateDoc, deleteDoc, addDoc, collection } from './firebase-config.js';
+import { db, appId, addDoc, doc, deleteDoc, collection } from './firebase-config.js';
 
 window.currentGroupId = 'global';
 
 window.selectGroup = (groupId) => {
     window.currentGroupId = groupId;
-    if(typeof window.updateReadReceipt === 'function') window.updateReadReceipt(groupId);
     window.renderChatSidebarList();
     window.renderChat();
     if(window.innerWidth < 768) {
@@ -65,29 +64,17 @@ window.renderChat = () => {
     chatBox.scrollTop = chatBox.scrollHeight;
 };
 
-window.clearOrDeleteGroup = async (action) => {
-    if(window.currentUserData.role !== 'CEO') return;
-    if(window.currentGroupId === 'global' && action === 'delete') return;
+document.getElementById('chatForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if(!text || !window.currentUserData) return;
 
-    if(confirm(action === 'clear' ? 'هل أنت متأكد من مسح الرسائل؟' : 'حذف المجموعة نهائياً؟')) {
-        try {
-            const msgs = window.globalChat.filter(m => (m.groupId || 'global') === window.currentGroupId);
-            msgs.forEach(async (m) => await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chat', m.id)));
-
-            if(action === 'delete') {
-                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'groups', window.currentGroupId));
-                window.currentGroupId = 'global';
-                window.showSection('home-grid');
-            }
-            window.showToast('تم التنفيذ بنجاح', 'success');
-        } catch(e) { console.error(e); }
-    }
-};
-
-window.filterChat = () => {
-    const query = document.getElementById('chatSearchInput').value.toLowerCase();
-    document.querySelectorAll('#chatMessages .flex.mb-4').forEach(el => {
-        if(el.innerText.toLowerCase().includes(query)) el.style.display = 'flex';
-        else el.style.display = 'none';
-    });
-};
+    try {
+        input.value = '';
+        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'chat'), {
+            text: text, uid: window.currentUserData.uid, senderName: window.currentUserData.name,
+            groupId: window.currentGroupId, timestamp: Date.now()
+        });
+    } catch(e) { console.error(e); window.showToast('فشل الإرسال', 'error'); }
+});
