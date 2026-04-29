@@ -1,69 +1,117 @@
-// settings-export.js
-import { db, appId, doc, updateDoc } from './firebase-config.js';
+// js/ui.js
+window.currentLang = localStorage.getItem('appLang') || 'ar';
 
-window.handleProfilePicChange = (e) => {
-    const file = e.target.files[0];
-    if(!file) return;
-    if(file.size > 500 * 1024) { window.showToast('الصورة كبيرة جداً، الحد الأقصى 500KB', 'warning'); return; }
-
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-        try {
-            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', window.currentUserData.uid), {
-                photoURL: ev.target.result
-            });
-            window.showToast('تم تحديث صورتك الشخصية بنجاح!', 'success');
-        } catch(e) { console.error(e); }
-    };
-    reader.readAsDataURL(file);
+window.escapeHTML = function(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>'"]/g, match => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    })[match]);
 };
 
-window.exportSystemData = (format) => {
-    if(!window.currentUserData || window.currentUserData.role !== 'CEO') return;
-    window.showToast('جاري تجهيز البيانات، سيتم التحميل خلال لحظات...', 'info');
+window.toggleLanguage = () => {
+    window.currentLang = window.currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('appLang', window.currentLang);
+    window.location.reload();
+};
 
-    const now = new Date();
-    if (format === 'excel') {
-        let content = "\uFEFF"; 
-        content += `تقرير نظام شركة Quill الشامل\nتاريخ السحب: ${now.toLocaleString('ar-EG')}\n\n`;
-        content += "--- الموظفون ---\nالاسم,الوظيفة\n";
-        window.globalUsers.forEach(u => { content += `"${window.escapeHTML(u.name)}","${u.role}"\n`; });
-        
-        const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", `Quill_System_Export_${now.getTime()}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+window.toggleTheme = () => {
+    document.documentElement.classList.toggle('dark');
+    const isDark = document.documentElement.classList.contains('dark');
+    localStorage.setItem('appTheme', isDark ? 'dark' : 'light');
+    document.getElementById('themeToggleIcon').className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+};
 
-    } else if (format === 'pdf') {
-        const htmlContent = `
-            <div style="font-family: 'Cairo', sans-serif; padding: 20px;">
-                <h1 style="color: #002d74; border-bottom: 2px solid #00839b; padding-bottom: 10px;">تقرير نظام شركة Quill الشامل</h1>
-                <p style="color: gray;">تاريخ سحب التقرير: ${now.toLocaleString('ar-EG')}</p>
-                <h3 style="color: #00839b; margin-top: 30px;">إحصائيات النظام:</h3>
-                <ul>
-                    <li>عدد الموظفين المسجلين: ${window.globalUsers.length}</li>
-                    <li>إجمالي المهام في النظام: ${window.globalTasks.length}</li>
-                    <li>إجمالي العملاء المسجلين: ${window.globalCRM.length}</li>
-                </ul>
-                <p style="margin-top: 50px; text-align: center; color: gray; font-size: 12px;">نهاية التقرير.</p>
-            </div>
-        `;
-        let printDiv = document.getElementById('printArea');
-        if(!printDiv) {
-            printDiv = document.createElement('div');
-            printDiv.id = 'printArea';
-            document.body.appendChild(printDiv);
-        }
-        printDiv.innerHTML = htmlContent;
-        window.print();
+window.toggleNotificationsDropdown = () => {
+    const dropdown = document.getElementById('notificationsDropdown');
+    if(dropdown) dropdown.classList.toggle('hidden');
+};
+
+window.showToast = (message, type = 'info') => {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    const colorClass = type === 'success' ? 'bg-green-500' : (type === 'warning' ? 'bg-secondary' : 'bg-red-500');
+    toast.className = `toast-enter ${colorClass} text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 text-sm w-max`;
+    toast.innerHTML = `<span class="font-bold">${message}</span>`;
+    container.appendChild(toast);
+    setTimeout(() => { toast.classList.replace('toast-enter', 'toast-leave'); setTimeout(() => toast.remove(), 500); }, 4000);
+};
+
+window.openModal = (id) => document.getElementById(id)?.classList.remove('hidden');
+window.closeModal = (id) => {
+    const el = document.getElementById(id);
+    if(el) {
+        el.classList.add('hidden');
+        const form = el.querySelector('form');
+        if(form) form.reset();
     }
-
-    const exportTime = Date.now();
-    updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', window.currentUserData.uid), { lastSystemExport: exportTime }).catch(e=>console.log(e));
-    window.closeModal('exportModal');
-    window.logAction('تحميل تقرير', `قام المدير بسحب تفاصيل النظام الكاملة بصيغة ${format.toUpperCase()}`);
 };
+
+window.toggleSidebar = () => {
+    document.getElementById('sidebar').classList.toggle('translate-x-full');
+    document.getElementById('mobileOverlay').classList.toggle('hidden');
+};
+
+window.checkPunchInLock = () => {
+    if(window.currentUserData && window.currentUserData.role !== 'CEO' && !window.hasPunchedInToday) {
+        document.getElementById('mainNavigationMenu').classList.add('hidden');
+        document.getElementById('sidebarLockMessage').classList.remove('hidden');
+        document.getElementById('homeGridContainer').classList.add('hidden');
+        document.getElementById('attendanceLockBanner').classList.remove('hidden');
+        
+        // إجبار توجيه الموظف لصفحة الحضور
+        if(window.location.hash !== '#attendance') window.location.hash = 'attendance';
+    } else {
+        document.getElementById('mainNavigationMenu').classList.remove('hidden');
+        document.getElementById('sidebarLockMessage').classList.add('hidden');
+        document.getElementById('homeGridContainer').classList.remove('hidden');
+        document.getElementById('attendanceLockBanner').classList.add('hidden');
+    }
+};
+
+window.showSection = (sectionId) => {
+    if(window.location.hash !== `#${sectionId}`) window.history.pushState(null, null, `#${sectionId}`);
+    document.querySelectorAll('.section-content').forEach(s => s.classList.add('hidden'));
+    
+    const targetSection = document.getElementById(sectionId);
+    if(targetSection) targetSection.classList.remove('hidden');
+
+    if (sectionId === 'home-grid') {
+        document.getElementById('backToHomeBtn').classList.add('hidden');
+        document.getElementById('page-title').classList.remove('hidden');
+    } else {
+        document.getElementById('backToHomeBtn').classList.remove('hidden');
+        document.getElementById('page-title').classList.add('hidden');
+    }
+    
+    document.querySelectorAll('.nav-btn').forEach(b => {
+        b.classList.remove('bg-secondary', 'text-white');
+        b.classList.add('text-gray-300');
+    });
+    
+    const activeBtn = document.querySelector(`.nav-btn[data-section="${sectionId}"]`);
+    if(activeBtn) {
+        activeBtn.classList.remove('text-gray-300');
+        activeBtn.classList.add('bg-secondary', 'text-white');
+    }
+    
+    if(window.innerWidth < 768) { 
+        document.getElementById('sidebar').classList.add('translate-x-full'); 
+        document.getElementById('mobileOverlay').classList.add('hidden'); 
+    }
+    window.checkPunchInLock();
+};
+
+window.addEventListener('hashchange', () => {
+    if(!window.currentUserData) return;
+    const hash = window.location.hash.replace('#', '');
+    const validSections = ['home-grid', 'attendance', 'crm-management', 'robots', 'renters', 'tasks', 'leaves', 'chat', 'drive', 'meetings', 'trainees', 'office-inventory', 'warehouse-inventory', 'expenses', 'employees', 'dashboard', 'settings', 'notices', 'my-profile', 'logs'];
+    
+    // التحقق الصارم من القفل
+    if (!window.hasPunchedInToday && window.currentUserData.role !== 'CEO' && hash !== 'attendance') {
+        window.location.hash = 'attendance';
+        window.showToast('عذراً، يجب تسجيل الحضور أولاً لفتح تطبيقات النظام.', 'warning');
+        return;
+    }
+    
+    window.showSection(validSections.includes(hash) ? hash : 'home-grid');
+});
