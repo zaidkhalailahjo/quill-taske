@@ -21,28 +21,25 @@
     <script src="https://meet.jit.si/external_api.js"></script>
     
     <script>
-        tailwind.config = {
-            darkMode: 'class', 
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#002d74',
-                        secondary: '#00839b',
-                        light: '#f3f4f6',
-                        dark: '#1f2937'
-                    },
-                    fontFamily: { sans: ['Cairo', 'sans-serif'] }
-                }
-            }
-        }
+        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: '#002d74', secondary: '#00839b', light: '#f3f4f6', dark: '#1f2937' }, fontFamily: { sans: ['Cairo', 'sans-serif'] } } } }
     </script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 h-screen overflow-hidden flex relative transition-colors duration-300">
 
     <div id="loadingScreen" class="fixed inset-0 bg-white dark:bg-gray-900 z-50 flex flex-col items-center justify-center">
         <div class="loader mb-4"></div>
-        <p class="text-primary dark:text-secondary font-bold text-lg" data-i18n="جاري التحميل...">جاري إعداد بيئة العمل واسترجاع البيانات...</p>
+        <p class="text-primary dark:text-secondary font-bold text-lg">جاري إعداد بيئة العمل واسترجاع البيانات...</p>
     </div>
+
+    <script>
+        setTimeout(() => {
+            const loader = document.getElementById('loadingScreen');
+            if(loader && !loader.classList.contains('hidden')) {
+                loader.classList.add('hidden');
+                console.warn("تم إنهاء شاشة التحميل إجبارياً للحماية من التعليق.");
+            }
+        }, 5000); // إخفاء بعد 5 ثوانٍ مهما حدث
+    </script>
 
     <div id="systemPasswordScreen" class="fixed inset-0 bg-primary z-[45] hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-md text-center">
@@ -50,7 +47,7 @@
             <img src="https://quill.world/wp-content/uploads/2022/01/New-Project-10-1.png" alt="Logo" class="h-12 md:h-16 mx-auto mb-6 object-contain hidden dark:block">
             <h2 class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-4">رمز الدخول للنظام</h2>
             <input type="password" id="sysPasswordInput" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-3 focus:outline-none focus:border-secondary mb-4 text-center" placeholder="اكتب كلمة السر">
-            <button id="sysPasswordBtn" class="w-full bg-secondary hover:bg-primary text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-sm disabled:opacity-50">متابعة</button>
+            <button id="sysPasswordBtn" class="w-full bg-secondary hover:bg-primary text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-sm">متابعة</button>
             <p id="sysPassError" class="text-red-500 text-sm mt-3 hidden font-bold">رمز الدخول غير صحيح!</p>
         </div>
     </div>
@@ -101,18 +98,12 @@
 
     <div id="toastContainer" class="fixed bottom-6 left-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
 
-    <div id="mediaViewerModal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center z-[100] p-4 transition-opacity">
-        <button id="closeMediaBtn" onclick="window.closeMediaModal()" class="absolute top-4 right-4 text-white hover:text-gray-300 p-2 z-[101]">
-            <i class="fa-solid fa-xmark text-3xl"></i>
-        </button>
-        <div id="mediaViewerContent" class="max-w-full max-h-full flex items-center justify-center"></div>
-    </div>
-
     <div class="flex-1 flex flex-col h-screen overflow-hidden w-full relative">
         <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 p-4 flex justify-between items-center z-10 flex-shrink-0 relative transition-colors no-print">
             <div class="flex items-center space-x-2 md:space-x-4 space-x-reverse z-10">
-                <button id="sidebarToggleBtn" onclick="window.toggleSidebar()" class="md:hidden text-gray-500 hover:text-primary ml-2">
+                <button onclick="window.toggleSidebar()" class="md:hidden text-gray-500 hover:text-primary ml-2 relative">
                     <i class="fa-solid fa-bars text-xl"></i>
+                    <span id="mobileMenuBadge" class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white dark:border-gray-800 rounded-full hidden"></span>
                 </button>
                 <div class="flex items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded transition" onclick="window.location.hash='settings'">
                     <img id="userAvatar" src="https://ui-avatars.com/api/?name=مستخدم&background=00839b&color=fff" class="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-secondary object-cover">
@@ -122,9 +113,27 @@
                     </div>
                 </div>
                 
+                <button onclick="window.toggleLanguage()" class="text-gray-400 hover:text-secondary p-2 rounded transition font-bold" title="تبديل اللغة">
+                    <span id="langIconTxt">EN</span>
+                </button>
+                
                 <button onclick="window.toggleTheme()" class="text-gray-400 hover:text-secondary p-2 rounded transition" title="الوضع الليلي/النهاري">
                     <i id="themeToggleIcon" class="fa-solid fa-moon"></i>
                 </button>
+
+                <div class="relative">
+                    <button onclick="window.toggleNotificationsDropdown()" id="headerNotifBtn" class="text-gray-400 hover:text-secondary p-2 rounded transition relative" title="الإشعارات">
+                        <i class="fa-solid fa-bell text-lg"></i>
+                        <span id="notificationsBadge" class="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center hidden pointer-events-none">0</span>
+                    </button>
+                    <div id="notificationsDropdown" class="hidden absolute top-full right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl rounded-xl w-72 max-h-80 overflow-hidden flex flex-col z-50">
+                        <div class="bg-gray-50 dark:bg-gray-900 p-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0">
+                            <span class="font-bold text-sm text-gray-700 dark:text-gray-200">الإشعارات</span>
+                            <button onclick="if(window.clearAllNotifications) window.clearAllNotifications()" class="text-xs text-red-500 hover:underline font-bold py-1 px-2">حذف الكل</button>
+                        </div>
+                        <div id="notificationsList" class="overflow-y-auto flex-1 p-2 space-y-2"></div>
+                    </div>
+                </div>
             </div>
             
             <div class="absolute inset-x-0 top-0 h-full flex items-center justify-center pointer-events-none w-full z-0">
@@ -163,47 +172,9 @@
                 <button onclick="window.location.hash='attendance'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors" data-section="attendance">
                     <i class="fa-solid fa-user-clock w-6 text-center ml-3"></i><span class="font-semibold text-sm">الحضور والانصراف</span>
                 </button>
-
-                <div class="mt-4 pt-4 border-t border-white/10 dark:border-gray-700">
-                    <p class="text-[10px] text-gray-400 mb-2 px-2">تطبيقات النظام الرئيسية</p>
-                    <button onclick="window.location.hash='robots'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative" data-section="robots">
-                        <i class="fa-solid fa-robot w-6 text-center ml-3"></i><span class="font-semibold text-sm">الروبوتات</span>
-                    </button>
-                    <button onclick="window.location.hash='crm-management'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative" data-section="crm-management">
-                        <i class="fa-solid fa-user-tie w-6 text-center ml-3"></i><span class="font-semibold text-sm">إدارة العملاء والمبيعات</span>
-                    </button>
-                    <button onclick="window.location.hash='renters'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative" data-section="renters">
-                        <i class="fa-solid fa-hand-holding-hand w-6 text-center ml-3"></i><span class="font-semibold text-sm">المستأجرين</span>
-                    </button>
-                    <button onclick="window.location.hash='tasks'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative" data-section="tasks">
-                        <i class="fa-solid fa-list-check w-6 text-center ml-3"></i><span class="font-semibold text-sm">المهام</span>
-                    </button>
-                    <button onclick="window.location.hash='chat'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative" data-section="chat">
-                        <i class="fa-solid fa-comments w-6 text-center ml-3"></i><span class="font-semibold text-sm">المناقشة</span>
-                    </button>
-                    <button onclick="window.location.hash='notices'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative" data-section="notices">
-                        <i class="fa-solid fa-bullhorn w-6 text-center ml-3"></i><span class="font-semibold text-sm">التعميمات</span>
-                    </button>
-                </div>
-                
-                <div class="mt-4 pt-4 border-t border-white/10 dark:border-gray-700">
-                    <p class="text-[10px] text-gray-400 mb-2 px-2">خدمات الموظفين والموارد</p>
-                    <button onclick="window.location.hash='leaves'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative" data-section="leaves">
-                        <i class="fa-solid fa-plane-departure w-6 text-center ml-3"></i><span class="font-semibold text-sm">الإجازات</span>
-                    </button>
-                    <button onclick="window.location.hash='drive'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative" data-section="drive">
-                        <i class="fa-solid fa-folder-open w-6 text-center ml-3"></i><span class="font-semibold text-sm">المستندات</span>
-                    </button>
-                    <button onclick="window.location.hash='meetings'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative" data-section="meetings">
-                        <i class="fa-solid fa-video w-6 text-center ml-3"></i><span class="font-semibold text-sm">الاجتماعات</span>
-                    </button>
-                    <button onclick="window.location.hash='trainees'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative" data-section="trainees">
-                        <i class="fa-solid fa-graduation-cap w-6 text-center ml-3"></i><span class="font-semibold text-sm">المتدربين</span>
-                    </button>
-                    <button id="nav-expenses-btn" onclick="window.location.hash='expenses'" class="nav-btn hidden w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative" data-section="expenses">
-                        <i class="fa-solid fa-file-invoice-dollar w-6 text-center ml-3"></i><span class="font-semibold text-sm">المصاريف والنثريات</span>
-                    </button>
-                </div>
+                <button onclick="window.location.hash='my-profile'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors" data-section="my-profile">
+                    <i class="fa-solid fa-id-card w-6 text-center ml-3"></i><span class="font-semibold text-sm">ملفي والعهد</span>
+                </button>
             </nav>
             
             <div id="sidebarLockMessage" class="flex-1 mt-6 px-4 text-center hidden flex flex-col justify-center">
@@ -227,12 +198,12 @@
 
                 <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                     <div class="text-right">
-                        <h2 class="text-3xl font-bold text-gray-800 dark:text-white">التطبيقات</h2>
+                        <h2 class="text-3xl font-bold text-gray-800 dark:text-white">الخدمات والمستندات</h2>
                         <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">اختر التطبيق الذي تود العمل عليه</p>
                     </div>
                     <div id="homePunchOutContainer" class="hidden w-full md:w-auto flex flex-col gap-2">
                         <div id="ceoExportSection" class="hidden">
-                            <button onclick="window.openModal('exportModal')" class="w-full bg-primary hover:bg-secondary text-white px-5 py-2.5 rounded-xl transition-colors font-bold shadow-md flex items-center justify-center gap-2">
+                            <button onclick="if(window.openModal) window.openModal('exportModal')" class="w-full bg-primary hover:bg-secondary text-white px-5 py-2.5 rounded-xl transition-colors font-bold shadow-md flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-file-export"></i> سحب تفاصيل النظام
                             </button>
                         </div>
@@ -240,7 +211,6 @@
                 </div>
                 
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="homeGridContainer">
-                    
                     <div onclick="window.location.hash='attendance'" class="app-card hover:border-indigo-200 group">
                         <div class="app-icon-container bg-indigo-50 text-indigo-500 group-hover:scale-110 transition-transform">
                             <i class="fa-solid fa-user-clock"></i>
@@ -310,214 +280,18 @@
                         </div>
                         <span class="font-bold text-gray-800 dark:text-gray-200">الاجتماعات</span>
                     </div>
-                    
-                    <div onclick="window.location.hash='trainees'" class="app-card hover:border-amber-200 group relative">
-                        <div class="app-icon-container bg-amber-50 text-amber-500 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-graduation-cap"></i>
-                        </div>
-                        <span class="font-bold text-gray-800 dark:text-gray-200">المتدربين</span>
-                    </div>
-
-                    <div id="grid-expenses" onclick="window.location.hash='expenses'" class="app-card hover:border-teal-200 group hidden">
-                        <div class="app-icon-container bg-teal-50 text-teal-600 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-file-invoice-dollar"></i>
-                        </div>
-                        <span class="font-bold text-gray-800 dark:text-gray-200">المصاريف والنثريات</span>
-                    </div>
-
-                    <div onclick="window.location.hash='office-inventory'" class="app-card hover:border-purple-200 group relative">
-                        <div class="app-icon-container bg-purple-50 text-purple-500 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-desktop"></i>
-                        </div>
-                        <span class="font-bold text-gray-800 dark:text-gray-200">جرد المكتب</span>
-                    </div>
-
-                    <div onclick="window.location.hash='warehouse-inventory'" class="app-card hover:border-orange-200 group relative">
-                        <div class="app-icon-container bg-orange-50 text-orange-500 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-boxes-stacked"></i>
-                        </div>
-                        <span class="font-bold text-gray-800 dark:text-gray-200">جرد المستودع</span>
-                    </div>
-
-                    <div id="grid-employees" onclick="window.location.hash='employees'" class="app-card hover:border-purple-200 group hidden">
-                        <div class="app-icon-container bg-purple-50 text-purple-500 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-users"></i>
-                        </div>
-                        <span class="font-bold text-gray-800 dark:text-gray-200">الموظفون</span>
-                    </div>
-
-                    <div id="grid-dashboard" onclick="window.location.hash='dashboard'" class="app-card hover:border-fuchsia-200 group hidden">
-                        <div class="app-icon-container bg-fuchsia-50 text-fuchsia-500 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-chart-pie"></i>
-                        </div>
-                        <span class="font-bold text-gray-800 dark:text-gray-200">لوحات البيانات</span>
-                    </div>
-
-                    <div id="grid-logs" onclick="window.location.hash='logs'" class="app-card hover:border-red-200 group hidden">
-                        <div class="app-icon-container bg-red-50 text-red-500 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-clock-rotate-left"></i>
-                        </div>
-                        <span class="font-bold text-gray-800 dark:text-gray-200">سجل النظام</span>
-                    </div>
-
                 </div>
             </section>
             
-            <section id="robots" class="section-content hidden animate-fade-in p-4 md:p-0">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
-                    <p class="text-sm md:text-base text-blue-600 dark:text-blue-400 font-bold"><i class="fa-solid fa-robot mx-2"></i>إدارة الروبوتات</p>
-                    
-                    <div class="flex gap-2 w-full md:w-auto items-center flex-wrap">
-                        <div class="flex items-center gap-2 flex-1 md:flex-none">
-                            <div class="search-wrapper w-full">
-                                <i class="fa-solid fa-search search-icon"></i>
-                                <input type="text" id="searchRobots" oninput="window.renderCurrentRobotsTab()" placeholder="بحث..." class="search-input w-full">
-                            </div>
-                            <span id="robotsSearchCount" class="text-xs bg-secondary text-white px-2 py-1 rounded-lg font-bold hidden whitespace-nowrap shadow-sm"></span>
-                        </div>
-                        
-                        <button id="addRobotCompanyBtn" onclick="window.openAddRobotModal('company')" class="hidden bg-gradient-to-r from-teal-500 to-teal-700 hover:from-teal-600 hover:to-teal-800 text-white px-5 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-md flex gap-2">
-                            <i class="fa-solid fa-plus-circle"></i> إضافة روبوت للشركة
-                        </button>
-                        <button id="addRobotWarehouseBtn" onclick="window.openAddRobotModal('warehouse')" class="hidden bg-gradient-to-r from-orange-500 to-orange-700 hover:from-orange-600 hover:to-orange-800 text-white px-5 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-md flex gap-2">
-                            <i class="fa-solid fa-plus-circle"></i> إضافة روبوت للمستودع
-                        </button>
-                    </div>
-                </div>
-
-                <div class="flex overflow-x-auto hide-scroll gap-2 border-b border-gray-200 dark:border-gray-700 mb-6 pb-2">
-                    <button onclick="window.switchRobotsTab('inCompany')" id="tabRobotsInCompany" class="whitespace-nowrap py-2 px-4 font-bold text-sm border-b-2 border-blue-600 text-blue-600 dark:text-blue-400 flex items-center gap-2 transition-colors">
-                        <i class="fa-solid fa-building"></i> في الشركة
-                    </button>
-                    <button onclick="window.switchRobotsTab('inWarehouse')" id="tabRobotsInWarehouse" class="whitespace-nowrap py-2 px-4 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex items-center gap-2 transition-colors">
-                        <i class="fa-solid fa-warehouse"></i> في المستودع
-                    </button>
-                </div>
-
-                <div id="inCompanyContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-                <div id="inWarehouseContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-            </section>
-
-            <section id="crm-management" class="section-content hidden animate-fade-in p-4 md:p-0">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
-                    <p class="text-sm md:text-base text-lime-600 dark:text-lime-400 font-bold"><i class="fa-solid fa-user-tie mx-2"></i>إدارة العملاء والمبيعات</p>
-                    
-                    <div class="flex gap-2 w-full md:w-auto items-center flex-wrap">
-                        <div class="flex items-center gap-2 flex-1 md:flex-none">
-                            <div class="search-wrapper w-full">
-                                <i class="fa-solid fa-search search-icon"></i>
-                                <input type="text" id="searchCrmManagement" oninput="window.renderCrmManagementTab()" placeholder="بحث باسم العميل..." class="search-input w-full">
-                            </div>
-                            <span id="crmManagementSearchCount" class="text-xs bg-secondary text-white px-2 py-1 rounded-lg font-bold hidden whitespace-nowrap shadow-sm"></span>
-                        </div>
-                        <button id="addClientBtn" onclick="window.openAddClientModal()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-sm flex gap-2">
-                            <i class="fa-solid fa-user-plus"></i> إضافة عميل
-                        </button>
-                    </div>
-                </div>
-
-                <div class="flex overflow-x-auto hide-scroll gap-2 border-b border-gray-200 dark:border-gray-700 mb-6 pb-2">
-                    <button onclick="window.switchCrmManagementTab('clients')" id="tabCrmClients" class="whitespace-nowrap py-2 px-4 font-bold text-sm border-b-2 border-lime-600 text-lime-600 dark:text-lime-400 flex items-center gap-2 transition-colors">
-                        <i class="fa-solid fa-users"></i> العملاء
-                    </button>
-                    <button onclick="window.switchCrmManagementTab('sold')" id="tabCrmSold" class="whitespace-nowrap py-2 px-4 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex items-center gap-2 transition-colors">
-                        <i class="fa-solid fa-cart-shopping"></i> الروبوتات المباعة
-                    </button>
-                </div>
-
-                <div id="clientsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-                <div id="soldContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-            </section>
-
-            <section id="renters" class="section-content hidden animate-fade-in p-4 md:p-0">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
-                    <p class="text-sm md:text-base text-teal-600 dark:text-teal-400 font-bold"><i class="fa-solid fa-hand-holding-hand mx-2"></i>إدارة المستأجرين</p>
-                    
-                    <div class="flex gap-2 w-full md:w-auto items-center flex-wrap">
-                        <div class="flex items-center gap-2 flex-1 md:flex-none">
-                            <div class="search-wrapper w-full">
-                                <i class="fa-solid fa-search search-icon"></i>
-                                <input type="text" id="searchRenters" oninput="window.renderRentersTab()" placeholder="بحث باسم المستأجر..." class="search-input w-full">
-                            </div>
-                            <span id="rentersSearchCount" class="text-xs bg-secondary text-white px-2 py-1 rounded-lg font-bold hidden whitespace-nowrap shadow-sm"></span>
-                        </div>
-                        <button id="addRentalBtn" onclick="window.openAddRentalModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-sm flex gap-2">
-                            <i class="fa-solid fa-plus"></i> إضافة مستأجر
-                        </button>
-                    </div>
-                </div>
-
-                <div class="flex overflow-x-auto hide-scroll gap-2 border-b border-gray-200 dark:border-gray-700 mb-6 pb-2">
-                    <button onclick="window.switchRentersTab('rentedNow')" id="tabRentersNow" class="whitespace-nowrap py-2 px-4 font-bold text-sm border-b-2 border-teal-600 text-teal-600 dark:text-teal-400 flex items-center gap-2 transition-colors">
-                        <i class="fa-solid fa-clock"></i> المستأجرين الحاليين
-                    </button>
-                    <button onclick="window.switchRentersTab('pastRenters')" id="tabRentersPast" class="whitespace-nowrap py-2 px-4 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex items-center gap-2 transition-colors">
-                        <i class="fa-solid fa-clock-rotate-left"></i> المستأجرين السابقين
-                    </button>
-                </div>
-
-                <div id="rentedNowContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-                <div id="pastRentersContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-            </section>
-
-            <section id="my-profile" class="section-content animate-fade-in hidden p-4 md:p-0 max-w-4xl mx-auto"></section>
             <section id="attendance" class="section-content hidden animate-fade-in p-4 md:p-0"></section>
-            <section id="dashboard" class="section-content animate-fade-in hidden p-4 md:p-0"></section>
-            <section id="employees" class="section-content hidden animate-fade-in p-4 md:p-0"></section>
-            <section id="notices" class="section-content hidden animate-fade-in p-4 md:p-0"></section>
-            <section id="tasks" class="section-content hidden animate-fade-in p-4 md:p-0"></section>
-            <section id="chat" class="section-content hidden animate-fade-in h-[calc(100vh-80px)] md:h-full pb-0 md:pb-4 p-0 md:p-0"></section>
-            <section id="settings" class="section-content hidden animate-fade-in p-4 md:p-0"></section>
-            <section id="logs" class="section-content hidden animate-fade-in p-4 md:p-0"></section>
-            <section id="office-inventory" class="section-content hidden animate-fade-in p-4 md:p-0"></section>
-            <section id="warehouse-inventory" class="section-content hidden animate-fade-in p-4 md:p-0"></section>
-            <section id="trainees" class="section-content hidden animate-fade-in p-4 md:p-0"></section>
-            <section id="drive" class="section-content hidden animate-fade-in p-4 md:p-0"></section>
-            <section id="meetings" class="section-content hidden animate-fade-in p-4 md:p-0"></section>
-            <section id="expenses" class="section-content hidden animate-fade-in p-4 md:p-0"></section>
-
-        </div>
+            </div>
     </div>
-
-    <div id="exportModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[60] p-4"></div>
-    <div id="installIconModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[80] p-4"></div>
-    <div id="taskModal" class="fixed inset-0 bg-black/40 hidden flex items-center justify-center z-50 p-4 transition-opacity"></div>
-    <div id="msgReadDetailsModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[70] p-4"></div>
-    <div id="taskReportModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[60] p-4"></div>
-    <div id="rejectTaskModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[70] p-4"></div>
-    <div id="ceoReportsModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[60] p-4"></div>
-    <div id="noticeModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4"></div>
-    <div id="clientModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[55] p-4"></div>
-    <div id="noteModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4"></div>
-    <div id="editNoteModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4"></div>
-    <div id="groupInfoModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4"></div>
-    <div id="createGroupModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4"></div>
-    <div id="editEmployeeModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4"></div>
-    <div id="addRobotModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4"></div>
-    <div id="addRentalModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4"></div>
-    <div id="addClientModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4"></div>
-    <div id="createFolderModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4"></div>
-    <div id="inventoryModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4"></div>
-    <div id="traineeModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4"></div>
-    <div id="traineeSessionModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4"></div>
-    <div id="leaveModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4"></div>
-    <div id="leaveDetailsModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[60] p-4"></div>
-    <div id="createMeetingModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4"></div>
-
-    <div id="printArea" class="hidden bg-white text-black p-8 text-right" dir="rtl"></div>
 
     <script type="module" src="firebase-config.js"></script>
     <script type="module" src="ui.js"></script>
     <script type="module" src="app.js"></script>
     <script type="module" src="auth.js"></script>
     <script type="module" src="dashboard-employees.js"></script>
-    <script type="module" src="tasks.js"></script>
-    <script type="module" src="chat.js"></script>
-    <script type="module" src="notices.js"></script>
-    <script type="module" src="settings-export.js"></script>
-    <script type="module" src="robots-crm.js"></script>
-    <script type="module" src="drive-meetings.js"></script>
-    <script type="module" src="inventory-trainees-expenses.js"></script>
-    
+
 </body>
 </html>
