@@ -5,15 +5,18 @@ window.currentUserAuth = null;
 window.currentUserData = null;
 window.hasPunchedInToday = true;
 
-document.getElementById('sysPasswordBtn')?.addEventListener('click', () => {
+// 1. دالة التحقق من كلمة مرور النظام (تعمل الآن بشكل مباشر)
+window.checkSystemPassword = () => {
     const pass = document.getElementById('sysPasswordInput').value;
-    if(pass === window.currentSystemPassword) {
+    // التحقق من الباسوورد 1112021
+    if(pass === (window.currentSystemPassword || '1112021')) {
         document.getElementById('systemPasswordScreen').classList.add('hidden');
         document.getElementById('loginScreen').classList.remove('hidden');
+        document.getElementById('sysPassError').classList.add('hidden');
     } else {
         document.getElementById('sysPassError').classList.remove('hidden');
     }
-});
+};
 
 document.getElementById('googleLoginBtn')?.addEventListener('click', async () => {
     try { await signInWithPopup(auth, new GoogleAuthProvider()); } 
@@ -41,7 +44,12 @@ onAuthStateChanged(auth, async (user) => {
                 
                 document.getElementById('setupProfileScreen').classList.add('hidden');
                 
-                // تشغيل المحرك
+                // 2. تحديث الواجهة (الاسم، الصورة، صلاحيات المدير)
+                if(typeof window.updateUIWithUserData === 'function') {
+                    window.updateUIWithUserData();
+                }
+
+                // 3. تشغيل المحرك لجلب المهام والعملاء
                 if(typeof window.startDatabaseListeners === 'function') {
                     window.startDatabaseListeners(); 
                 }
@@ -60,17 +68,17 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
+// إعداد حساب جديد
 document.getElementById('setupProfileForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = document.getElementById('setupName').value;
     const role = document.getElementById('setupRole').value;
     try {
         const newUserData = {
-            name: window.escapeHTML(name), role: window.escapeHTML(role), uid: window.currentUserAuth.uid, email: window.currentUserAuth.email || 'no-email@company.com', 
-            photoURL: window.currentUserAuth.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=00839b&color=fff`,
-            readReceipts: {}, chatLayout: 'media-top', chatColor: 'bg-[#00839b]', lastActive: Date.now(), timestamp: Date.now(),
-            status: 'pending', 
-            permissions: { canAssignTasks: false, canExpenses: false, canCRM: false, canNotices: false, canGroups: false }
+            name: window.escapeHTML(name), role: window.escapeHTML(role), uid: window.currentUserAuth.uid, email: window.currentUserAuth.email, 
+            photoURL: window.currentUserAuth.photoURL || `https://ui-avatars.com/api/?name=${name}&background=00839b&color=fff`,
+            status: 'pending', timestamp: Date.now(),
+            permissions: { canAssignTasks: false, canExpenses: false, canCRM: false, canNotices: false }
         };
         await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', window.currentUserAuth.uid), newUserData);
         window.currentUserData = newUserData;
@@ -80,19 +88,22 @@ document.getElementById('setupProfileForm')?.addEventListener('submit', async (e
     } catch(e) { console.error(e); }
 });
 
+// إنهاء تسجيل الدخول بنجاح
 window.finishLoginSetup = () => {
     localStorage.setItem('quill_user_cache_main', JSON.stringify(window.currentUserData));
+    
     if(typeof window.updateUIWithUserData === 'function') window.updateUIWithUserData();
-    window.logAction('تسجيل دخول', `سجل ${window.currentUserData.name} الدخول للنظام`);
+    
+    window.logAction('تسجيل دخول', `سجل ${window.currentUserData.name} الدخول للنظام (المنصة الرئيسية)`);
     
     // التحقق الفوري من الحضور وتوجيه الموظف إذا لم يكن مديراً
     if(window.currentUserData.role !== 'CEO' && !window.hasPunchedInToday) {
         window.location.hash = 'attendance';
+        window.checkPunchInLock();
     } else {
         window.dispatchEvent(new Event('hashchange'));
     }
     
-    // إخفاء شاشة التحميل كخطوة نهائية
     const loader = document.getElementById('loadingScreen');
     if(loader) loader.classList.add('hidden');
 };
