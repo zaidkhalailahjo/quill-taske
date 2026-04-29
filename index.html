@@ -3657,3 +3657,30 @@
                         attachmentHtml = `<img src="${window.escapeHTML(msg.fileData)}" class="rounded-lg max-w-full h-auto max-h-48 cursor-pointer object-contain bg-black/5 border border-black/10 shadow-sm" onclick="window.openMedia('${window.escapeHTML(msg.fileData)}', '${fileTypeSafe}')">`;
                     } else if(fileTypeSafe.startsWith('video/')) {
                         attachmentHtml = `<div class="relative cursor-pointer" onclick="window.openMedia('${window.escapeHTML(msg.fileData)}', '${fileTypeSafe}')"><video src="${window.escapeHTML(msg.fileData)}" class="rounded-lg max-w-full h-auto max-h-48 bg-black shadow-sm"></video><i class="fa-solid fa-circle-play text-white/
+                        <section id="crm" class="animate-fade-in p-4 md:p-0">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-4">
+        <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 font-bold" data-i18n="قاعدة بيانات العملاء">قاعدة بيانات العملاء (CRM)</p>
+        <div class="flex items-center gap-3 w-full md:w-auto">
+            <div class="relative w-full md:w-64">
+                <input type="text" id="crmSearchInput" onkeyup="window.filterCRM()" placeholder="بحث باسم العميل أو الهاتف..." class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg pl-3 pr-10 py-2 text-sm w-full focus:outline-none focus:border-lime-500 shadow-sm">
+                <i class="fa-solid fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+            <button onclick="window.openClientModal()" class="bg-lime-600 hover:bg-lime-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm font-bold shadow-sm whitespace-nowrap">
+                <i class="fa-solid fa-user-plus mx-2"></i> إضافة عميل
+            </button>
+        </div>
+    </div>
+    <div id="crmList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    </div>
+</section>
+
+<section id="notices" class="animate-fade-in p-4 md:p-0 mt-10">
+    <div class="flex justify-between items-center mb-4 md:mb-6">
+        <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 font-bold" data-i18n="التعميمات">لوحة الإعلانات والتعميمات الرسمية</p>
+        <button id="addNoticeBtn" onclick="window.openModal('noticeModal')" class="hidden bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm font-bold shadow-sm">
+            <i class="fa-solid fa-bullhorn mx-2"></i> إضافة إعلان جديد
+        </button>
+    </div>
+    <div id="noticesList" class="space-y-4">
+    </div>
+</section>
