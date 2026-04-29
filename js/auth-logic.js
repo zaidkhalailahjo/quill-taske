@@ -10,7 +10,7 @@ window.checkSystemPassword = () => {
     const pass = document.getElementById('sysPasswordInput').value;
     if(pass === '1112021') {
         document.getElementById('systemPasswordScreen').classList.add('hidden');
-        document.getElementById('loginScreen').classList.remove('hidden');
+        document.getElementById('loginScreen').clasList.remove('hidden');
     } else {
         document.getElementById('sysPassError').classList.remove('hidden');
     }
