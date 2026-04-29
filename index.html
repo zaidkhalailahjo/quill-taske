@@ -313,7 +313,7 @@
                     </a>
                     
                     <a href="https://quill.farah-snacks.store/#notices" class="w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors">
-                        <i class="fa-solid fa-bullhorn w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="التعميمات">التعميمات</span>
+                        <i class="fa-solid fa-bullhorn w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="العملاء">التعميمات</span>
                     </a>
                 </div>
                 
@@ -1428,7 +1428,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, getDoc, setDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyCfoP0rgX8WZthQVP_AeZcxDHHCllgu3TM",
@@ -1827,7 +1827,7 @@
             
             const data = {
                 name: document.getElementById('newRobotName').value,
-                serialNumber: document.getElementById('newRobotSerial').value,
+                serialNumber: document.getElementById('newRobotSerial').value || 'بدون رقم',
                 status: document.getElementById('newRobotStatus').value,
                 location: document.getElementById('robotLocation').value,
                 isRented: false,
@@ -2101,7 +2101,7 @@
                 }
 
                 cont.innerHTML += `
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col h-full hover:shadow-md transition group">
+                    <divclass="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col h-full hover:shadow-md transition group">
                         <div class="flex items-center gap-3 mb-3 border-b dark:border-gray-700 pb-3">
                             ${logoHtml}
                             <div>
@@ -2703,25 +2703,37 @@
             try { await updateDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'files', fileId), { pinned: !currentPinStatus }); } catch(e) { console.error(e); }
         };
 
+        // --- حل مشكلة حذف المجلدات ---
         window.deleteDriveItem = async (id, isFolder, itemName) => {
-            const msg = isFolder ? 'هل أنت متأكد من حذف المجلد؟ سيتم حذف جميع محتوياته أيضاً.' : 'هل أنت متأكد من حذف هذا الملف؟';
+            const msg = isFolder ? 'هل أنت متأكد من حذف المجلد؟ سيتم حذف جميع محتوياته أيضاً (ملفات ومجلدات فرعية).' : 'هل أنت متأكد من حذف هذا الملف؟';
             if(confirm(msg)) {
                 try {
-                    const col = isFolder ? 'folders' : 'files';
-                    await deleteDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', col, id));
-                    
                     if (isFolder) {
-                        const filesToDelete = globalFiles.filter(f => f.folderId === id);
-                        for(let f of filesToDelete) {
-                            await deleteDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'files', f.id));
-                        }
+                        await recursivelyDeleteFolder(id);
+                    } else {
+                        await deleteDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'files', id));
                     }
-
-                    showToast('تم الحذف', 'success');
-                    window.logAction(isFolder ? 'حذف مجلد' : 'حذف ملف', `تم الحذف: ${itemName}`);
+                    showToast('تم الحذف بنجاح', 'success');
+                    window.logAction(isFolder ? 'حذف مجلد' : 'حذف ملف', `تم الحذف: ${decodeURIComponent(itemName)}`);
                 } catch(e) { console.error(e); }
             }
         };
+
+        async function recursivelyDeleteFolder(folderId) {
+            // Delete all files inside this folder
+            const filesToDelete = globalFiles.filter(f => f.folderId === folderId);
+            for(let f of filesToDelete) {
+                await deleteDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'files', f.id));
+            }
+            // Find child folders and delete them recursively
+            const childFolders = globalFolders.filter(f => f.parentId === folderId);
+            for(let cf of childFolders) {
+                await recursivelyDeleteFolder(cf.id);
+            }
+            // Finally delete the target folder itself
+            await deleteDoc(doc(dbStorage, 'artifacts', appId, 'public', 'data', 'folders', folderId));
+        }
+        // ---------------------------------
 
         window.renderDriveFiles = () => {
             const allContainer = document.getElementById('allFilesContainer');
@@ -2761,7 +2773,8 @@
             currentFoldersList.forEach(f => {
                 const isOwner = f.creatorId === currentUserData.uid;
                 const canManage = isOwner || isCEO;
-                const deleteBtn = canManage ? `<button onclick="event.stopPropagation(); window.deleteDriveItem('${f.id}', true, '${escapeHTML(f.name).replace(/'/g, "\\'")}')" class="text-red-400 hover:text-red-600 p-1"><i class="fa-solid fa-trash"></i></button>` : '';
+                const encodedName = encodeURIComponent(f.name);
+                const deleteBtn = canManage ? `<button onclick="event.stopPropagation(); window.deleteDriveItem('${f.id}', true, '${encodedName}')" class="text-red-400 hover:text-red-600 p-1"><i class="fa-solid fa-trash"></i></button>` : '';
 
                 allContainer.innerHTML += `
                     <div onclick="window.navigateToFolder('${f.id}')" class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-xl p-4 shadow-sm hover:shadow-md transition cursor-pointer group flex flex-col h-full">
@@ -2784,7 +2797,8 @@
 
                 const isOwner = f.uploaderId === currentUserData.uid;
                 const canManage = isOwner || isCEO;
-                const deleteBtn = canManage ? `<button onclick="window.deleteDriveItem('${f.id}', false, '${escapeHTML(f.name).replace(/'/g, "\\'")}')" class="text-red-400 hover:text-red-600 p-1" title="حذف"><i class="fa-solid fa-trash"></i></button>` : '';
+                const encodedName = encodeURIComponent(f.name);
+                const deleteBtn = canManage ? `<button onclick="window.deleteDriveItem('${f.id}', false, '${encodedName}')" class="text-red-400 hover:text-red-600 p-1" title="حذف"><i class="fa-solid fa-trash"></i></button>` : '';
                 const pinBtnClass = canManage ? 'cursor-pointer hover:text-primary' : 'cursor-not-allowed opacity-50';
                 const pinBtnAction = canManage ? `onclick="window.togglePinFile('${f.id}', ${f.pinned})"` : '';
 
@@ -2879,6 +2893,11 @@
             try {
                 const record = globalAttendance.find(a => a.uid === currentUserData.uid && a.date === today);
                 if(record) {
+                    // --- حل مشكلة الانصراف المزدوج ---
+                    if (record.status === 'completed') {
+                         showToast('لقد قمت بتسجيل الانصراف مسبقاً', 'info');
+                         return;
+                    }
                     let breaks = record.breaks || [];
                     if(breaks.length > 0 && breaks[breaks.length - 1].end === null) {
                         breaks[breaks.length - 1].end = Date.now();
@@ -3083,7 +3102,10 @@
             const newDays = parseFloat(document.getElementById('empTotalDays').value);
             const newHours = parseFloat(document.getElementById('empTotalHours').value);
             
-            if(!empId || isNaN(newDays) || isNaN(newHours)) return;
+            if(!empId || isNaN(newDays) || isNaN(newHours)) {
+                showToast('يرجى التأكد من الأرقام المدخلة', 'warning');
+                return;
+            }
             
             try {
                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', empId), {
@@ -3097,12 +3119,27 @@
             }
         };
 
+        // --- حل مشكلة إضافة الطلبات عبر فحص NaN ---
         document.getElementById('leaveForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if(!currentUserData) return;
             
-            const fromDate = new Date(document.getElementById('leaveFrom').value).getTime();
-            const toDate = new Date(document.getElementById('leaveTo').value).getTime();
+            const fromVal = document.getElementById('leaveFrom').value;
+            const toVal = document.getElementById('leaveTo').value;
+
+            if(!fromVal || !toVal) {
+                showToast('يرجى التأكد من تعبئة التواريخ', 'warning');
+                return;
+            }
+
+            const fromDate = new Date(fromVal).getTime();
+            const toDate = new Date(toVal).getTime();
+
+            if (isNaN(fromDate) || isNaN(toDate)) {
+                showToast('صيغة التاريخ غير صحيحة أو غير مكتملة، يرجى إعادة الإدخال.', 'error');
+                return;
+            }
+
             const attachmentBase64 = document.getElementById('leaveAttachmentBase64').value;
             
             if(toDate <= fromDate) {
@@ -3143,7 +3180,7 @@
                 showToast('تم التحديث', 'success');
                 
                 const leave = globalLeaves.find(l => l.id === id);
-                if(leave) {
+                if(leave && leave.uid) {
                     const statusText = newStatus === 'approved' ? 'تمت الموافقة على' : 'تم رفض';
                     window.sendSystemNotification(leave.uid, 'تحديث حالة الإجازة', `${statusText} طلب الإجازة الخاص بك.`, 'leaves', 'leaves');
                 }
@@ -3261,7 +3298,7 @@
                 
                 // تعبئة قائمة الموظفين في قسم الأرصدة إذا لم تعبأ
                 const select = document.getElementById('balanceEmpSelect');
-                if(select.options.length <= 1 && globalUsers.length > 0) {
+                if(select && select.options.length <= 1 && globalUsers.length > 0) {
                     globalUsers.forEach(u => {
                         if(u.role !== 'CEO') select.innerHTML += `<option value="${u.uid}">${u.name}</option>`;
                     });
@@ -3363,6 +3400,10 @@
 
             if (timeVal) {
                 scheduledTime = new Date(timeVal).getTime();
+                if (isNaN(scheduledTime)) {
+                    showToast('الوقت المدخل غير صحيح.', 'error');
+                    return;
+                }
                 if (scheduledTime > Date.now()) status = 'scheduled';
             }
 
@@ -3453,17 +3494,20 @@
             window.open(`https://wa.me/?text=${text}`, '_blank');
         };
 
+        // --- حل مشكلة تعارض تسجيل الدخول للاجتماعات ---
         async function logMeetingEvent(meetingId, actionType) {
             if(!currentUserData) return;
             try {
                 const meetingRef = doc(db, 'artifacts', appId, 'public', 'data', 'meetings', meetingId);
-                const meetingDoc = await getDoc(meetingRef);
-                if(meetingDoc.exists()) {
-                    let events = meetingDoc.data().events || [];
-                    events.push({ uid: currentUserData.uid, name: currentUserData.name, action: actionType, timestamp: Date.now() });
-                    await updateDoc(meetingRef, { events: events });
-                }
-            } catch(e) { console.error(e); }
+                await updateDoc(meetingRef, {
+                    events: arrayUnion({
+                        uid: currentUserData.uid,
+                        name: currentUserData.name,
+                        action: actionType,
+                        timestamp: Date.now()
+                    })
+                });
+            } catch(e) { console.error("Error logging meeting event", e); }
         }
 
         window.renderMeetings = () => {
@@ -3555,17 +3599,24 @@
         };
 
         // النثريات والمصاريف
+        // --- حل مشكلة تعطل إضافة المصاريف بسبب التواريخ الخاطئة ---
         window.handleExpenseSubmit = async (e) => {
             e.preventDefault();
             if(!currentUserData || (currentUserData.role !== 'CEO' && currentUserData.role !== 'accountant')) return;
             
             const desc = document.getElementById('expDesc').value;
-            const amount = document.getElementById('expAmount').value;
-            const date = document.getElementById('expDate').value;
+            const amountVal = document.getElementById('expAmount').value;
+            const dateVal = document.getElementById('expDate').value;
             
+            const amount = parseFloat(amountVal);
+            if(isNaN(amount) || !dateVal) {
+                showToast('يرجى التأكد من تعبئة المبلغ والتاريخ بشكل صحيح', 'error');
+                return;
+            }
+
             try {
                 await addDoc(getColRef('expenses'), {
-                    desc: desc, amount: amount, date: date, addedBy: currentUserData.name, uid: currentUserData.uid, timestamp: Date.now()
+                    desc: desc, amount: amount, date: dateVal, addedBy: currentUserData.name, uid: currentUserData.uid, timestamp: Date.now()
                 });
                 document.getElementById('expensesForm').reset();
                 showToast('تم إضافة المصروف بنجاح', 'success');
@@ -3680,7 +3731,8 @@
                 data.quantity = 1; 
             } else {
                 data.name = document.getElementById('invPartName').value;
-                data.quantity = document.getElementById('invPartQty').value;
+                const qtyVal = parseInt(document.getElementById('invPartQty').value);
+                data.quantity = isNaN(qtyVal) ? 1 : qtyVal;
                 data.serialNumber = document.getElementById('invPartSerial').value || 'لا يوجد';
                 data.status = document.getElementById('invPartStatus').value;
             }
@@ -3979,6 +4031,7 @@
             window.openModal('traineeSessionModal');
         };
 
+        // --- إضافة المواعيد وفحص التواريخ ---
         document.getElementById('traineeSessionForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if(!currentUserData) return;
@@ -3992,7 +4045,16 @@
             const trainee = globalTrainees.find(t => t.id === id);
             if(!trainee) return;
 
+            if(!dateTimeStr) {
+                 showToast('يرجى تحديد وقت الموعد', 'error');
+                 return;
+            }
+
             const timestampFromInput = new Date(dateTimeStr).getTime();
+            if(isNaN(timestampFromInput)) {
+                 showToast('وقت الموعد غير صحيح', 'error');
+                 return;
+            }
 
             let sessions = trainee.sessions || [];
             sessions.push({
@@ -4467,7 +4529,7 @@
             try {
                 const newUserData = {
                     name: name, role: role, uid: currentUserAuth.uid, email: currentUserAuth.email || 'no-email@company.com', 
-                    photoURL: currentUserAuth.photoURL || `https://ui-avatars.com/api/?name=${name}&background=00839b&color=fff`,
+                    photoURL: currentUserAuth.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=00839b&color=fff`,
                     readReceipts: {}, notifications: [], notificationPreferences: defaultNotifPreferences,
                     leaveBalances: { days: 14, hours: 20 },
                     lastActive: Date.now(), timestamp: Date.now()
