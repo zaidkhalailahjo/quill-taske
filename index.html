@@ -550,9 +550,13 @@
                     </div>
                     <!-- منتقي التاريخ للظهور في تاب الجرد القديم فقط -->
                     <div id="oldInventoryDateFilter" class="hidden w-full md:w-auto pb-2 md:pb-0">
-                        <select id="oldInventoryDateSelect" onchange="renderInventory()" class="w-full md:w-auto border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-1.5 text-sm font-bold outline-none">
-                            <option value="all">جميع التواريخ القديمة</option>
-                        </select>
+                        <div class="relative inline-block w-full md:w-auto">
+                            <i class="fa-regular fa-calendar absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            <select id="oldInventoryDateSelect" onchange="renderInventory()" class="w-full md:w-auto border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white rounded-lg pl-3 pr-10 py-2 text-sm font-bold outline-none appearance-none focus:border-purple-500 shadow-sm cursor-pointer">
+                                <option value="all">جميع التواريخ القديمة</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                        </div>
                     </div>
                 </div>
 
@@ -701,7 +705,7 @@
                 </div>
 
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
-                    <p class="text-sm md:text-base text-gray-600 dark:text-gray-300" data-i18n="مشاركة الملفات">إدارة المستندات (الحد الأقصى للملف: 100MB)</p>
+                    <p class="text-sm md:text-base text-gray-600 dark:text-gray-300" data-i18n="مشاركة الملفات">إدارة المستندات (الحد الأقصى للملف: 200MB)</p>
                     <div class="flex flex-wrap gap-2 w-full md:w-auto">
                         <button id="toggleSelectModeBtn" onclick="window.toggleSelectMode()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm font-bold shadow flex-1 md:flex-none justify-center">
                             تحديد ملفات
@@ -1189,69 +1193,75 @@
                 <button onclick="window.closeModal('inventoryModal')" class="hover:text-gray-200"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <div class="p-4 md:p-6 overflow-y-auto flex-1">
-                <form id="inventoryForm" class="space-y-4">
+                <form id="inventoryForm">
                     <input type="hidden" id="invLocation">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">نوع المحتوى</label>
-                        <select id="invItemType" onchange="window.handleInvTypeChange()" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none font-bold focus:border-purple-500">
-                            <option value="robot">روبوت</option>
-                            <option value="part">قطعة / قطع غيار</option>
-                            <option value="furniture">مفروشات (أثاث)</option>
-                            <option value="electronics">إلكترونيات / أجهزة</option>
-                            <option value="misc">متفرقات</option>
-                        </select>
-                    </div>
-                    
-                    <div id="invRobotFields" class="space-y-4">
+                    <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">اسم الروبوت</label>
-                            <input list="robotNamesList" id="invRobotName" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500" dir="ltr" placeholder="اختر أو اكتب الاسم">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">الرقم التسلسلي</label>
-                            <input type="text" id="invRobotSerial" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500" dir="ltr">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">الحالة</label>
-                            <select id="invRobotStatus" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500">
-                                <option value="جديد">جديد</option>
-                                <option value="مستعمل">مستعمل</option>
-                                <option value="معطل">معطل</option>
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">نوع المحتوى</label>
+                            <select id="invItemType" onchange="window.handleInvTypeChange()" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none font-bold focus:border-purple-500">
+                                <option value="robot">روبوت</option>
+                                <option value="part">قطعة / قطع غيار</option>
+                                <option value="furniture">مفروشات (أثاث)</option>
+                                <option value="electronics">إلكترونيات / أجهزة</option>
+                                <option value="misc">متفرقات</option>
                             </select>
                         </div>
-                    </div>
-
-                    <div id="invGenericFields" class="space-y-4 hidden">
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">اسم / وصف العنصر</label>
-                            <input type="text" id="invGenericName" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500">
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
+                        
+                        <div id="invRobotFields" class="space-y-4">
                             <div>
-                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">العدد (الكمية)</label>
-                                <input type="number" id="invGenericQty" min="1" value="1" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500" dir="ltr">
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">اسم الروبوت</label>
+                                <input list="robotNamesList" id="invRobotName" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500" dir="ltr" placeholder="اختر أو اكتب الاسم">
                             </div>
                             <div>
-                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">رقم تسلسلي (إن وجد)</label>
-                                <input type="text" id="invGenericSerial" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500" dir="ltr" placeholder="اختياري">
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">الرقم التسلسلي</label>
+                                <input type="text" id="invRobotSerial" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500" dir="ltr">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">الحالة</label>
+                                <select id="invRobotStatus" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500">
+                                    <option value="جديد">جديد</option>
+                                    <option value="مستعمل">مستعمل</option>
+                                    <option value="معطل">معطل</option>
+                                </select>
+                            </div>
+                            <!-- حقل التفاصيل الإضافية للروبوت -->
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">تفاصيل إضافية</label>
+                                <textarea id="invRobotNotes" rows="2" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500 whitespace-pre-wrap" placeholder="ملاحظات وتفاصيل إضافية..."></textarea>
                             </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">الحالة الجاهزية</label>
-                            <select id="invGenericStatus" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500">
-                                <option value="جديد">جديد</option>
-                                <option value="مستخدم / سليم">مستخدم / سليم</option>
-                                <option value="بحاجة لصيانة">بحاجة لصيانة</option>
-                                <option value="تالف">تالف</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">تفاصيل إضافية</label>
-                            <textarea id="invGenericNotes" rows="2" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500 whitespace-pre-wrap" placeholder="مثال: لون المكتب، مكان القطعة..."></textarea>
+
+                        <div id="invGenericFields" class="space-y-4 hidden">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">اسم / وصف العنصر</label>
+                                <input type="text" id="invGenericName" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">العدد (الكمية)</label>
+                                    <input type="number" id="invGenericQty" min="1" value="1" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500" dir="ltr">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">رقم تسلسلي (إن وجد)</label>
+                                    <input type="text" id="invGenericSerial" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500" dir="ltr" placeholder="اختياري">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">الحالة الجاهزية</label>
+                                <select id="invGenericStatus" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500">
+                                    <option value="جديد">جديد</option>
+                                    <option value="مستخدم / سليم">مستخدم / سليم</option>
+                                    <option value="بحاجة لصيانة">بحاجة لصيانة</option>
+                                    <option value="تالف">تالف</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">تفاصيل إضافية</label>
+                                <textarea id="invGenericNotes" rows="2" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500 whitespace-pre-wrap" placeholder="مثال: لون المكتب، مكان القطعة..."></textarea>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="pt-4 flex justify-end gap-2 border-t dark:border-gray-700">
+                    <div class="pt-4 mt-4 flex justify-end gap-2 border-t dark:border-gray-700">
                         <button type="button" onclick="window.closeModal('inventoryModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-bold text-sm">إلغاء</button>
                         <button type="submit" id="invSubmitBtn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-bold text-sm shadow">حفظ في الجرد</button>
                     </div>
@@ -1524,7 +1534,7 @@
             "الوظيفة (الدور)": "Role",
             "الدخول للنظام": "Enter System",
             "المساحة المستخدمة": "Used Storage",
-            "مشاركة الملفات": "Share Important Files (Max 100MB)",
+            "مشاركة الملفات": "Share Important Files (Max 200MB)",
             "رفع ملف جديد": "Upload New File",
             "الملفات المثبتة": "Pinned Files",
             "كل الملفات": "All Files",
@@ -1626,9 +1636,9 @@
         let currentRobotsTab = 'rentedNow'; 
         let activeUploads = []; // قائمة الملفات التي يتم رفعها حالياً
 
-        // مسار ملف Google Apps Script المحدث
+        // مسار ملف Google Apps Script
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHp_AgS8kVIBMNdlSTCHb6YMAe9Tsv_8LSa-tsGHcyldgo9W8wVEDFvRUd3sqJxsl-/exec";
-        const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+        const MAX_FILE_SIZE = 200 * 1024 * 1024; // تم رفع المساحة إلى 200 ميجابايت
         const MAX_GLOBAL_STORAGE = 5 * 1024 * 1024 * 1024 * 1024; // 5TB 
 
         const defaultNotifPreferences = {
@@ -1750,17 +1760,26 @@
             const imgEl = document.getElementById('imageViewerImg');
             const vidEl = document.getElementById('imageViewerVideo');
 
+            // تعديل مسار Google Drive ليفتح كصورة مباشرة بدلاً من صفحة ويب
+            let displayUrl = file.data;
+            if (displayUrl.includes('drive.google.com/file/d/')) {
+                const match = displayUrl.match(/\/d\/(.+?)\//);
+                if (match && match[1]) {
+                    displayUrl = `https://drive.google.com/uc?export=view&id=${match[1]}`;
+                }
+            }
+
             if (file.type.startsWith('video/')) {
                 imgEl.classList.add('hidden');
                 imgEl.src = '';
                 vidEl.classList.remove('hidden');
-                vidEl.src = file.data;
+                vidEl.src = displayUrl;
             } else {
                 vidEl.classList.add('hidden');
                 vidEl.pause();
                 vidEl.src = '';
                 imgEl.classList.remove('hidden');
-                imgEl.src = file.data;
+                imgEl.src = displayUrl;
             }
             
             document.getElementById('viewerLeftBtn').style.visibility = currentViewerIndex > 0 ? 'visible' : 'hidden';
@@ -2921,7 +2940,7 @@
                 const file = files[i];
                 
                 if(file.size > MAX_FILE_SIZE) { 
-                    showToast(`حجم الملف ${file.name} تجاوز 100 ميجابايت.`, 'warning'); 
+                    showToast(`حجم الملف ${file.name} تجاوز 200 ميجابايت.`, 'warning'); 
                     continue; 
                 }
 
@@ -3014,6 +3033,19 @@
             const msg = isFolder ? 'هل أنت متأكد من حذف المجلد؟ سيتم حذف جميع محتوياته أيضاً (ملفات ومجلدات فرعية).' : 'هل أنت متأكد من حذف هذا الملف؟';
             if(confirm(msg)) {
                 try {
+                    // المحاولة لحذف الملف من Google Drive إذا أمكن
+                    if (!isFolder) {
+                        const fileObj = globalFiles.find(f => f.id === id);
+                        if (fileObj && fileObj.data && fileObj.data.includes('drive.google.com')) {
+                            try {
+                                fetch(GOOGLE_SCRIPT_URL, {
+                                    method: 'POST',
+                                    body: JSON.stringify({ action: 'delete', url: fileObj.data })
+                                }).catch(e => console.log('Drive delete request sent'));
+                            } catch(e) {}
+                        }
+                    }
+
                     if (isFolder) {
                         await recursivelyDeleteFolder(id);
                     } else {
@@ -3028,6 +3060,10 @@
         async function recursivelyDeleteFolder(folderId) {
             const filesToDelete = globalFiles.filter(f => f.folderId === folderId);
             for(let f of filesToDelete) {
+                // المحاولة لحذف من درايف
+                if (f.data && f.data.includes('drive.google.com')) {
+                    try { fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', url: f.data }) }).catch(e => {}); } catch(e){}
+                }
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'files', f.id));
             }
             const childFolders = globalFolders.filter(f => f.parentId === folderId);
@@ -3047,9 +3083,14 @@
                     for(let cb of checkedBoxes) {
                         const id = cb.getAttribute('data-id');
                         const isFolder = cb.getAttribute('data-isfolder') === 'true';
+                        
                         if(isFolder) {
                             await recursivelyDeleteFolder(id);
                         } else {
+                            const fileObj = globalFiles.find(f => f.id === id);
+                            if (fileObj && fileObj.data && fileObj.data.includes('drive.google.com')) {
+                                try { fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', url: fileObj.data }) }).catch(e => {}); } catch(e){}
+                            }
                             await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'files', id));
                         }
                     }
@@ -3240,7 +3281,7 @@
                             <i class="fa-solid ${iconClass} text-2xl"></i>
                             <button ${pinBtnAction} class="text-xl ${pinBtnClass} ${f.pinned ? 'text-primary dark:text-secondary' : 'text-gray-300 dark:text-gray-600'} ${isSelectMode ? 'hidden' : ''}"><i class="fa-solid fa-thumbtack"></i></button>
                         </div>
-                        <h4 class="font-bold text-sm text-gray-800 dark:text-gray-200 truncate mb-1" title="${escapeHTML(f.name)}">${escapeHTML(f.name)}</h4>
+                        <h4 class="font-bold text-sm text-gray-800dark:text-gray-200 truncate mb-1" title="${escapeHTML(f.name)}">${escapeHTML(f.name)}</h4>
                         <p class="text-[10px] text-gray-400 mb-3">${f.sizeStr} • بواسطة ${escapeHTML(f.uploaderName)}</p>
                         
                         <div class="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center gap-2 ${isSelectMode ? 'hidden' : ''}">
@@ -3254,7 +3295,6 @@
                     </div>
                 `;
                 
-                // التعديل: الملف المثبت يظهر فقط في قسم المثبتة ولا يظهر بالأسفل
                 if(f.pinned) {
                     pinnedContainer.innerHTML += cardHtml;
                 } else {
@@ -4158,6 +4198,8 @@
             document.getElementById('inventoryForm').reset();
             window.handleInvTypeChange(); 
             window.openModal('inventoryModal');
+            document.getElementById('invSubmitBtn').disabled = false;
+            document.getElementById('invSubmitBtn').innerHTML = 'حفظ في الجرد';
         };
 
         window.handleInvTypeChange = () => {
@@ -4180,6 +4222,10 @@
         document.getElementById('inventoryForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if(!currentUserData) return;
+            
+            const submitBtn = document.getElementById('invSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mx-1"></i> جاري الحفظ...';
 
             const type = document.getElementById('invItemType').value; 
             
@@ -4194,6 +4240,7 @@
                 data.name = document.getElementById('invRobotName').value;
                 data.serialNumber = document.getElementById('invRobotSerial').value;
                 data.status = document.getElementById('invRobotStatus').value;
+                data.notes = document.getElementById('invRobotNotes').value;
                 data.quantity = 1; 
             } else {
                 data.name = document.getElementById('invGenericName').value;
@@ -4209,7 +4256,12 @@
                 window.closeModal('inventoryModal');
                 showToast('تمت إضافة العنصر بنجاح', 'success');
                 window.logAction('إضافة جرد', `تم إضافة ${data.name} إلى الجرد`);
-            } catch(err) { console.error(err); }
+            } catch(err) { 
+                console.error(err); 
+                showToast('حدث خطأ في الحفظ', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'حفظ في الجرد';
+            }
         });
 
         window.moveToOldInventory = async (id) => {
