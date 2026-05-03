@@ -1363,35 +1363,62 @@
         </div>
     </div>
 
-    <!-- نافذة المواعيد -->
+    <!-- نافذة المواعيد وتقييم المتدرب -->
     <div id="traineeSessionModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
             <div class="bg-blue-600 text-white p-4 flex justify-between items-center">
                 <h3 class="font-bold text-base md:text-lg" id="sessionModalTitle">تسجيل موعد تدريب</h3>
                 <button onclick="window.closeModal('traineeSessionModal')" class="hover:text-blue-200"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
-            <form id="traineeSessionForm" class="p-4 md:p-6 space-y-4">
-                <input type="hidden" id="sessionId">
-                <input type="hidden" id="sessionNumber">
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">تاريخ ووقت الموعد / الإنهاء</label>
-                    <input type="datetime-local" id="sessionDateTime" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-blue-500 outline-none" dir="ltr">
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">معلومات إضافية عن ما تم إنجازه</label>
-                    <textarea id="sessionNotes" rows="3" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-blue-500 outline-none whitespace-pre-wrap"></textarea>
-                </div>
-                <div class="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" id="sessionFinishTraining" class="w-4 h-4 text-red-600 rounded">
-                        <span class="text-sm font-bold text-red-700 dark:text-red-400">آخر يوم تدريب (إنهاء ونقل للمتدربين السابقين)</span>
-                    </label>
-                </div>
-                <div class="pt-4 flex justify-end gap-2">
-                    <button type="button" onclick="window.closeModal('traineeSessionModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-bold text-sm">إلغاء</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-bold text-sm shadow">حفظ الموعد</button>
-                </div>
-            </form>
+            <div class="p-4 md:p-6 overflow-y-auto flex-1">
+                <form id="traineeSessionForm" class="space-y-4">
+                    <input type="hidden" id="sessionId">
+                    <input type="hidden" id="sessionNumber">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">تاريخ ووقت الموعد / الإنهاء</label>
+                        <input type="datetime-local" id="sessionDateTime" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-blue-500 outline-none" dir="ltr">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">معلومات إضافية عن ما تم إنجازه</label>
+                        <textarea id="sessionNotes" rows="3" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-blue-500 outline-none whitespace-pre-wrap"></textarea>
+                    </div>
+                    <div class="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="sessionFinishTraining" class="w-4 h-4 text-red-600 rounded">
+                            <span class="text-sm font-bold text-red-700 dark:text-red-400">آخر يوم تدريب (إنهاء ونقل للمتدربين السابقين)</span>
+                        </label>
+                    </div>
+                    
+                    <!-- قسم التقييم المخفي افتراضياً -->
+                    <div id="evaluationSection" class="hidden bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 mt-2">
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">تقييم المتدرب</label>
+                        <div class="flex flex-col sm:flex-row items-center gap-4 mb-2">
+                            <select id="evalText" onchange="window.updateStarsFromText()" class="w-full sm:w-auto border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm dark:bg-gray-800 dark:text-white font-bold focus:border-amber-500 outline-none">
+                                <option value="0">غير مقبول (0 نجمة)</option>
+                                <option value="1">مقبول (1 نجمة)</option>
+                                <option value="2">جيد (2 نجمة)</option>
+                                <option value="3">جيد جداً (3 نجمات)</option>
+                                <option value="4">رائع (4 نجمات)</option>
+                                <option value="5" selected>ممتاز (5 نجمات)</option>
+                            </select>
+                            <span id="starDisplay" class="text-amber-400 text-2xl flex gap-1 cursor-pointer" onmousemove="window.hoverStars(event)" onmouseleave="window.resetStars()" onclick="window.setStars(event)">
+                                <i class="fa-solid fa-star" data-val="1"></i>
+                                <i class="fa-solid fa-star" data-val="2"></i>
+                                <i class="fa-solid fa-star" data-val="3"></i>
+                                <i class="fa-solid fa-star" data-val="4"></i>
+                                <i class="fa-solid fa-star" data-val="5"></i>
+                            </span>
+                            <input type="hidden" id="evalScore" value="5">
+                        </div>
+                        <p class="text-[10px] text-gray-500 text-center sm:text-right mt-1">يمكنك اختيار التقييم من القائمة أو النقر على النجوم مباشرة (يسمح بنصف نجمة).</p>
+                    </div>
+
+                    <div class="pt-4 flex justify-end gap-2">
+                        <button type="button" onclick="window.closeModal('traineeSessionModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-bold text-sm">إلغاء</button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-bold text-sm shadow">حفظ الموعد</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -3383,7 +3410,7 @@
                 }
 
                 const downloadLinkHtml = targetUrl !== "#" ? 
-                    `<a href="${targetUrl}" target="_blank" download="${escapeHTML(f.name)}" onclick="event.stopPropagation()" class="text-secondary hover:text-primary text-sm font-bold flex items-center gap-1"><i class="fa-solid fa-download"></i> تحميل / عرض</a>` : 
+                    `<a href="${targetUrl}" target="_blank" download="${escapeHTML(f.name)}" onclick="event.stopPropagation()" class="text-secondary hover:text-primary text-sm font-bold flex items-center gap-1 bg-gray-100 dark:bg-gray-700 px-3 py-1.5 rounded transition"><i class="fa-solid fa-download"></i> تحميل</a>` : 
                     `<span class="text-gray-400 text-sm font-bold flex items-center gap-1"><i class="fa-solid fa-ban"></i> غير متاح</span>`;
 
                 const clickAction = isSelectMode ? `window.toggleCheckbox('${f.id}')` : `window.openImageViewer('${f.id}')`;
@@ -4492,6 +4519,7 @@
             }
         };
 
+        // Fix logic for moving items and scheduling.
         window.confirmBulkMove = async () => {
             const isNow = inventoryConfig.moveMode === 'now';
             const dateInput = document.getElementById('bulkMoveDateInput').value;
@@ -4513,7 +4541,7 @@
             if(!isNow && timestamp > Date.now()) {
                 // It's a future date, we simulate scheduling by saving the target date to Firebase config
                 try {
-                    await setDoc(doc(db, 'artifacts', appId, 'public', 'config', 'inventory_settings'), {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory_settings'), {
                         scheduledMoveDate: timestamp
                     }, { merge: true });
                     document.getElementById('currentScheduleMsg').innerText = `تمت الجدولة لتاريخ: ${moveDate.toLocaleDateString('ar-EG')}`;
@@ -4545,7 +4573,7 @@
                     })
                 ));
                 // Clear schedule if we just moved
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'config', 'inventory_settings'), {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory_settings'), {
                     scheduledMoveDate: null
                 }, { merge: true });
 
@@ -4562,7 +4590,7 @@
         // Check if there is a scheduled move that should be executed now
         function checkScheduledInventoryMove() {
             if(!currentUserData || currentUserData.role !== 'CEO') return;
-            getDoc(doc(db, 'artifacts', appId, 'public', 'config', 'inventory_settings')).then(docSnap => {
+            getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory_settings')).then(docSnap => {
                 if(docSnap.exists() && docSnap.data().scheduledMoveDate) {
                     const targetDate = docSnap.data().scheduledMoveDate;
                     if(Date.now() >= targetDate) {
@@ -4576,7 +4604,7 @@
                                 })
                             )).then(() => {
                                 // Clear schedule
-                                updateDoc(doc(db, 'artifacts', appId, 'public', 'config', 'inventory_settings'), {
+                                updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory_settings'), {
                                     scheduledMoveDate: null
                                 });
                                 populateOldInventoryDates();
@@ -4690,6 +4718,20 @@
 
             if(!hasActive) activeCont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا توجد نتائج في الجرد الحالي.</p>';
             if(!hasPast) pastCont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا توجد نتائج مطابقة في الجرد القديم.</p>';
+        };
+
+        // نقل مفرد للجرد
+        window.moveToOldInventory = async (id) => {
+            if(currentUserData.role !== 'CEO') return;
+            if(confirm('هل تريد نقل هذا العنصر إلى الجرد القديم؟')) {
+                try {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id), { 
+                        isOld: true,
+                        movedToOldAt: Date.now()
+                    });
+                    showToast('تم النقل للجرد القديم', 'success');
+                } catch(e) { console.error(e); }
+            }
         };
 
         // المتدربين
@@ -4851,6 +4893,77 @@
             } catch(e) { console.error(e); }
         };
 
+        // دالات التقييم بالنجوم
+        window.updateStarsFromText = () => {
+            const val = document.getElementById('evalText').value;
+            document.getElementById('evalScore').value = val;
+            window.fillStars(parseFloat(val));
+        };
+
+        window.hoverStars = (e) => {
+            const rect = document.getElementById('starDisplay').getBoundingClientRect();
+            // RTL calculation: right to left
+            let x = rect.right - e.clientX; 
+            if (x < 0) x = 0;
+            if (x > rect.width) x = rect.width;
+            
+            // 5 stars total
+            let val = (x / rect.width) * 5;
+            val = Math.ceil(val * 2) / 2; // Round to nearest 0.5
+            if (val > 5) val = 5;
+            if (val < 0) val = 0;
+            
+            window.fillStars(val);
+        };
+
+        window.resetStars = () => {
+            window.fillStars(parseFloat(document.getElementById('evalScore').value));
+        };
+
+        window.setStars = (e) => {
+            const rect = document.getElementById('starDisplay').getBoundingClientRect();
+            let x = rect.right - e.clientX; 
+            if (x < 0) x = 0;
+            let val = (x / rect.width) * 5;
+            val = Math.ceil(val * 2) / 2;
+            if (val > 5) val = 5;
+            
+            document.getElementById('evalScore').value = val;
+            
+            // حاول مطابقة القائمة النصية لأقرب رقم صحيح
+            const intVal = Math.round(val);
+            const evalText = document.getElementById('evalText');
+            if (evalText) evalText.value = intVal.toString();
+            
+            window.fillStars(val);
+        };
+
+        window.fillStars = (val) => {
+            const starsContainer = document.getElementById('starDisplay');
+            // Since it's RTL, the first child is visually on the right (Star 1).
+            for(let i=0; i<5; i++) {
+                const starVal = i + 1;
+                const starIcon = starsContainer.children[i];
+                if (val >= starVal) {
+                    starIcon.className = 'fa-solid fa-star';
+                } else if (val >= starVal - 0.5) {
+                    starIcon.className = 'fa-solid fa-star-half-stroke';
+                } else {
+                    starIcon.className = 'fa-regular fa-star';
+                }
+            }
+        };
+
+        document.getElementById('sessionFinishTraining').addEventListener('change', (e) => {
+            const evalSection = document.getElementById('evaluationSection');
+            if(e.target.checked) {
+                evalSection.classList.remove('hidden');
+                window.resetStars();
+            } else {
+                evalSection.classList.add('hidden');
+            }
+        });
+
         window.openTraineeSessionModal = (id) => {
             const trainee = globalTrainees.find(t => t.id === id);
             if(!trainee) return;
@@ -4861,6 +4974,7 @@
             document.getElementById('sessionNumber').value = sessionNum;
             document.getElementById('sessionNotes').value = '';
             document.getElementById('sessionFinishTraining').checked = false;
+            document.getElementById('evaluationSection').classList.add('hidden');
             
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -4878,6 +4992,7 @@
             const dateTimeStr = document.getElementById('sessionDateTime').value;
             const notes = document.getElementById('sessionNotes').value;
             const isFinished = document.getElementById('sessionFinishTraining').checked;
+            const evalScore = parseFloat(document.getElementById('evalScore').value) || 0;
 
             const trainee = globalTrainees.find(t => t.id === id);
             if(!trainee) return;
@@ -4907,12 +5022,34 @@
                 if(isFinished) {
                     updateData.status = 'completed';
                     updateData.completedAt = timestampFromInput; 
+                    updateData.evaluation = evalScore; // حفظ التقييم
                 }
                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'trainees', id), updateData);
                 window.closeModal('traineeSessionModal');
-                showToast(isFinished ? 'تم إنهاء فترة التدريب للمتدرب' : 'تم تسجيل الموعد بنجاح', 'success');
+                showToast(isFinished ? 'تم إنهاء فترة التدريب للمتدرب بنجاح وتقييمه' : 'تم تسجيل الموعد بنجاح', 'success');
             } catch(e) { console.error(e); }
         });
+
+        window.deleteTrainee = async (id) => {
+            if(currentUserData.role !== 'CEO') return;
+            if(confirm('هل أنت متأكد من حذف هذا المتدرب من السجل نهائياً؟')) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'trainees', id));
+                    showToast('تم حذف المتدرب بنجاح', 'success');
+                } catch(e) { console.error(e); }
+            }
+        };
+
+        function generateStarsHtml(val) {
+            let html = '<span class="text-amber-400 text-sm flex gap-0.5">';
+            for(let i=0; i<5; i++) {
+                if(val >= i + 1) html += '<i class="fa-solid fa-star"></i>';
+                else if (val >= i + 0.5) html += '<i class="fa-solid fa-star-half-stroke"></i>';
+                else html += '<i class="fa-regular fa-star text-gray-300"></i>';
+            }
+            html += ` <span class="text-gray-500 font-bold ml-1">(${val})</span></span>`;
+            return html;
+        }
 
         window.renderTrainees = () => {
             const activeCont = document.getElementById('activeTraineesContainer');
@@ -4934,6 +5071,13 @@
             );
 
             updateSearchBadge('traineesSearchCount', filteredTrainees.length, searchTerm);
+
+            // فرز المتدربين: المتدربين الخاصين بالموظف الحالي يظهرون أولاً
+            filteredTrainees.sort((a, b) => {
+                const aIsMine = a.trainers && a.trainers.includes(currentUserData.uid) ? 1 : 0;
+                const bIsMine = b.trainers && b.trainers.includes(currentUserData.uid) ? 1 : 0;
+                return bIsMine - aIsMine;
+            });
 
             filteredTrainees.forEach(t => {
                 const isMyTrainee = t.trainers && t.trainers.includes(currentUserData.uid);
@@ -4971,10 +5115,10 @@
                     let handoverRequestsHtml = '';
 
                     if (isMyTrainee) {
-                        trainerBadgeHtml = `<span class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded shadow-sm font-bold">أنت المدرب</span>`;
+                        trainerBadgeHtml = `<span class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded shadow-sm font-bold border border-green-200">أنت المدرب</span>`;
                         actionBtnsHtml = `
                             <button onclick="window.openEditTraineeModal('${t.id}')" class="flex-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-gray-700 dark:text-gray-200 py-2 rounded font-bold transition">تعديل</button>
-                            <button onclick="window.openTraineeSessionModal('${t.id}')" class="flex-1 text-xs bg-blue-50 hover:bg-blue-100 text-blue-600 py-2 rounded font-bold transition shadow-sm">إضافة موعد (${sessionsCount + 1})</button>
+                            <button onclick="window.openTraineeSessionModal('${t.id}')" class="flex-1 text-xs bg-blue-50 hover:bg-blue-100 text-blue-600 py-2 rounded font-bold transition shadow-sm border border-blue-200">إضافة موعد (${sessionsCount + 1})</button>
                         `;
                         
                         if (t.handoverRequests && t.handoverRequests.length > 0) {
@@ -4982,11 +5126,11 @@
                                 <p class="text-[10px] font-bold text-yellow-700 dark:text-yellow-500 mb-1">طلبات استلام التدريب بدلاً منك:</p>
                             `;
                             t.handoverRequests.forEach(req => {
-                                handoverRequestsHtml += `<div class="flex justify-between items-center text-[10px] bg-white dark:bg-gray-800 p-1 rounded mb-1">
+                                handoverRequestsHtml += `<div class="flex justify-between items-center text-[10px] bg-white dark:bg-gray-800 p-1 rounded mb-1 border border-gray-100">
                                     <span class="font-bold text-gray-800 dark:text-white">${escapeHTML(req.name)}</span>
                                     <div class="flex gap-1">
-                                        <button onclick="window.resolveHandover('${t.id}', '${req.uid}', 'approve')" class="text-white bg-green-500 hover:bg-green-600 px-2 rounded">موافقة</button>
-                                        <button onclick="window.resolveHandover('${t.id}', '${req.uid}', 'reject')" class="text-white bg-red-500 hover:bg-red-600 px-2 rounded">رفض</button>
+                                        <button onclick="window.resolveHandover('${t.id}', '${req.uid}', 'approve')" class="text-white bg-green-500 hover:bg-green-600 px-2 rounded font-bold shadow-sm">موافقة</button>
+                                        <button onclick="window.resolveHandover('${t.id}', '${req.uid}', 'reject')" class="text-white bg-red-500 hover:bg-red-600 px-2 rounded font-bold shadow-sm">رفض</button>
                                     </div>
                                 </div>`;
                             });
@@ -4996,14 +5140,17 @@
                     } else {
                         const hasRequested = t.handoverRequests && t.handoverRequests.some(r => r.uid === currentUserData.uid);
                         if (hasRequested) {
-                            trainerBadgeHtml = `<span class="text-[10px] bg-yellow-100 text-yellow-700 px-2 py-1 rounded shadow-sm font-bold">بانتظار موافقة الاستلام</span>`;
+                            trainerBadgeHtml = `<span class="text-[10px] bg-yellow-100 text-yellow-700 px-2 py-1 rounded shadow-sm font-bold border border-yellow-200">بانتظار موافقة الاستلام</span>`;
                         } else {
                             trainerBadgeHtml = `<button onclick="window.requestTakeOverTraining('${t.id}')" class="text-[10px] bg-amber-50 text-amber-600 px-2 py-1 rounded shadow-sm font-bold hover:bg-amber-100 transition border border-amber-200">طلب استلام التدريب</button>`;
                         }
                     }
 
+                    // Highlight card border if it's my trainee
+                    const cardBorder = isMyTrainee ? 'border-amber-400 dark:border-amber-600 shadow-md ring-1 ring-amber-100' : 'border-gray-200 dark:border-gray-700 shadow-sm';
+
                     activeCont.innerHTML += `
-                        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col h-full relative group">
+                        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border ${cardBorder} flex flex-col h-full relative group transition hover:shadow-lg">
                             <div class="flex justify-between items-start mb-2">
                                 <h3 class="font-bold text-lg text-amber-600 dark:text-amber-500"><i class="fa-solid fa-user-graduate mx-1"></i> ${escapeHTML(t.name)}</h3>
                                 ${trainerBadgeHtml}
@@ -5012,9 +5159,9 @@
                                 <p><i class="fa-solid fa-bullseye text-gray-400 mx-1"></i> السبب: <span>${escapeHTML(t.reason || '-')}</span> | <span dir="ltr" class="font-bold text-amber-600">${escapeHTML(t.field || '-')}</span></p>
                                 <p><i class="fa-solid fa-phone text-gray-400 mx-1"></i> <span dir="ltr">${escapeHTML(t.phone || '-')}</span></p>
                                 <p><i class="fa-solid fa-calendar-day text-gray-400 mx-1"></i> البدء: <span dir="ltr">${escapeHTML(t.startDate)}</span></p>
-                                <p><i class="fa-solid fa-chalkboard-user text-gray-400 mx-1"></i> المدرب: <span class="font-bold">${trainersNames}</span></p>
+                                <p><i class="fa-solid fa-chalkboard-user text-gray-400 mx-1"></i> المدرب: <span class="font-bold ${isMyTrainee ? 'text-green-600' : ''}">${trainersNames}</span></p>
                             </div>
-                            ${t.notes ? `<p class="text-[10px] text-gray-500 bg-gray-50 dark:bg-gray-700 p-2 rounded mb-2">${escapeHTML(t.notes)}</p>` : ''}
+                            ${t.notes ? `<p class="text-[10px] text-gray-500 bg-gray-50 dark:bg-gray-700 p-2 rounded mb-2 border border-gray-100 dark:border-gray-600">${escapeHTML(t.notes)}</p>` : ''}
                             
                             ${handoverRequestsHtml}
                             ${sessionsHtml}
@@ -5031,11 +5178,24 @@
                         compDate = new Date(t.completedAt).toLocaleString('ar-EG', {year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
                     }
 
+                    // CEO can delete
+                    const deleteBtnHtml = currentUserData.role === 'CEO' ? `<button onclick="window.deleteTrainee('${t.id}')" class="text-red-500 hover:text-red-700 p-1 transition ml-1"><i class="fa-solid fa-trash"></i></button>` : '';
+                    
+                    // Evaluation Stars
+                    const evalStars = (t.evaluation !== undefined) ? generateStarsHtml(t.evaluation) : '<span class="text-[10px] text-gray-400">لا يوجد تقييم</span>';
+
                     pastCont.innerHTML += `
-                        <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col h-full opacity-80">
+                        <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col h-full opacity-90 transition hover:shadow-md">
                             <div class="flex justify-between items-start mb-2">
                                 <h3 class="font-bold text-lg text-gray-700 dark:text-gray-300 line-through decoration-gray-400"><i class="fa-solid fa-user-graduate mx-1"></i> ${escapeHTML(t.name)}</h3>
-                                <span class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded shadow-sm font-bold"><i class="fa-solid fa-check"></i> تدريب مكتمل</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded shadow-sm font-bold border border-green-200"><i class="fa-solid fa-check"></i> تدريب مكتمل</span>
+                                    ${deleteBtnHtml}
+                                </div>
+                            </div>
+                            <div class="mb-3 bg-white dark:bg-gray-700 p-2 rounded border border-gray-100 dark:border-gray-600 flex items-center justify-between">
+                                <span class="text-xs font-bold text-gray-700 dark:text-gray-300">التقييم النهائي:</span>
+                                ${evalStars}
                             </div>
                             <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1 mb-2">
                                 <p><i class="fa-solid fa-bullseye mx-1"></i> السبب: <span>${escapeHTML(t.reason || '-')}</span> | <span dir="ltr" class="font-bold">${escapeHTML(t.field || '-')}</span></p>
