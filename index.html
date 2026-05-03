@@ -3278,17 +3278,6 @@
                 `;
             });
             chatBox.scrollTop = chatBox.scrollHeight;
-        } 
-                <div class="border rounded px-3 py-2 w-[85%] ${align}">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="font-bold text-[10px] text-gray-800 dark:text-gray-200">${escapeHTML(c.senderName)}</span>
-                            <span class="text-[9px] text-gray-400">${time}</span>
-                        </div>
-                        <p class="text-xs text-gray-700 dark:text-gray-300">${escapeHTML(c.text)}</p>
-                    </div>
-                `;
-            });
-            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
         window.sendLeaveComment = async () => {
