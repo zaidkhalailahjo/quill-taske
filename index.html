@@ -50,6 +50,13 @@
         .animate-stripes { animation: slideStripes 1.5s linear infinite; }
         @keyframes slideStripes { from { background-position: 1.5rem 0; } to { background-position: 0 0; } }
 
+        /* Loading Dots Animation */
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        @keyframes dots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } 100% { content: ''; } }
+
         .app-card {
             display: flex;
             flex-direction: column;
@@ -295,6 +302,10 @@
                     <i class="fa-solid fa-robot w-6 text-center ml-3"></i><span class="font-semibold text-sm">الروبوتات</span>
                 </button>
                 
+                <button onclick="window.location.hash='inventory'" class="nav-btn w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative" data-section="inventory">
+                    <i class="fa-solid fa-boxes-stacked w-6 text-center ml-3"></i><span class="font-semibold text-sm">الجرد</span>
+                </button>
+                
                 <button id="nav-expenses-btn" onclick="window.location.hash='expenses'" class="nav-btn hidden w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative" data-section="expenses">
                     <i class="fa-solid fa-file-invoice-dollar w-6 text-center ml-3"></i><span class="font-semibold text-sm">المصاريف والنثريات</span>
                 </button>
@@ -317,7 +328,7 @@
                     </a>
                     
                     <a href="https://quill.farah-snacks.store/#notices" class="w-full flex items-center py-3 px-4 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors">
-                        <i class="fa-solid fa-bullhorn w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="العملاء">التعميمات</span>
+                        <i class="fa-solid fa-bullhorn w-6 text-center ml-3"></i><span class="font-semibold text-sm" data-i18n="التعميمات">التعميمات</span>
                     </a>
                 </div>
                 
@@ -412,18 +423,11 @@
                         <span class="font-bold text-gray-800 dark:text-gray-200">المصاريف والنثريات</span>
                     </div>
 
-                    <div onclick="window.location.hash='office-inventory'" class="app-card hover:border-purple-200 group relative">
+                    <div onclick="window.location.hash='inventory'" class="app-card hover:border-purple-200 group relative">
                         <div class="app-icon-container bg-purple-50 text-purple-500 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-desktop"></i>
-                        </div>
-                        <span class="font-bold text-gray-800 dark:text-gray-200">جرد المكتب</span>
-                    </div>
-
-                    <div onclick="window.location.hash='warehouse-inventory'" class="app-card hover:border-orange-200 group relative">
-                        <div class="app-icon-container bg-orange-50 text-orange-500 group-hover:scale-110 transition-transform">
                             <i class="fa-solid fa-boxes-stacked"></i>
                         </div>
-                        <span class="font-bold text-gray-800 dark:text-gray-200">جرد المستودع</span>
+                        <span class="font-bold text-gray-800 dark:text-gray-200">الجرد</span>
                     </div>
 
                     <a href="https://quill.farah-snacks.store/#tasks" class="app-card hover:border-emerald-200 group relative">
@@ -516,72 +520,44 @@
                 <div id="soldContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
             </section>
 
-            <!-- جرد المكتب -->
-            <section id="office-inventory" class="section-content hidden animate-fade-in p-4 md:p-0">
+            <!-- الجرد الموحد (مكتب ومستودع) -->
+            <section id="inventory" class="section-content hidden animate-fade-in p-4 md:p-0">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
-                    <p class="text-sm md:text-base text-purple-600 dark:text-purple-400 font-bold"><i class="fa-solid fa-desktop mx-2"></i>إدارة جرد المكتب</p>
+                    <p class="text-sm md:text-base text-purple-600 dark:text-purple-400 font-bold"><i class="fa-solid fa-boxes-stacked mx-2"></i>إدارة الجرد العام</p>
                     <div class="flex gap-2 w-full md:w-auto items-center">
                         <div class="flex items-center gap-2 flex-1 md:flex-none">
                             <div class="search-wrapper w-full">
                                 <i class="fa-solid fa-search search-icon"></i>
-                                <input type="text" id="searchOfficeInventory" oninput="renderInventory('office')" placeholder="بحث (عربي/إنجليزي)..." class="search-input w-full">
+                                <input type="text" id="searchInventory" oninput="renderInventory()" placeholder="بحث في الجرد..." class="search-input w-full">
                             </div>
-                            <span id="officeSearchCount" class="text-xs bg-secondary text-white px-2 py-1 rounded-lg font-bold hidden whitespace-nowrap shadow-sm"></span>
+                            <span id="inventorySearchCount" class="text-xs bg-secondary text-white px-2 py-1 rounded-lg font-bold hidden whitespace-nowrap shadow-sm"></span>
                         </div>
-                        <button onclick="window.openAddInventoryModal('office')" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-sm flex gap-2">
-                            <i class="fa-solid fa-plus"></i> إضافة
+                        <button onclick="window.openAddInventoryModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-sm flex gap-2">
+                            <i class="fa-solid fa-plus"></i> إضافة جرد
                         </button>
                     </div>
                 </div>
 
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-gray-200 dark:border-gray-700 mb-6">
                     <div class="flex gap-4 w-full md:w-auto">
-                        <button onclick="window.switchInventoryTab('office', 'active')" id="tabOfficeActive" class="py-2 px-4 font-bold text-sm border-b-2 border-purple-600 text-purple-600 dark:text-purple-400">آخر جرد</button>
-                        <button onclick="window.switchInventoryTab('office', 'past')" id="tabOfficePast" class="py-2 px-4 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">جرد قديم</button>
+                        <button onclick="window.switchInventoryTab('active')" id="tabInventoryActive" class="py-2 px-4 font-bold text-sm border-b-2 border-purple-600 text-purple-600 dark:text-purple-400">آخر جرد (حالي)</button>
+                        <button onclick="window.switchInventoryTab('past')" id="tabInventoryPast" class="py-2 px-4 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">جرد قديم</button>
                     </div>
-                    <div id="bulkMoveOfficeContainer" class="w-full md:w-auto pb-2 md:pb-0">
-                        <button onclick="window.moveAllToOldInventory('office')" class="w-full md:w-auto bg-gray-500 hover:bg-gray-600 text-white px-4 py-1.5 rounded-lg transition-colors text-xs font-bold shadow-sm flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-boxes-packing"></i> نقل الكل للجرد القديم
+                    <div id="bulkMoveInventoryContainer" class="w-full md:w-auto pb-2 md:pb-0 flex items-center gap-2">
+                        <button onclick="window.moveAllToOldInventory()" class="w-full md:w-auto bg-gray-500 hover:bg-gray-600 text-white px-4 py-1.5 rounded-lg transition-colors text-xs font-bold shadow-sm flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-boxes-packing"></i> نقل جميع الجرد الحالي للقديم
                         </button>
+                    </div>
+                    <!-- منتقي التاريخ للظهور في تاب الجرد القديم فقط -->
+                    <div id="oldInventoryDateFilter" class="hidden w-full md:w-auto pb-2 md:pb-0">
+                        <select id="oldInventoryDateSelect" onchange="renderInventory()" class="w-full md:w-auto border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-1.5 text-sm font-bold outline-none">
+                            <option value="all">جميع التواريخ القديمة</option>
+                        </select>
                     </div>
                 </div>
 
-                <div id="officeActiveContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-                <div id="officePastContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-            </section>
-
-            <!-- جرد المستودع -->
-            <section id="warehouse-inventory" class="section-content hidden animate-fade-in p-4 md:p-0">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
-                    <p class="text-sm md:text-base text-orange-600 dark:text-orange-400 font-bold"><i class="fa-solid fa-boxes-stacked mx-2"></i>إدارة جرد المستودع</p>
-                    <div class="flex gap-2 w-full md:w-auto items-center">
-                        <div class="flex items-center gap-2 flex-1 md:flex-none">
-                            <div class="search-wrapper w-full">
-                                <i class="fa-solid fa-search search-icon"></i>
-                                <input type="text" id="searchWarehouseInventory" oninput="renderInventory('warehouse')" placeholder="بحث (عربي/إنجليزي)..." class="search-input w-full">
-                            </div>
-                            <span id="warehouseSearchCount" class="text-xs bg-secondary text-white px-2 py-1 rounded-lg font-bold hidden whitespace-nowrap shadow-sm"></span>
-                        </div>
-                        <button onclick="window.openAddInventoryModal('warehouse')" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow-sm flex gap-2">
-                            <i class="fa-solid fa-plus"></i> إضافة
-                        </button>
-                    </div>
-                </div>
-
-                <div class="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-gray-200 dark:border-gray-700 mb-6">
-                    <div class="flex gap-4 w-full md:w-auto">
-                        <button onclick="window.switchInventoryTab('warehouse', 'active')" id="tabWarehouseActive" class="py-2 px-4 font-bold text-sm border-b-2 border-orange-600 text-orange-600 dark:text-orange-400">آخر جرد</button>
-                        <button onclick="window.switchInventoryTab('warehouse', 'past')" id="tabWarehousePast" class="py-2 px-4 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">جرد قديم</button>
-                    </div>
-                    <div id="bulkMoveWarehouseContainer" class="w-full md:w-auto pb-2 md:pb-0">
-                        <button onclick="window.moveAllToOldInventory('warehouse')" class="w-full md:w-auto bg-gray-500 hover:bg-gray-600 text-white px-4 py-1.5 rounded-lg transition-colors text-xs font-bold shadow-sm flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-boxes-packing"></i> نقل الكل للجرد القديم
-                        </button>
-                    </div>
-                </div>
-
-                <div id="warehouseActiveContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-                <div id="warehousePastContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                <div id="inventoryActiveContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                <div id="inventoryPastContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
             </section>
 
             <!-- الحضور والانصراف -->
@@ -729,6 +705,9 @@
                     <div class="flex flex-wrap gap-2 w-full md:w-auto">
                         <button id="toggleSelectModeBtn" onclick="window.toggleSelectMode()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm font-bold shadow flex-1 md:flex-none justify-center">
                             تحديد ملفات
+                        </button>
+                        <button id="selectAllDriveBtn" onclick="window.selectAllDriveFiles()" class="hidden bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg transition-colors items-center text-sm font-bold shadow flex-1 md:flex-none justify-center">
+                            تحديد الكل
                         </button>
                         <button id="bulkShareDriveBtn" onclick="window.shareSelectedItems()" class="hidden bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm font-bold shadow flex-1 md:flex-none justify-center">
                             <i class="fa-solid fa-share-nodes mx-2"></i> مشاركة
@@ -1153,21 +1132,31 @@
         </div>
     </div>
 
-    <!-- نافذة المشاركة الاحتياطية -->
+    <!-- نافذة المشاركة (محدثة لدعم الإدخال اليدوي للإيميل والهاتف) -->
     <div id="shareModalFallback" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[65] p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden flex flex-col">
             <div class="bg-green-600 text-white p-4 flex justify-between items-center flex-shrink-0">
-                <h3 class="font-bold text-base md:text-lg">مشاركة الملفات</h3>
+                <h3 class="font-bold text-base md:text-lg">مشاركة الملفات المحددة</h3>
                 <button onclick="window.closeModal('shareModalFallback')" class="hover:text-green-200"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
-            <div class="p-4 md:p-6 flex flex-col items-center gap-4">
+            <div class="p-4 md:p-6 flex flex-col items-center gap-6">
                 <textarea id="shareTextContent" class="hidden"></textarea>
-                <button onclick="window.shareViaWhatsApp()" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg font-bold flex items-center justify-center gap-3 transition">
-                    <i class="fa-brands fa-whatsapp text-2xl"></i> مشاركة عبر WhatsApp
-                </button>
-                <button onclick="window.shareViaOutlook()" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg font-bold flex items-center justify-center gap-3 transition">
-                    <i class="fa-regular fa-envelope text-2xl"></i> مشاركة عبر الإيميل / Outlook
-                </button>
+                
+                <div class="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-900/50 space-y-3">
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300">المشاركة عبر واتساب</label>
+                    <input type="text" id="sharePhoneInput" placeholder="رقم الهاتف (اختياري، مثلاً: 96279...)" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-green-500 outline-none text-sm text-right" dir="ltr">
+                    <button onclick="window.shareViaWhatsApp()" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2.5 rounded-lg font-bold flex items-center justify-center gap-3 transition">
+                        <i class="fa-brands fa-whatsapp text-xl"></i> إرسال عبر WhatsApp
+                    </button>
+                </div>
+
+                <div class="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-900/50 space-y-3">
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300">المشاركة عبر الإيميل</label>
+                    <input type="email" id="shareEmailInput" placeholder="البريد الإلكتروني للجهة المستلمة (اختياري)" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-blue-500 outline-none text-sm text-right" dir="ltr">
+                    <button onclick="window.shareViaOutlook()" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2.5 rounded-lg font-bold flex items-center justify-center gap-3 transition">
+                        <i class="fa-regular fa-envelope text-xl"></i> إرسال عبر الإيميل / Outlook
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -1192,72 +1181,82 @@
         </div>
     </div>
 
-    <!-- نافذة الجرد -->
+    <!-- نافذة الجرد (الموحدة) -->
     <div id="inventoryModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden">
-            <div id="invModalHeader" class="bg-purple-600 text-white p-4 flex justify-between items-center">
-                <h3 class="font-bold text-base md:text-lg">إضافة محتويات</h3>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+            <div id="invModalHeader" class="bg-purple-600 text-white p-4 flex justify-between items-center flex-shrink-0">
+                <h3 class="font-bold text-base md:text-lg">إضافة محتويات للجرد</h3>
                 <button onclick="window.closeModal('inventoryModal')" class="hover:text-gray-200"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
-            <form id="inventoryForm" class="p-4 md:p-6 space-y-4">
-                <input type="hidden" id="invLocation">
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">نوع المحتوى</label>
-                    <select id="invItemType" onchange="window.handleInvTypeChange()" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none font-bold">
-                        <option value="robot">روبوت</option>
-                        <option value="part">قطعة</option>
-                    </select>
-                </div>
-                
-                <div id="invRobotFields" class="space-y-4">
+            <div class="p-4 md:p-6 overflow-y-auto flex-1">
+                <form id="inventoryForm" class="space-y-4">
+                    <input type="hidden" id="invLocation">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">اسم الروبوت</label>
-                        <input list="robotNamesList" id="invRobotName" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none" dir="ltr" placeholder="اختر أو اكتب الاسم">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">الرقم التسلسلي</label>
-                        <input type="text" id="invRobotSerial" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none" dir="ltr">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">الحالة</label>
-                        <select id="invRobotStatus" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none">
-                            <option value="جديد">جديد</option>
-                            <option value="مستعمل">مستعمل</option>
-                            <option value="معطل">معطل</option>
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">نوع المحتوى</label>
+                        <select id="invItemType" onchange="window.handleInvTypeChange()" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none font-bold focus:border-purple-500">
+                            <option value="robot">روبوت</option>
+                            <option value="part">قطعة / قطع غيار</option>
+                            <option value="furniture">مفروشات (أثاث)</option>
+                            <option value="electronics">إلكترونيات / أجهزة</option>
+                            <option value="misc">متفرقات</option>
                         </select>
                     </div>
-                </div>
-
-                <div id="invPartFields" class="space-y-4 hidden">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">اسم القطعة</label>
-                        <input type="text" id="invPartName" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none">
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    
+                    <div id="invRobotFields" class="space-y-4">
                         <div>
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">عدد الموجود</label>
-                            <input type="number" id="invPartQty" min="1" value="1" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none" dir="ltr">
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">اسم الروبوت</label>
+                            <input list="robotNamesList" id="invRobotName" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500" dir="ltr" placeholder="اختر أو اكتب الاسم">
                         </div>
                         <div>
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">الرقم التسلسلي (إن وجد)</label>
-                            <input type="text" id="invPartSerial" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none" dir="ltr" placeholder="اختياري">
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">الرقم التسلسلي</label>
+                            <input type="text" id="invRobotSerial" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500" dir="ltr">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">الحالة</label>
+                            <select id="invRobotStatus" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500">
+                                <option value="جديد">جديد</option>
+                                <option value="مستعمل">مستعمل</option>
+                                <option value="معطل">معطل</option>
+                            </select>
                         </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">الحالة</label>
-                        <select id="invPartStatus" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none">
-                            <option value="جديد">جديد</option>
-                            <option value="مستخدم">مستخدم</option>
-                            <option value="غير صالحة للاستخدام">غير صالحة للاستخدام</option>
-                        </select>
-                    </div>
-                </div>
 
-                <div class="pt-4 flex justify-end gap-2 border-t dark:border-gray-700">
-                    <button type="button" onclick="window.closeModal('inventoryModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-bold text-sm">إلغاء</button>
-                    <button type="submit" id="invSubmitBtn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-bold text-sm shadow">حفظ المحتويات</button>
-                </div>
-            </form>
+                    <div id="invGenericFields" class="space-y-4 hidden">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">اسم / وصف العنصر</label>
+                            <input type="text" id="invGenericName" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">العدد (الكمية)</label>
+                                <input type="number" id="invGenericQty" min="1" value="1" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500" dir="ltr">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">رقم تسلسلي (إن وجد)</label>
+                                <input type="text" id="invGenericSerial" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500" dir="ltr" placeholder="اختياري">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">الحالة الجاهزية</label>
+                            <select id="invGenericStatus" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500">
+                                <option value="جديد">جديد</option>
+                                <option value="مستخدم / سليم">مستخدم / سليم</option>
+                                <option value="بحاجة لصيانة">بحاجة لصيانة</option>
+                                <option value="تالف">تالف</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">تفاصيل إضافية</label>
+                            <textarea id="invGenericNotes" rows="2" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-purple-500 whitespace-pre-wrap" placeholder="مثال: لون المكتب، مكان القطعة..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 flex justify-end gap-2 border-t dark:border-gray-700">
+                        <button type="button" onclick="window.closeModal('inventoryModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-bold text-sm">إلغاء</button>
+                        <button type="submit" id="invSubmitBtn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-bold text-sm shadow">حفظ في الجرد</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -1625,11 +1624,12 @@
         let hasPunchedInToday = true; 
         let seenBackgroundNotifIds = new Set();
         let currentRobotsTab = 'rentedNow'; 
-        
-        // إعدادات تخزين الدرايف الجديدة
+        let activeUploads = []; // قائمة الملفات التي يتم رفعها حالياً
+
+        // مسار ملف Google Apps Script المحدث
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHp_AgS8kVIBMNdlSTCHb6YMAe9Tsv_8LSa-tsGHcyldgo9W8wVEDFvRUd3sqJxsl-/exec";
         const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
         const MAX_GLOBAL_STORAGE = 5 * 1024 * 1024 * 1024 * 1024; // 5TB 
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzffAWkWFXZ5qesE7-_i1SSufvUlowRDxT7F53Uc_Q-lgY2q8dLiGWY4LAC5jaQ6Ad2/exec";
 
         const defaultNotifPreferences = {
             style: 'number',
@@ -1660,7 +1660,6 @@
         document.addEventListener("DOMContentLoaded", () => {
             applyLanguageToDOM();
             
-            // مستمع زر Enter في خانة المحادثة للطلبات
             const leaveChatInput = document.getElementById('leaveChatInput');
             if(leaveChatInput) {
                 leaveChatInput.addEventListener('keypress', function (e) {
@@ -1728,14 +1727,14 @@
         }, {passive: true});
 
         function handleSwipe() {
-            if (touchendX < touchstartX - 50) window.navigateViewer(1); // Swipe left -> Next
-            if (touchendX > touchstartX + 50) window.navigateViewer(-1); // Swipe right -> Prev
+            if (touchendX < touchstartX - 50) window.navigateViewer(1); 
+            if (touchendX > touchstartX + 50) window.navigateViewer(-1); 
         }
 
         document.addEventListener('keydown', (e) => {
             if (!document.getElementById('imageViewerModal').classList.contains('hidden')) {
-                if (e.key === 'ArrowRight' || e.key === 'ArrowUp') window.navigateViewer(-1); // Next in RTL
-                if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') window.navigateViewer(1); // Prev in RTL
+                if (e.key === 'ArrowRight' || e.key === 'ArrowUp') window.navigateViewer(-1); 
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') window.navigateViewer(1); 
                 if (e.key === 'Escape') window.closeImageViewer();
             }
         });
@@ -1776,7 +1775,6 @@
             }
         };
         // ----------------------------------------------------------------------
-
 
         window.switchRobotsTab = (tabName) => {
             currentRobotsTab = tabName;
@@ -2418,7 +2416,6 @@
             });
         }
 
-
         window.exportSystemData = (format) => {
             if(!currentUserData || currentUserData.role !== 'CEO') return;
 
@@ -2542,7 +2539,6 @@
             }
         };
 
-        // تم توحيد قاعدة البيانات هنا لتصبح db فقط
         function getColRef(colName) { return collection(db, 'artifacts', appId, 'public', 'data', colName); }
         function getStorageColRef(colName) { return collection(db, 'artifacts', appId, 'public', 'data', colName); }
 
@@ -2759,18 +2755,34 @@
         window.toggleSelectMode = () => {
             isSelectMode = !isSelectMode;
             const btn = document.getElementById('toggleSelectModeBtn');
+            const selectAllBtn = document.getElementById('selectAllDriveBtn');
             btn.innerText = isSelectMode ? 'إلغاء التحديد' : 'تحديد ملفات';
+            
             if(isSelectMode) {
                 btn.classList.replace('bg-blue-500', 'bg-gray-500');
                 btn.classList.replace('hover:bg-blue-600', 'hover:bg-gray-600');
+                selectAllBtn.classList.remove('hidden');
+                selectAllBtn.classList.add('flex');
             } else {
                 btn.classList.replace('bg-gray-500', 'bg-blue-500');
                 btn.classList.replace('hover:bg-gray-600', 'hover:bg-blue-600');
+                selectAllBtn.classList.remove('flex');
+                selectAllBtn.classList.add('hidden');
+                document.querySelectorAll('.drive-item-cb').forEach(cb => cb.checked = false);
             }
             
-            document.querySelectorAll('.drive-item-cb').forEach(cb => cb.checked = false);
             window.updateBulkActionBtnsVisibility();
             renderDriveFiles();
+        };
+
+        let isAllSelected = false;
+        window.selectAllDriveFiles = () => {
+            if(!isSelectMode) return;
+            isAllSelected = !isAllSelected;
+            const checkboxes = document.querySelectorAll('.drive-item-cb');
+            checkboxes.forEach(cb => cb.checked = isAllSelected);
+            document.getElementById('selectAllDriveBtn').innerText = isAllSelected ? 'إلغاء تحديد الكل' : 'تحديد الكل';
+            window.updateBulkActionBtnsVisibility();
         };
 
         window.toggleCheckbox = (id) => {
@@ -2818,7 +2830,7 @@
                 return;
             }
 
-            const shareText = "مرحباً، إليك الملفات التالية:\n\n" + links.join('\n\n');
+            const shareText = "مرحباً، إليك الملفات التالية من نظام Quill:\n\n" + links.join('\n\n');
 
             if (navigator.share) {
                 try {
@@ -2839,12 +2851,19 @@
 
         window.shareViaWhatsApp = () => {
             const text = encodeURIComponent(document.getElementById('shareTextContent').value);
-            window.open(`https://wa.me/?text=${text}`, '_blank');
+            let phone = document.getElementById('sharePhoneInput').value.trim();
+            if(phone) {
+                phone = phone.replace(/[^0-9]/g, '');
+                window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+            } else {
+                window.open(`https://wa.me/?text=${text}`, '_blank');
+            }
         };
 
         window.shareViaOutlook = () => {
             const text = encodeURIComponent(document.getElementById('shareTextContent').value);
-            window.open(`mailto:?subject=ملفات مشتركة من نظام Quill&body=${text}`, '_blank');
+            const email = document.getElementById('shareEmailInput').value.trim();
+            window.open(`mailto:${email}?subject=ملفات مشتركة من نظام Quill&body=${text}`, '_blank');
         };
 
         window.handleCreateFolder = async (e) => {
@@ -2914,11 +2933,19 @@
 
                 const sizeStr = formatBytes(file.size);
                 
+                // إضافة الملف لقائمة الرفع النشطة لإظهار المؤشر
+                const uploadId = 'upload_' + Date.now() + '_' + i;
+                activeUploads.push({
+                    id: uploadId,
+                    name: file.name,
+                    sizeStr: sizeStr,
+                    folderId: targetFolderId
+                });
+                renderDriveFiles();
+                
                 const reader = new FileReader();
                 reader.onload = async (ev) => {
                     const base64Data = ev.target.result.split(',')[1];
-                    
-                    showToast(`جاري رفع ملف: ${file.name} إلى Google Drive...`, 'info');
                     
                     try {
                         const payload = JSON.stringify({
@@ -2962,12 +2989,16 @@
                             timestamp: Date.now()
                         });
 
-                        if(fileUrl !== "#") showToast(`تم رفع ملف ${file.name} على Google Drive بنجاح!`, 'success');
+                        if(fileUrl !== "#") showToast(`تم رفع ملف ${file.name} بنجاح!`, 'success');
                         window.logAction('رفع ملف', `تم رفع ملف جديد: ${file.name} إلى المستندات`);
 
                     } catch (err) {
                         console.error(err);
                         showToast(`حدث خطأ أثناء رفع ${file.name}`, 'error');
+                    } finally {
+                        // إزالة من قائمة الرفع
+                        activeUploads = activeUploads.filter(u => u.id !== uploadId);
+                        renderDriveFiles();
                     }
                 };
                 reader.readAsDataURL(file);
@@ -3023,7 +3054,7 @@
                         }
                     }
                     showToast('تم حذف العناصر المحددة بنجاح', 'success');
-                    window.toggleSelectMode(); // Close select mode after deletion
+                    window.toggleSelectMode();
                 } catch(e) {
                     console.error(e);
                     showToast('حدث خطأ أثناء الحذف', 'error');
@@ -3128,7 +3159,22 @@
                 f.name.toLowerCase().includes(searchTerm)
             );
 
-            if(currentFoldersList.length === 0 && currentFilesList.length === 0) {
+            // عرض بطاقات الرفع المؤقتة
+            const currentActiveUploads = activeUploads.filter(u => u.folderId === currentFolderId);
+            currentActiveUploads.forEach(u => {
+                allContainer.innerHTML += `
+                    <div class="bg-gray-100 dark:bg-gray-800 border-2 border-dashed border-blue-300 dark:border-blue-700 rounded-xl p-4 shadow-sm flex flex-col h-full relative opacity-70">
+                        <div class="flex justify-between items-start mb-2 pt-2">
+                            <i class="fa-solid fa-cloud-arrow-up text-blue-400 text-2xl animate-bounce"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-blue-800 dark:text-blue-300 truncate mb-1" title="${escapeHTML(u.name)}">${escapeHTML(u.name)}</h4>
+                        <p class="text-[10px] text-blue-500 font-bold loading-dots">جاري التحميل</p>
+                        <p class="text-[10px] text-gray-400 mt-1">${u.sizeStr}</p>
+                    </div>
+                `;
+            });
+
+            if(currentFoldersList.length === 0 && currentFilesList.length === 0 && currentActiveUploads.length === 0) {
                 allContainer.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">المجلد فارغ أو لا توجد نتائج مطابقة.</p>';
             }
 
@@ -3207,8 +3253,13 @@
                         </div>
                     </div>
                 `;
-                if(f.pinned && !isSelectMode) pinnedContainer.innerHTML += cardHtml;
-                allContainer.innerHTML += cardHtml;
+                
+                // التعديل: الملف المثبت يظهر فقط في قسم المثبتة ولا يظهر بالأسفل
+                if(f.pinned) {
+                    pinnedContainer.innerHTML += cardHtml;
+                } else {
+                    allContainer.innerHTML += cardHtml;
+                }
             });
             
             document.getElementById('pinnedFilesTitle').classList.toggle('hidden', pinnedContainer.innerHTML === '' || isSelectMode);
@@ -3217,7 +3268,7 @@
 
         function updateStorageProgress() {
             const currentStorage = globalFiles.reduce((acc, f) => acc + (f.size || 0), 0);
-            const percentage = (currentStorage / MAX_GLOBAL_STORAGE) * 100;updateStorageProgress
+            const percentage = (currentStorage / MAX_GLOBAL_STORAGE) * 100;
             document.getElementById('storageText').innerText = `${formatBytes(currentStorage)} / 5 TB`;
             const bar = document.getElementById('storageBar');
             bar.style.width = `${percentage}%`;
@@ -4059,32 +4110,51 @@
             });
         };
 
-        // الجرد (المكتب / المستودع)
-        window.switchInventoryTab = (location, tab) => {
-            const activeBtn = document.getElementById(`tab${location.charAt(0).toUpperCase() + location.slice(1)}Active`);
-            const pastBtn = document.getElementById(`tab${location.charAt(0).toUpperCase() + location.slice(1)}Past`);
-            const activeContainer = document.getElementById(`${location}ActiveContainer`);
-            const pastContainer = document.getElementById(`${location}PastContainer`);
-            const bulkMoveBtnContainer = document.getElementById(`bulkMove${location.charAt(0).toUpperCase() + location.slice(1)}Container`);
-            const color = location === 'office' ? 'purple' : 'orange';
+        // الجرد (الموحد)
+        window.switchInventoryTab = (tab) => {
+            const activeBtn = document.getElementById('tabInventoryActive');
+            const pastBtn = document.getElementById('tabInventoryPast');
+            const activeContainer = document.getElementById('inventoryActiveContainer');
+            const pastContainer = document.getElementById('inventoryPastContainer');
+            const bulkMoveBtnContainer = document.getElementById('bulkMoveInventoryContainer');
+            const dateFilter = document.getElementById('oldInventoryDateFilter');
 
             if(tab === 'active') {
-                activeBtn.className = `py-2 px-4 font-bold text-sm border-b-2 border-${color}-600 text-${color}-600 dark:text-${color}-400`;
+                activeBtn.className = "py-2 px-4 font-bold text-sm border-b-2 border-purple-600 text-purple-600 dark:text-purple-400";
                 pastBtn.className = "py-2 px-4 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300";
                 activeContainer.classList.remove('hidden');
                 pastContainer.classList.add('hidden');
                 if(bulkMoveBtnContainer) bulkMoveBtnContainer.classList.remove('hidden');
+                if(dateFilter) dateFilter.classList.add('hidden');
             } else {
-                pastBtn.className = `py-2 px-4 font-bold text-sm border-b-2 border-${color}-600 text-${color}-600 dark:text-${color}-400`;
+                pastBtn.className = "py-2 px-4 font-bold text-sm border-b-2 border-purple-600 text-purple-600 dark:text-purple-400";
                 activeBtn.className = "py-2 px-4 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300";
                 pastContainer.classList.remove('hidden');
                 activeContainer.classList.add('hidden');
                 if(bulkMoveBtnContainer) bulkMoveBtnContainer.classList.add('hidden');
+                if(dateFilter) dateFilter.classList.remove('hidden');
+                
+                populateOldInventoryDates();
             }
         };
 
-        window.openAddInventoryModal = (location) => {
-            document.getElementById('invLocation').value = location;
+        function populateOldInventoryDates() {
+            const select = document.getElementById('oldInventoryDateSelect');
+            if(!select) return;
+            const oldItems = globalInventory.filter(i => i.isOld && i.movedToOldAt);
+            const dates = new Set();
+            oldItems.forEach(i => {
+                const d = new Date(i.movedToOldAt).toLocaleDateString('en-GB'); 
+                dates.add(d);
+            });
+            
+            select.innerHTML = '<option value="all">جميع التواريخ القديمة</option>';
+            Array.from(dates).sort().reverse().forEach(d => {
+                select.innerHTML += `<option value="${d}">${d}</option>`;
+            });
+        }
+
+        window.openAddInventoryModal = () => {
             document.getElementById('inventoryForm').reset();
             window.handleInvTypeChange(); 
             window.openModal('inventoryModal');
@@ -4094,16 +4164,16 @@
             const type = document.getElementById('invItemType').value;
             if(type === 'robot') {
                 document.getElementById('invRobotFields').classList.remove('hidden');
-                document.getElementById('invPartFields').classList.add('hidden');
+                document.getElementById('invGenericFields').classList.add('hidden');
                 document.getElementById('invRobotName').required = true;
                 document.getElementById('invRobotSerial').required = true;
-                document.getElementById('invPartName').required = false;
+                document.getElementById('invGenericName').required = false;
             } else {
                 document.getElementById('invRobotFields').classList.add('hidden');
-                document.getElementById('invPartFields').classList.remove('hidden');
+                document.getElementById('invGenericFields').classList.remove('hidden');
                 document.getElementById('invRobotName').required = false;
                 document.getElementById('invRobotSerial').required = false;
-                document.getElementById('invPartName').required = true;
+                document.getElementById('invGenericName').required = true;
             }
         };
 
@@ -4111,11 +4181,9 @@
             e.preventDefault();
             if(!currentUserData) return;
 
-            const location = document.getElementById('invLocation').value; 
             const type = document.getElementById('invItemType').value; 
             
             let data = {
-                location: location,
                 itemType: type,
                 isOld: false,
                 addedBy: currentUserData.name,
@@ -4128,35 +4196,38 @@
                 data.status = document.getElementById('invRobotStatus').value;
                 data.quantity = 1; 
             } else {
-                data.name = document.getElementById('invPartName').value;
-                const qtyVal = parseInt(document.getElementById('invPartQty').value);
+                data.name = document.getElementById('invGenericName').value;
+                const qtyVal = parseInt(document.getElementById('invGenericQty').value);
                 data.quantity = isNaN(qtyVal) ? 1 : qtyVal;
-                data.serialNumber = document.getElementById('invPartSerial').value || 'لا يوجد';
-                data.status = document.getElementById('invPartStatus').value;
+                data.serialNumber = document.getElementById('invGenericSerial').value || 'لا يوجد';
+                data.status = document.getElementById('invGenericStatus').value;
+                data.notes = document.getElementById('invGenericNotes').value;
             }
 
             try {
                 await addDoc(getColRef('inventory'), data);
                 window.closeModal('inventoryModal');
                 showToast('تمت إضافة العنصر بنجاح', 'success');
-                window.logAction('إضافة جرد', `تم إضافة ${data.name} إلى جرد ${location === 'office' ? 'المكتب' : 'المستودع'}`);
+                window.logAction('إضافة جرد', `تم إضافة ${data.name} إلى الجرد`);
             } catch(err) { console.error(err); }
         });
 
         window.moveToOldInventory = async (id) => {
             if(confirm('نقل هذا العنصر إلى الجرد القديم؟')) {
                 try {
-                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id), { isOld: true });
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id), { 
+                        isOld: true,
+                        movedToOldAt: Date.now()
+                    });
                     showToast('تم النقل للجرد القديم', 'info');
                 } catch(e) { console.error(e); }
             }
         };
 
-        window.moveAllToOldInventory = async (location) => {
-            const locationName = location === 'office' ? 'المكتب' : 'المستودع';
-            if(confirm(`هل أنت متأكد من نقل جميع محتويات الجرد الحالي لـ (${locationName}) إلى الجرد القديم؟`)) {
+        window.moveAllToOldInventory = async () => {
+            if(confirm(`هل أنت متأكد من نقل جميع محتويات الجرد الحالي إلى الجرد القديم؟`)) {
                 showToast('جاري النقل...', 'info');
-                const itemsToMove = globalInventory.filter(i => i.location === location && !i.isOld);
+                const itemsToMove = globalInventory.filter(i => !i.isOld);
                 
                 if(itemsToMove.length === 0) {
                     showToast('لا يوجد شيء لنقله', 'warning');
@@ -4164,11 +4235,16 @@
                 }
 
                 try {
+                    const now = Date.now();
                     await Promise.all(itemsToMove.map(item => 
-                        updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', item.id), { isOld: true })
+                        updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', item.id), { 
+                            isOld: true,
+                            movedToOldAt: now
+                        })
                     ));
                     showToast('تم النقل بنجاح', 'success');
-                    window.logAction('جرد شامل', `تم نقل جميع جرد ${locationName} إلى القديم`);
+                    window.logAction('جرد شامل', `تم نقل جميع الجرد الحالي إلى القديم`);
+                    populateOldInventoryDates();
                 } catch(e) { 
                     console.error(e); 
                     showToast('حدث خطأ أثناء النقل', 'error');
@@ -4186,11 +4262,11 @@
             }
         };
 
-        window.renderInventory = (location) => {
-            const activeCont = document.getElementById(`${location}ActiveContainer`);
-            const pastCont = document.getElementById(`${location}PastContainer`);
-            const searchTermInputId = location === 'office' ? 'searchOfficeInventory' : 'searchWarehouseInventory';
-            const searchTerm = document.getElementById(searchTermInputId)?.value.toLowerCase() || '';
+        window.renderInventory = () => {
+            const activeCont = document.getElementById('inventoryActiveContainer');
+            const pastCont = document.getElementById('inventoryPastContainer');
+            const searchTerm = document.getElementById('searchInventory')?.value.toLowerCase() || '';
+            const selectedDate = document.getElementById('oldInventoryDateSelect')?.value || 'all';
 
             if(!activeCont || !pastCont) return;
 
@@ -4200,23 +4276,27 @@
             let hasActive = false;
             let hasPast = false;
 
-            const colorClass = location === 'office' ? 'purple' : 'orange';
-            const locationItems = globalInventory.filter(i => 
-                i.location === location && 
-                (
-                    i.name.toLowerCase().includes(searchTerm) || 
-                    (i.serialNumber && i.serialNumber.toLowerCase().includes(searchTerm)) ||
-                    i.status.toLowerCase().includes(searchTerm)
-                )
+            const inventoryItems = globalInventory.filter(i => 
+                i.name.toLowerCase().includes(searchTerm) || 
+                (i.serialNumber && i.serialNumber.toLowerCase().includes(searchTerm)) ||
+                i.status.toLowerCase().includes(searchTerm) ||
+                (i.notes && i.notes.toLowerCase().includes(searchTerm))
             );
 
-            updateSearchBadge(location === 'office' ? 'officeSearchCount' : 'warehouseSearchCount', locationItems.length, searchTerm);
+            updateSearchBadge('inventorySearchCount', inventoryItems.length, searchTerm);
 
-            locationItems.forEach(item => {
+            inventoryItems.forEach(item => {
                 const dateStr = new Date(item.timestamp).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' });
-                const icon = item.itemType === 'robot' ? 'fa-robot' : 'fa-microchip';
-                const typeText = item.itemType === 'robot' ? 'روبوت' : 'قطعة';
-                const statusColor = item.status.includes('جديد') ? 'text-green-500' : (item.status.includes('معطل') || item.status.includes('غير صالحة') ? 'text-red-500' : 'text-yellow-500');
+                
+                let icon = 'fa-boxes-stacked';
+                let typeText = 'أخرى';
+                if(item.itemType === 'robot') { icon = 'fa-robot'; typeText = 'روبوت'; }
+                else if(item.itemType === 'part') { icon = 'fa-microchip'; typeText = 'قطعة / غيار'; }
+                else if(item.itemType === 'furniture') { icon = 'fa-chair'; typeText = 'مفروشات'; }
+                else if(item.itemType === 'electronics') { icon = 'fa-laptop'; typeText = 'إلكترونيات'; }
+                else if(item.itemType === 'misc') { icon = 'fa-box-open'; typeText = 'متفرقات'; }
+
+                const statusColor = item.status.includes('جديد') || item.status.includes('سليم') ? 'text-green-500' : (item.status.includes('معطل') || item.status.includes('تالف') || item.status.includes('غير صالحة') ? 'text-red-500' : 'text-yellow-500');
                 
                 const isCEO = currentUserData.role === 'CEO';
                 const deleteBtnHtml = isCEO ? `<button onclick="window.deleteInventoryItem('${item.id}')" class="text-red-400 hover:text-red-600 p-1" title="حذف"><i class="fa-solid fa-trash"></i></button>` : '';
@@ -4224,16 +4304,17 @@
                 let cardHtml = `
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col h-full relative group transition hover:shadow-md">
                         <div class="flex justify-between items-start mb-3 border-b dark:border-gray-700 pb-2">
-                            <h3 class="font-bold text-lg text-${colorClass}-600 dark:text-${colorClass}-400"><i class="fa-solid ${icon} mx-1"></i> ${escapeHTML(item.name)}</h3>
+                            <h3 class="font-bold text-lg text-purple-600 dark:text-purple-400"><i class="fa-solid ${icon} mx-1"></i> ${escapeHTML(item.name)}</h3>
                             <div class="flex gap-2">
                                 <span class="text-[10px] bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded font-bold">${typeText}</span>
                                 ${deleteBtnHtml}
                             </div>
                         </div>
                         <div class="text-xs text-gray-600 dark:text-gray-300 space-y-2 mb-4">
-                            <p class="flex justify-between"><span>العدد:</span> <span class="font-bold">${item.quantity}</span></p>
-                            <p class="flex justify-between"><span>الرقم التسلسلي:</span> <span class="font-bold" dir="ltr">${escapeHTML(item.serialNumber)}</span></p>
+                            <p class="flex justify-between"><span>العدد:</span> <span class="font-bold">${item.quantity || 1}</span></p>
+                            <p class="flex justify-between"><span>الرقم التسلسلي:</span> <span class="font-bold" dir="ltr">${escapeHTML(item.serialNumber || '---')}</span></p>
                             <p class="flex justify-between"><span>الحالة:</span> <span class="font-bold ${statusColor}">${escapeHTML(item.status)}</span></p>
+                            ${item.notes ? `<p class="text-gray-500 bg-gray-50 dark:bg-gray-700 p-2 rounded mt-2">${escapeHTML(item.notes)}</p>` : ''}
                             <p class="flex justify-between"><span>أُضيف بواسطة:</span> <span>${escapeHTML(item.addedBy)}</span></p>
                             <p class="flex justify-between text-[10px] text-gray-400 pt-2 border-t dark:border-gray-700"><span>تاريخ الإضافة:</span> <span>${dateStr}</span></p>
                         </div>
@@ -4248,14 +4329,23 @@
                     </div>`;
                     activeCont.innerHTML += cardHtml;
                 } else {
-                    hasPast = true;
-                    cardHtml += `</div>`;
-                    pastCont.innerHTML += cardHtml;
+                    let showPast = true;
+                    if(selectedDate !== 'all') {
+                        const itemDate = new Date(item.movedToOldAt || item.timestamp).toLocaleDateString('en-GB');
+                        if(itemDate !== selectedDate) showPast = false;
+                    }
+                    
+                    if(showPast) {
+                        hasPast = true;
+                        const movedDateStr = item.movedToOldAt ? new Date(item.movedToOldAt).toLocaleDateString('ar-EG') : 'غير محدد';
+                        cardHtml += `<div class="mt-auto pt-2 border-t dark:border-gray-700 text-[10px] text-gray-500 text-center font-bold">تاريخ النقل للجرد القديم: ${movedDateStr}</div></div>`;
+                        pastCont.innerHTML += cardHtml;
+                    }
                 }
             });
 
-            if(!hasActive) activeCont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا توجد نتائج في الجرد الأخير.</p>';
-            if(!hasPast) pastCont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا توجد نتائج في الجرد القديم.</p>';
+            if(!hasActive) activeCont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا توجد نتائج في الجرد الحالي.</p>';
+            if(!hasPast) pastCont.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">لا توجد نتائج مطابقة في الجرد القديم.</p>';
         };
 
         // المتدربين
@@ -4691,8 +4781,7 @@
             if(sectionId === 'leaves') window.renderLeaves();
             if(sectionId === 'trainees') window.renderTrainees();
             if(sectionId === 'drive') window.renderDriveFiles();
-            if(sectionId === 'office-inventory') window.renderInventory('office');
-            if(sectionId === 'warehouse-inventory') window.renderInventory('warehouse');
+            if(sectionId === 'inventory') window.renderInventory();
             if(sectionId === 'meetings') window.renderMeetings();
             if(sectionId === 'expenses') window.renderExpenses();
             if(sectionId === 'robots') window.switchRobotsTab(currentRobotsTab);
@@ -4701,7 +4790,7 @@
         window.addEventListener('hashchange', () => {
             if(!currentUserData) return;
             const hash = window.location.hash.replace('#', '');
-            const validSections = ['home-grid', 'attendance', 'leaves', 'drive', 'meetings', 'settings', 'expenses', 'trainees', 'office-inventory', 'warehouse-inventory', 'robots'];
+            const validSections = ['home-grid', 'attendance', 'leaves', 'drive', 'meetings', 'settings', 'expenses', 'trainees', 'inventory', 'robots'];
             
             if (!hasPunchedInToday && currentUserData.role !== 'CEO' && hash !== 'attendance') {
                 window.location.hash = 'attendance';
@@ -4790,12 +4879,13 @@
                 if(window.location.hash === '#trainees') window.renderTrainees();
             }, (error) => console.error(error));
 
+            // دمج قائمة الجرد
             onSnapshot(getColRef('inventory'), (snapshot) => {
                 globalInventory = [];
                 snapshot.forEach(doc => globalInventory.push({id: doc.id, ...doc.data()}));
                 globalInventory.sort((a,b) => b.timestamp - a.timestamp);
-                if(window.location.hash === '#office-inventory') window.renderInventory('office');
-                if(window.location.hash === '#warehouse-inventory') window.renderInventory('warehouse');
+                if(window.location.hash === '#inventory') window.renderInventory();
+                populateOldInventoryDates();
             }, (error) => console.error(error));
 
             onSnapshot(getColRef('robots'), (snapshot) => {
