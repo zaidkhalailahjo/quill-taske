@@ -1189,12 +1189,13 @@
     <div id="inventoryModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
             <div id="invModalHeader" class="bg-purple-600 text-white p-4 flex justify-between items-center flex-shrink-0">
-                <h3 class="font-bold text-base md:text-lg">إضافة محتويات للجرد</h3>
+                <h3 class="font-bold text-base md:text-lg" id="inventoryModalTitle">إضافة محتويات للجرد</h3>
                 <button onclick="window.closeModal('inventoryModal')" class="hover:text-gray-200"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <div class="p-4 md:p-6 overflow-y-auto flex-1">
                 <form id="inventoryForm">
                     <input type="hidden" id="invLocation">
+                    <input type="hidden" id="invId">
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">نوع المحتوى</label>
@@ -1270,6 +1271,27 @@
         </div>
     </div>
 
+    <!-- نافذة نقل الجرد للقديم -->
+    <div id="bulkMoveInventoryModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[60] p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-sm overflow-hidden">
+            <div class="bg-gray-600 text-white p-4 flex justify-between items-center">
+                <h3 class="font-bold text-base">نقل الجرد الحالي إلى القديم</h3>
+                <button onclick="window.closeModal('bulkMoveInventoryModal')" class="hover:text-gray-200"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-4 md:p-6 space-y-4">
+                <p class="text-sm text-gray-600 dark:text-gray-300 font-bold">يرجى تحديد تاريخ الجرد الذي تريد حفظه به:</p>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">تاريخ الجرد</label>
+                    <input type="date" id="bulkMoveDateInput" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 outline-none focus:border-gray-500">
+                </div>
+                <div class="pt-4 flex justify-end gap-2 border-t dark:border-gray-700">
+                    <button onclick="window.closeModal('bulkMoveInventoryModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-bold text-sm">إلغاء</button>
+                    <button onclick="window.confirmBulkMove()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-bold text-sm shadow">تأكيد النقل</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modals المتدربين -->
     <div id="traineeModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
@@ -1283,6 +1305,22 @@
                     <div>
                         <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">اسم المتدرب</label>
                         <input type="text" id="traineeName" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-amber-500 outline-none">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">سبب التدريب</label>
+                            <select id="traineeReason" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-amber-500 outline-none">
+                                <option value="تدريب يهدف لتوظيف">تدريب يهدف لتوظيف</option>
+                                <option value="تدريب مبدأئي">تدريب مبدأئي</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">المجال</label>
+                            <select id="traineeField" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-amber-500 outline-none" dir="ltr">
+                                <option value="Sales">Sales</option>
+                                <option value="Technical">Technical</option>
+                            </select>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">رقم الهاتف</label>
@@ -1636,8 +1674,8 @@
         let currentRobotsTab = 'rentedNow'; 
         let activeUploads = []; // قائمة الملفات التي يتم رفعها حالياً
 
-        // مسار ملف Google Apps Script
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHp_AgS8kVIBMNdlSTCHb6YMAe9Tsv_8LSa-tsGHcyldgo9W8wVEDFvRUd3sqJxsl-/exec";
+        // مسار ملف Google Apps Script المحدث
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbypyU71N-WHj_MX553W7eabsVZjPH5g4diXod8YjjbcYAA27ioqKDJXbojZGGDL--Zw/exec";
         const MAX_FILE_SIZE = 200 * 1024 * 1024; // تم رفع المساحة إلى 200 ميجابايت
         const MAX_GLOBAL_STORAGE = 5 * 1024 * 1024 * 1024 * 1024; // 5TB 
 
@@ -4184,8 +4222,10 @@
             const oldItems = globalInventory.filter(i => i.isOld && i.movedToOldAt);
             const dates = new Set();
             oldItems.forEach(i => {
-                const d = new Date(i.movedToOldAt).toLocaleDateString('en-GB'); 
-                dates.add(d);
+                // استخدام صيغة yyyy-mm-dd لتكون أسهل في القراءة والترتيب والتصفية
+                const d = new Date(i.movedToOldAt);
+                const dStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                dates.add(dStr);
             });
             
             select.innerHTML = '<option value="all">جميع التواريخ القديمة</option>';
@@ -4196,10 +4236,40 @@
 
         window.openAddInventoryModal = () => {
             document.getElementById('inventoryForm').reset();
+            document.getElementById('invId').value = '';
+            document.getElementById('inventoryModalTitle').innerText = 'إضافة محتويات للجرد';
             window.handleInvTypeChange(); 
             window.openModal('inventoryModal');
             document.getElementById('invSubmitBtn').disabled = false;
             document.getElementById('invSubmitBtn').innerHTML = 'حفظ في الجرد';
+        };
+
+        window.openEditInventoryModal = (id) => {
+            const item = globalInventory.find(i => i.id === id);
+            if(!item) return;
+
+            document.getElementById('inventoryForm').reset();
+            document.getElementById('invId').value = item.id;
+            document.getElementById('inventoryModalTitle').innerText = 'تعديل محتويات الجرد';
+            document.getElementById('invItemType').value = item.itemType;
+            window.handleInvTypeChange();
+
+            if (item.itemType === 'robot') {
+                document.getElementById('invRobotName').value = item.name;
+                document.getElementById('invRobotSerial').value = item.serialNumber || '';
+                document.getElementById('invRobotStatus').value = item.status;
+                document.getElementById('invRobotNotes').value = item.notes || '';
+            } else {
+                document.getElementById('invGenericName').value = item.name;
+                document.getElementById('invGenericQty').value = item.quantity || 1;
+                document.getElementById('invGenericSerial').value = item.serialNumber || '';
+                document.getElementById('invGenericStatus').value = item.status;
+                document.getElementById('invGenericNotes').value = item.notes || '';
+            }
+
+            window.openModal('inventoryModal');
+            document.getElementById('invSubmitBtn').disabled = false;
+            document.getElementById('invSubmitBtn').innerHTML = 'حفظ التعديلات';
         };
 
         window.handleInvTypeChange = () => {
@@ -4228,6 +4298,7 @@
             submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mx-1"></i> جاري الحفظ...';
 
             const type = document.getElementById('invItemType').value; 
+            const invId = document.getElementById('invId').value;
             
             let data = {
                 itemType: type,
@@ -4252,10 +4323,17 @@
             }
 
             try {
-                await addDoc(getColRef('inventory'), data);
+                if (invId) {
+                    delete data.timestamp; // لا تحدث تاريخ الإضافة الأصلي
+                    delete data.isOld; // حافظ على حالته
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', invId), data);
+                    showToast('تم تعديل العنصر بنجاح', 'success');
+                } else {
+                    await addDoc(getColRef('inventory'), data);
+                    showToast('تمت إضافة العنصر بنجاح', 'success');
+                    window.logAction('إضافة جرد', `تم إضافة ${data.name} إلى الجرد`);
+                }
                 window.closeModal('inventoryModal');
-                showToast('تمت إضافة العنصر بنجاح', 'success');
-                window.logAction('إضافة جرد', `تم إضافة ${data.name} إلى الجرد`);
             } catch(err) { 
                 console.error(err); 
                 showToast('حدث خطأ في الحفظ', 'error');
@@ -4276,31 +4354,47 @@
             }
         };
 
-        window.moveAllToOldInventory = async () => {
-            if(confirm(`هل أنت متأكد من نقل جميع محتويات الجرد الحالي إلى الجرد القديم؟`)) {
-                showToast('جاري النقل...', 'info');
-                const itemsToMove = globalInventory.filter(i => !i.isOld);
-                
-                if(itemsToMove.length === 0) {
-                    showToast('لا يوجد شيء لنقله', 'warning');
-                    return;
-                }
+        window.moveAllToOldInventory = () => {
+            document.getElementById('bulkMoveDateInput').value = getTodayDateString();
+            window.openModal('bulkMoveInventoryModal');
+        };
 
-                try {
-                    const now = Date.now();
-                    await Promise.all(itemsToMove.map(item => 
-                        updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', item.id), { 
-                            isOld: true,
-                            movedToOldAt: now
-                        })
-                    ));
-                    showToast('تم النقل بنجاح', 'success');
-                    window.logAction('جرد شامل', `تم نقل جميع الجرد الحالي إلى القديم`);
-                    populateOldInventoryDates();
-                } catch(e) { 
-                    console.error(e); 
-                    showToast('حدث خطأ أثناء النقل', 'error');
-                }
+        window.confirmBulkMove = async () => {
+            const dateInput = document.getElementById('bulkMoveDateInput').value;
+            if(!dateInput) {
+                showToast('يرجى تحديد التاريخ', 'warning');
+                return;
+            }
+
+            const timestamp = new Date(dateInput).getTime();
+            if(isNaN(timestamp)) {
+                showToast('تاريخ غير صحيح', 'error');
+                return;
+            }
+
+            showToast('جاري النقل...', 'info');
+            const itemsToMove = globalInventory.filter(i => !i.isOld);
+            
+            if(itemsToMove.length === 0) {
+                showToast('لا يوجد شيء لنقله', 'warning');
+                window.closeModal('bulkMoveInventoryModal');
+                return;
+            }
+
+            try {
+                await Promise.all(itemsToMove.map(item => 
+                    updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', item.id), { 
+                        isOld: true,
+                        movedToOldAt: timestamp
+                    })
+                ));
+                showToast('تم النقل بنجاح', 'success');
+                window.logAction('جرد شامل', `تم نقل الجرد الحالي إلى القديم بتارخ ${dateInput}`);
+                window.closeModal('bulkMoveInventoryModal');
+                populateOldInventoryDates();
+            } catch(e) { 
+                console.error(e); 
+                showToast('حدث خطأ أثناء النقل', 'error');
             }
         };
 
@@ -4351,7 +4445,13 @@
                 const statusColor = item.status.includes('جديد') || item.status.includes('سليم') ? 'text-green-500' : (item.status.includes('معطل') || item.status.includes('تالف') || item.status.includes('غير صالحة') ? 'text-red-500' : 'text-yellow-500');
                 
                 const isCEO = currentUserData.role === 'CEO';
-                const deleteBtnHtml = isCEO ? `<button onclick="window.deleteInventoryItem('${item.id}')" class="text-red-400 hover:text-red-600 p-1" title="حذف"><i class="fa-solid fa-trash"></i></button>` : '';
+                let actionBtnsHtml = '';
+                if(isCEO) {
+                    actionBtnsHtml = `
+                        <button onclick="window.openEditInventoryModal('${item.id}')" class="text-indigo-400 hover:text-indigo-600 p-1" title="تعديل"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="window.deleteInventoryItem('${item.id}')" class="text-red-400 hover:text-red-600 p-1" title="حذف"><i class="fa-solid fa-trash"></i></button>
+                    `;
+                }
 
                 let cardHtml = `
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col h-full relative group transition hover:shadow-md">
@@ -4359,7 +4459,7 @@
                             <h3 class="font-bold text-lg text-purple-600 dark:text-purple-400"><i class="fa-solid ${icon} mx-1"></i> ${escapeHTML(item.name)}</h3>
                             <div class="flex gap-2">
                                 <span class="text-[10px] bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded font-bold">${typeText}</span>
-                                ${deleteBtnHtml}
+                                ${!item.isOld ? actionBtnsHtml : (isCEO ? `<button onclick="window.deleteInventoryItem('${item.id}')" class="text-red-400 hover:text-red-600 p-1" title="حذف"><i class="fa-solid fa-trash"></i></button>` : '')}
                             </div>
                         </div>
                         <div class="text-xs text-gray-600 dark:text-gray-300 space-y-2 mb-4">
@@ -4383,7 +4483,9 @@
                 } else {
                     let showPast = true;
                     if(selectedDate !== 'all') {
-                        const itemDate = new Date(item.movedToOldAt || item.timestamp).toLocaleDateString('en-GB');
+                        // مطابقة التاريخ بناءً على صياغة yyyy-mm-dd
+                        const d = new Date(item.movedToOldAt || item.timestamp);
+                        const itemDate = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
                         if(itemDate !== selectedDate) showPast = false;
                     }
                     
@@ -4424,6 +4526,8 @@
             document.getElementById('traineeModalTitle').innerText = 'إضافة متدرب جديد';
             document.getElementById('traineeForm').reset();
             document.getElementById('traineeId').value = '';
+            document.getElementById('traineeReason').value = 'تدريب يهدف لتوظيف';
+            document.getElementById('traineeField').value = 'Sales';
             
             const list = document.getElementById('traineeTrainersList');
             list.innerHTML = '';
@@ -4448,6 +4552,8 @@
             document.getElementById('traineePhone').value = t.phone || '';
             document.getElementById('traineeStartDate').value = t.startDate || '';
             document.getElementById('traineeNotes').value = t.notes || '';
+            document.getElementById('traineeReason').value = t.reason || 'تدريب يهدف لتوظيف';
+            document.getElementById('traineeField').value = t.field || 'Sales';
 
             const list = document.getElementById('traineeTrainersList');
             list.innerHTML = '';
@@ -4472,6 +4578,8 @@
             const phone = document.getElementById('traineePhone').value;
             const startDate = document.getElementById('traineeStartDate').value;
             const notes = document.getElementById('traineeNotes').value;
+            const reason = document.getElementById('traineeReason').value;
+            const field = document.getElementById('traineeField').value;
             
             const checkboxes = document.querySelectorAll('.trainee-trainer-checkbox:checked');
             const trainers = Array.from(checkboxes).map(cb => cb.value);
@@ -4479,12 +4587,12 @@
             try {
                 if(id) {
                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'trainees', id), {
-                        name, phone, startDate, trainers, notes
+                        name, phone, startDate, trainers, notes, reason, field
                     });
                     showToast('تم تحديث البيانات بنجاح', 'success');
                 } else {
                     await addDoc(getColRef('trainees'), {
-                        name, phone, startDate, trainers, notes, status: 'active', sessions: [], handoverRequests: [], timestamp: Date.now()
+                        name, phone, startDate, trainers, notes, reason, field, status: 'active', sessions: [], handoverRequests: [], timestamp: Date.now()
                     });
                     showToast('تمت إضافة المتدرب بنجاح', 'success');
                     
@@ -4711,6 +4819,7 @@
                                 ${trainerBadgeHtml}
                             </div>
                             <div class="text-xs text-gray-600 dark:text-gray-300 space-y-1 mb-2">
+                                <p><i class="fa-solid fa-bullseye text-gray-400 mx-1"></i> السبب: <span>${escapeHTML(t.reason || '-')}</span> | <span dir="ltr" class="font-bold text-amber-600">${escapeHTML(t.field || '-')}</span></p>
                                 <p><i class="fa-solid fa-phone text-gray-400 mx-1"></i> <span dir="ltr">${escapeHTML(t.phone || '-')}</span></p>
                                 <p><i class="fa-solid fa-calendar-day text-gray-400 mx-1"></i> البدء: <span dir="ltr">${escapeHTML(t.startDate)}</span></p>
                                 <p><i class="fa-solid fa-chalkboard-user text-gray-400 mx-1"></i> المدرب: <span class="font-bold">${trainersNames}</span></p>
@@ -4739,6 +4848,7 @@
                                 <span class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded shadow-sm font-bold"><i class="fa-solid fa-check"></i> تدريب مكتمل</span>
                             </div>
                             <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1 mb-2">
+                                <p><i class="fa-solid fa-bullseye mx-1"></i> السبب: <span>${escapeHTML(t.reason || '-')}</span> | <span dir="ltr" class="font-bold">${escapeHTML(t.field || '-')}</span></p>
                                 <p><i class="fa-solid fa-calendar-day mx-1"></i> من: <span dir="ltr">${escapeHTML(t.startDate)}</span><br>إلى: <span dir="ltr">${compDate}</span></p>
                                 <p><i class="fa-solid fa-chalkboard-user mx-1"></i> المدرب: <span class="font-bold">${trainersNames}</span></p>
                             </div>
@@ -4766,6 +4876,7 @@
             if(id === 'traineeModal') document.getElementById('traineeForm').reset();
             if(id === 'traineeSessionModal') document.getElementById('traineeSessionForm').reset();
             if(id === 'inventoryModal') document.getElementById('inventoryForm').reset();
+            if(id === 'bulkMoveInventoryModal') document.getElementById('bulkMoveDateInput').value = '';
             if(id === 'addRentalModal') document.getElementById('rentalForm').reset();
             if(id === 'addClientModal') {
                 document.getElementById('clientForm').reset();
