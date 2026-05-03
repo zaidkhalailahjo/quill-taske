@@ -45,9 +45,10 @@
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #00839b; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .bg-striped { background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent); background-size: 1rem 1rem; }
-        .animate-stripes { animation: slideStripes 1s linear infinite; }
-        @keyframes slideStripes { from { background-position: 1rem 0; } to { background-position: 0 0; } }
+        /* Animation for storage bar */
+        .bg-striped { background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.25) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.25) 50%, rgba(255, 255, 255, 0.25) 75%, transparent 75%, transparent); background-size: 1.5rem 1.5rem; }
+        .animate-stripes { animation: slideStripes 1.5s linear infinite; }
+        @keyframes slideStripes { from { background-position: 1.5rem 0; } to { background-position: 0 0; } }
 
         .app-card {
             display: flex;
@@ -183,7 +184,6 @@
                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1" data-i18n="الوظيفة (الدور)">الوظيفة (الدور)</label>
                     <select id="setupRole" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2 focus:outline-none focus:border-secondary">
                         <option value="" disabled selected>-- اختر وظيفتك --</option>
-                        <!-- تمت إزالة خيار المدير من هنا -->
                         <option value="technical team supervisor">Technical Team Supervisor</option>
                         <option value="Technical Engineer">Technical Engineer</option>
                         <option value="accountant">Accountant</option>
@@ -725,10 +725,16 @@
                 </div>
 
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
-                    <p class="text-sm md:text-base text-gray-600 dark:text-gray-300" data-i18n="مشاركة الملفات">إدارة المستندات (الحد الأقصى للملف: 50MB)</p>
+                    <p class="text-sm md:text-base text-gray-600 dark:text-gray-300" data-i18n="مشاركة الملفات">إدارة المستندات (الحد الأقصى للملف: 100MB)</p>
                     <div class="flex flex-wrap gap-2 w-full md:w-auto">
+                        <button id="toggleSelectModeBtn" onclick="window.toggleSelectMode()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm font-bold shadow flex-1 md:flex-none justify-center">
+                            تحديد ملفات
+                        </button>
+                        <button id="bulkShareDriveBtn" onclick="window.shareSelectedItems()" class="hidden bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm font-bold shadow flex-1 md:flex-none justify-center">
+                            <i class="fa-solid fa-share-nodes mx-2"></i> مشاركة
+                        </button>
                         <button id="bulkDeleteDriveBtn" onclick="window.deleteSelectedDriveItems()" class="hidden bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm font-bold shadow flex-1 md:flex-none justify-center">
-                            <i class="fa-solid fa-trash-can mx-2"></i> حذف المحدد
+                            <i class="fa-solid fa-trash-can mx-2"></i> حذف
                         </button>
                         <div class="search-wrapper flex-1 md:flex-none w-full md:w-auto">
                             <i class="fa-solid fa-search search-icon"></i>
@@ -737,7 +743,6 @@
                         <button onclick="window.openModal('createFolderModal')" class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm font-bold shadow flex-1 md:flex-none justify-center">
                             <i class="fa-solid fa-folder-plus mx-2"></i> مجلد
                         </button>
-                        <!-- تم إضافة خيار الرفع المتعدد multiple هنا -->
                         <input type="file" id="driveFileInput" class="hidden" multiple onchange="window.handleDriveFileSelect(event)">
                         <button id="uploadFileBtn" onclick="document.getElementById('driveFileInput').click()" class="bg-secondary hover:bg-primary text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm font-bold shadow flex-1 md:flex-none justify-center">
                             <i class="fa-solid fa-cloud-arrow-up mx-2"></i> ملفات
@@ -1126,6 +1131,67 @@
         </div>
     </div>
 
+    <!-- نافذة إعادة تسمية الملف/المجلد -->
+    <div id="renameModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[60] p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-sm overflow-hidden">
+            <div class="bg-indigo-600 text-white p-4 flex justify-between items-center">
+                <h3 class="font-bold text-base" id="renameModalTitle">إعادة التسمية</h3>
+                <button onclick="window.closeModal('renameModal')" class="hover:text-indigo-200"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <form id="renameForm" class="p-4 md:p-6 space-y-4" onsubmit="window.handleRenameSubmit(event)">
+                <input type="hidden" id="renameItemId">
+                <input type="hidden" id="renameItemType"> <!-- 'file' or 'folder' -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">الاسم الجديد</label>
+                    <input type="text" id="renameItemName" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-indigo-500 outline-none">
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="window.closeModal('renameModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-bold text-sm">إلغاء</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-bold text-sm shadow">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- نافذة المشاركة الاحتياطية -->
+    <div id="shareModalFallback" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[65] p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden flex flex-col">
+            <div class="bg-green-600 text-white p-4 flex justify-between items-center flex-shrink-0">
+                <h3 class="font-bold text-base md:text-lg">مشاركة الملفات</h3>
+                <button onclick="window.closeModal('shareModalFallback')" class="hover:text-green-200"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-4 md:p-6 flex flex-col items-center gap-4">
+                <textarea id="shareTextContent" class="hidden"></textarea>
+                <button onclick="window.shareViaWhatsApp()" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg font-bold flex items-center justify-center gap-3 transition">
+                    <i class="fa-brands fa-whatsapp text-2xl"></i> مشاركة عبر WhatsApp
+                </button>
+                <button onclick="window.shareViaOutlook()" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg font-bold flex items-center justify-center gap-3 transition">
+                    <i class="fa-regular fa-envelope text-2xl"></i> مشاركة عبر الإيميل / Outlook
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة عرض الصور والفيديو (المستندات) -->
+    <div id="imageViewerModal" class="fixed inset-0 bg-black/95 hidden flex flex-col items-center justify-center z-[70] p-4 select-none touch-none">
+        <button onclick="window.closeImageViewer()" class="absolute top-4 right-4 text-white hover:text-gray-300 text-3xl z-10"><i class="fa-solid fa-xmark"></i></button>
+        <h3 id="imageViewerTitle" class="absolute top-4 w-full text-center text-white font-bold text-lg pointer-events-none drop-shadow-md z-0"></h3>
+        
+        <button id="viewerRightBtn" onclick="window.navigateViewer(1)" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 text-4xl p-2 z-10"><i class="fa-solid fa-chevron-right"></i></button>
+        <button id="viewerLeftBtn" onclick="window.navigateViewer(-1)" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 text-4xl p-2 z-10"><i class="fa-solid fa-chevron-left"></i></button>
+
+        <div class="w-full max-w-5xl h-[70vh] flex items-center justify-center relative pointer-events-auto">
+            <img id="imageViewerImg" src="" class="max-w-full max-h-full object-contain rounded shadow-2xl transition-opacity">
+            <video id="imageViewerVideo" controls class="max-w-full max-h-full object-contain rounded shadow-2xl hidden"></video>
+        </div>
+
+        <div class="absolute bottom-6 flex gap-4 z-10">
+            <a id="imageViewerDownloadBtn" href="#" download class="bg-secondary hover:bg-primary text-white px-6 py-2 rounded-lg font-bold transition flex items-center gap-2 shadow-lg">
+                <i class="fa-solid fa-download"></i> تحميل
+            </a>
+        </div>
+    </div>
+
     <!-- نافذة الجرد -->
     <div id="inventoryModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden">
@@ -1375,42 +1441,6 @@
         </div>
     </div>
 
-    <!-- نافذة عرض الصور (المستندات) -->
-    <div id="imageViewerModal" class="fixed inset-0 bg-black/90 hidden flex flex-col items-center justify-center z-[70] p-4">
-        <button onclick="window.closeImageViewer()" class="absolute top-4 right-4 text-white hover:text-gray-300 text-3xl"><i class="fa-solid fa-xmark"></i></button>
-        <h3 id="imageViewerTitle" class="text-white font-bold text-lg mb-4 text-center"></h3>
-        <div class="w-full max-w-4xl h-auto max-h-[80vh] flex items-center justify-center">
-            <img id="imageViewerImg" src="" class="max-w-full max-h-full object-contain rounded shadow-2xl">
-        </div>
-        <div class="mt-4 flex gap-4">
-            <a id="imageViewerDownloadBtn" href="#" download class="bg-secondary hover:bg-primary text-white px-6 py-2 rounded-lg font-bold transition flex items-center gap-2">
-                <i class="fa-solid fa-download"></i> تحميل
-            </a>
-        </div>
-    </div>
-
-    <!-- نافذة إعادة تسمية الملف/المجلد -->
-    <div id="renameModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[60] p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-sm overflow-hidden">
-            <div class="bg-indigo-600 text-white p-4 flex justify-between items-center">
-                <h3 class="font-bold text-base" id="renameModalTitle">إعادة التسمية</h3>
-                <button onclick="window.closeModal('renameModal')" class="hover:text-indigo-200"><i class="fa-solid fa-xmark text-xl"></i></button>
-            </div>
-            <form id="renameForm" class="p-4 md:p-6 space-y-4" onsubmit="window.handleRenameSubmit(event)">
-                <input type="hidden" id="renameItemId">
-                <input type="hidden" id="renameItemType"> <!-- 'file' or 'folder' -->
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">الاسم الجديد</label>
-                    <input type="text" id="renameItemName" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-indigo-500 outline-none">
-                </div>
-                <div class="pt-2 flex justify-end gap-2">
-                    <button type="button" onclick="window.closeModal('renameModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-bold text-sm">إلغاء</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-bold text-sm shadow">حفظ</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <!-- نافذة إنشاء اجتماع -->
     <div id="createMeetingModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md overflow-hidden">
@@ -1495,7 +1525,7 @@
             "الوظيفة (الدور)": "Role",
             "الدخول للنظام": "Enter System",
             "المساحة المستخدمة": "Used Storage",
-            "مشاركة الملفات": "Share Important Files (Max 50MB)",
+            "مشاركة الملفات": "Share Important Files (Max 100MB)",
             "رفع ملف جديد": "Upload New File",
             "الملفات المثبتة": "Pinned Files",
             "كل الملفات": "All Files",
@@ -1597,7 +1627,7 @@
         let currentRobotsTab = 'rentedNow'; 
         
         // إعدادات تخزين الدرايف الجديدة
-        const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+        const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
         const MAX_GLOBAL_STORAGE = 5 * 1024 * 1024 * 1024 * 1024; // 5TB 
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzffAWkWFXZ5qesE7-_i1SSufvUlowRDxT7F53Uc_Q-lgY2q8dLiGWY4LAC5jaQ6Ad2/exec";
 
@@ -1681,6 +1711,72 @@
                 } catch(e) { console.error("Cache parsing error", e); }
             }
         });
+
+        // ------------------ Viewer Swipe & Keyboard Navigation ------------------
+        let viewerFilesList = [];
+        let currentViewerIndex = -1;
+        let touchstartX = 0;
+        let touchendX = 0;
+
+        document.getElementById('imageViewerModal').addEventListener('touchstart', e => {
+            touchstartX = e.changedTouches[0].screenX;
+        }, {passive: true});
+
+        document.getElementById('imageViewerModal').addEventListener('touchend', e => {
+            touchendX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, {passive: true});
+
+        function handleSwipe() {
+            if (touchendX < touchstartX - 50) window.navigateViewer(1); // Swipe left -> Next
+            if (touchendX > touchstartX + 50) window.navigateViewer(-1); // Swipe right -> Prev
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (!document.getElementById('imageViewerModal').classList.contains('hidden')) {
+                if (e.key === 'ArrowRight' || e.key === 'ArrowUp') window.navigateViewer(-1); // Next in RTL
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') window.navigateViewer(1); // Prev in RTL
+                if (e.key === 'Escape') window.closeImageViewer();
+            }
+        });
+
+        function updateViewerUI() {
+            if (currentViewerIndex < 0 || currentViewerIndex >= viewerFilesList.length) return;
+            const file = viewerFilesList[currentViewerIndex];
+            
+            document.getElementById('imageViewerTitle').innerText = file.name;
+            document.getElementById('imageViewerDownloadBtn').href = file.data;
+            document.getElementById('imageViewerDownloadBtn').download = file.name;
+
+            const imgEl = document.getElementById('imageViewerImg');
+            const vidEl = document.getElementById('imageViewerVideo');
+
+            if (file.type.startsWith('video/')) {
+                imgEl.classList.add('hidden');
+                imgEl.src = '';
+                vidEl.classList.remove('hidden');
+                vidEl.src = file.data;
+            } else {
+                vidEl.classList.add('hidden');
+                vidEl.pause();
+                vidEl.src = '';
+                imgEl.classList.remove('hidden');
+                imgEl.src = file.data;
+            }
+            
+            document.getElementById('viewerLeftBtn').style.visibility = currentViewerIndex > 0 ? 'visible' : 'hidden';
+            document.getElementById('viewerRightBtn').style.visibility = currentViewerIndex < viewerFilesList.length - 1 ? 'visible' : 'hidden';
+        }
+
+        window.navigateViewer = (direction) => {
+            const newIndex = currentViewerIndex + direction;
+            if (newIndex >= 0 && newIndex < viewerFilesList.length) {
+                currentViewerIndex = newIndex;
+                updateViewerUI();
+            }
+        };
+        // ----------------------------------------------------------------------
+
 
         window.switchRobotsTab = (tabName) => {
             currentRobotsTab = tabName;
@@ -2657,7 +2753,100 @@
             } catch(e) { console.error(e); }
         };
 
-        // إدارة المستندات والمجلدات عبر Google Apps Script
+        // إدارة المستندات
+        let isSelectMode = false;
+        
+        window.toggleSelectMode = () => {
+            isSelectMode = !isSelectMode;
+            const btn = document.getElementById('toggleSelectModeBtn');
+            btn.innerText = isSelectMode ? 'إلغاء التحديد' : 'تحديد ملفات';
+            if(isSelectMode) {
+                btn.classList.replace('bg-blue-500', 'bg-gray-500');
+                btn.classList.replace('hover:bg-blue-600', 'hover:bg-gray-600');
+            } else {
+                btn.classList.replace('bg-gray-500', 'bg-blue-500');
+                btn.classList.replace('hover:bg-gray-600', 'hover:bg-blue-600');
+            }
+            
+            document.querySelectorAll('.drive-item-cb').forEach(cb => cb.checked = false);
+            window.updateBulkActionBtnsVisibility();
+            renderDriveFiles();
+        };
+
+        window.toggleCheckbox = (id) => {
+            const cb = document.querySelector(`.drive-item-cb[data-id="${id}"]`);
+            if(cb) {
+                cb.checked = !cb.checked;
+                window.updateBulkActionBtnsVisibility();
+            }
+        };
+
+        window.updateBulkActionBtnsVisibility = () => {
+            const checkedCount = document.querySelectorAll('.drive-item-cb:checked').length;
+            const delBtn = document.getElementById('bulkDeleteDriveBtn');
+            const shareBtn = document.getElementById('bulkShareDriveBtn');
+            
+            if(checkedCount > 0) {
+                delBtn.classList.remove('hidden');
+                shareBtn.classList.remove('hidden');
+                delBtn.innerHTML = `<i class="fa-solid fa-trash-can mx-2"></i> حذف (${checkedCount})`;
+                shareBtn.innerHTML = `<i class="fa-solid fa-share-nodes mx-2"></i> مشاركة (${checkedCount})`;
+            } else {
+                delBtn.classList.add('hidden');
+                shareBtn.classList.add('hidden');
+            }
+        };
+
+        window.shareSelectedItems = async () => {
+            const checkedBoxes = document.querySelectorAll('.drive-item-cb:checked');
+            if(checkedBoxes.length === 0) return;
+            
+            let links = [];
+            checkedBoxes.forEach(cb => {
+                const id = cb.getAttribute('data-id');
+                const isFolder = cb.getAttribute('data-isfolder') === 'true';
+                if(!isFolder) {
+                    const file = globalFiles.find(f => f.id === id);
+                    if(file && file.data && file.data !== '#') {
+                        links.push(`${file.name}: \n${file.data}`);
+                    }
+                }
+            });
+
+            if(links.length === 0) {
+                showToast('لم يتم العثور على روابط صالحة للمشاركة (المجلدات لا تشارك حالياً)', 'warning');
+                return;
+            }
+
+            const shareText = "مرحباً، إليك الملفات التالية:\n\n" + links.join('\n\n');
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'مشاركة ملفات من نظام Quill',
+                        text: shareText
+                    });
+                } catch (error) {
+                    console.log('تم إلغاء المشاركة أو غير مدعومة بالكامل', error);
+                    document.getElementById('shareTextContent').value = shareText;
+                    window.openModal('shareModalFallback');
+                }
+            } else {
+                document.getElementById('shareTextContent').value = shareText;
+                window.openModal('shareModalFallback');
+            }
+        };
+
+        window.shareViaWhatsApp = () => {
+            const text = encodeURIComponent(document.getElementById('shareTextContent').value);
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+        };
+
+        window.shareViaOutlook = () => {
+            const text = encodeURIComponent(document.getElementById('shareTextContent').value);
+            window.open(`mailto:?subject=ملفات مشتركة من نظام Quill&body=${text}`, '_blank');
+        };
+
         window.handleCreateFolder = async (e) => {
             e.preventDefault();
             const name = document.getElementById('newFolderName').value;
@@ -2703,19 +2892,17 @@
             }
         };
 
-        // الرفع المتعدد وتفعيل Google Drive API
         window.handleDriveFileSelect = async (e) => {
             const files = e.target.files;
             if(!files || files.length === 0) return;
 
-            // نلتقط المعرف الحالي للمجلد حتى لا يتغير أثناء عملية الرفع في حال تصفح المستخدم لمجلد آخر
             const targetFolderId = currentFolderId;
 
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
                 
                 if(file.size > MAX_FILE_SIZE) { 
-                    showToast(`حجم الملف ${file.name} تجاوز 50 ميجابايت.`, 'warning'); 
+                    showToast(`حجم الملف ${file.name} تجاوز 100 ميجابايت.`, 'warning'); 
                     continue; 
                 }
 
@@ -2753,7 +2940,6 @@
                             console.warn("استجابة غير مقروءة (CORS) من جوجل درايف.", parseErr);
                         }
 
-                        // في حال لم يرسل Google script الرابط، وكان الملف صغيراً، نحفظه كبيانات Base64 (حد 800 كيلوبايت)
                         if (!fileUrl) {
                             if (ev.target.result.length < 800000) {
                                 fileUrl = ev.target.result;
@@ -2820,17 +3006,6 @@
             await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'folders', folderId));
         }
 
-        window.updateBulkDeleteBtnVisibility = () => {
-            const checkedCount = document.querySelectorAll('.drive-item-cb:checked').length;
-            const btn = document.getElementById('bulkDeleteDriveBtn');
-            if(checkedCount > 0) {
-                btn.classList.remove('hidden');
-                btn.innerHTML = `<i class="fa-solid fa-trash-can mx-2"></i> حذف المحدد (${checkedCount})`;
-            } else {
-                btn.classList.add('hidden');
-            }
-        };
-
         window.deleteSelectedDriveItems = async () => {
             const checkedBoxes = document.querySelectorAll('.drive-item-cb:checked');
             if(checkedBoxes.length === 0) return;
@@ -2848,30 +3023,12 @@
                         }
                     }
                     showToast('تم حذف العناصر المحددة بنجاح', 'success');
-                    document.getElementById('bulkDeleteDriveBtn').classList.add('hidden');
+                    window.toggleSelectMode(); // Close select mode after deletion
                 } catch(e) {
                     console.error(e);
                     showToast('حدث خطأ أثناء الحذف', 'error');
                 }
             }
-        };
-
-        window.openImageViewer = (fileId) => {
-            const file = globalFiles.find(f => f.id === fileId);
-            if(!file || !file.data || file.data === '#') {
-                showToast('عذراً، لا يمكن عرض هذا الملف حالياً.', 'warning');
-                return;
-            }
-            document.getElementById('imageViewerImg').src = file.data;
-            document.getElementById('imageViewerTitle').innerText = file.name;
-            document.getElementById('imageViewerDownloadBtn').href = file.data;
-            document.getElementById('imageViewerDownloadBtn').download = file.name;
-            document.getElementById('imageViewerModal').classList.remove('hidden');
-        };
-
-        window.closeImageViewer = () => {
-            document.getElementById('imageViewerModal').classList.add('hidden');
-            document.getElementById('imageViewerImg').src = '';
         };
 
         window.openRenameModal = (id, isFolder, encodedName) => {
@@ -2900,6 +3057,42 @@
             }
         };
 
+        window.openImageViewer = (fileId) => {
+            if(isSelectMode) return window.toggleCheckbox(fileId);
+
+            viewerFilesList = globalFiles.filter(f => 
+                (f.folderId || null) === currentFolderId && 
+                (f.type.startsWith('image/') || f.type.startsWith('video/'))
+            );
+            
+            currentViewerIndex = viewerFilesList.findIndex(f => f.id === fileId);
+            
+            if(currentViewerIndex === -1) {
+                 const file = globalFiles.find(f => f.id === fileId);
+                 if(file && file.data && file.data !== '#') {
+                     window.open(file.data, '_blank');
+                 } else {
+                     showToast('لا يمكن عرض هذا الملف أو تحميله.', 'warning');
+                 }
+                 return;
+            }
+            
+            updateViewerUI();
+            document.getElementById('imageViewerModal').classList.remove('hidden');
+        };
+
+        window.closeImageViewer = () => {
+            document.getElementById('imageViewerModal').classList.add('hidden');
+            document.getElementById('imageViewerImg').src = '';
+            
+            const vidEl = document.getElementById('imageViewerVideo');
+            vidEl.pause();
+            vidEl.src = '';
+            
+            viewerFilesList = [];
+            currentViewerIndex = -1;
+        };
+
         window.renderDriveFiles = () => {
             const allContainer = document.getElementById('allFilesContainer');
             const pinnedContainer = document.getElementById('pinnedFilesContainer');
@@ -2909,7 +3102,6 @@
             allContainer.innerHTML = '';
             pinnedContainer.innerHTML = '';
             breadcrumbs.innerHTML = '';
-            document.getElementById('bulkDeleteDriveBtn').classList.add('hidden');
             
             const isCEO = currentUserData && currentUserData.role === 'CEO';
 
@@ -2946,16 +3138,18 @@
                 const encodedName = encodeURIComponent(f.name);
                 const deleteBtn = canManage ? `<button onclick="event.stopPropagation(); window.deleteDriveItem('${f.id}', true, '${encodedName}')" class="text-red-400 hover:text-red-600 p-1 bg-red-50 dark:bg-gray-700 rounded transition"><i class="fa-solid fa-trash"></i></button>` : '';
                 const renameBtn = canManage ? `<button onclick="event.stopPropagation(); window.openRenameModal('${f.id}', true, '${encodedName}')" class="text-indigo-400 hover:text-indigo-600 p-1 bg-indigo-50 dark:bg-gray-700 rounded transition"><i class="fa-solid fa-pen"></i></button>` : '';
-                const checkBoxHtml = canManage ? `<input type="checkbox" data-id="${f.id}" data-isfolder="true" class="drive-item-cb w-4 h-4 text-indigo-600 rounded cursor-pointer" onclick="event.stopPropagation()" onchange="window.updateBulkDeleteBtnVisibility()">` : '';
+                const checkBoxHtml = (canManage && isSelectMode) ? `<input type="checkbox" data-id="${f.id}" data-isfolder="true" class="drive-item-cb w-5 h-5 text-indigo-600 rounded cursor-pointer" onclick="event.stopPropagation()" onchange="window.updateBulkActionBtnsVisibility()">` : '';
+
+                const clickAction = isSelectMode ? `window.toggleCheckbox('${f.id}')` : `window.navigateToFolder('${f.id}')`;
 
                 allContainer.innerHTML += `
-                    <div onclick="window.navigateToFolder('${f.id}')" class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-xl p-4 shadow-sm hover:shadow-md transition cursor-pointer group flex flex-col h-full relative">
+                    <div onclick="${clickAction}" class="bg-indigo-50 dark:bg-indigo-900/20 border ${isSelectMode ? 'border-indigo-300 hover:bg-indigo-100' : 'border-indigo-100 hover:shadow-md'} dark:border-indigo-800 rounded-xl p-4 shadow-sm transition cursor-pointer group flex flex-col h-full relative">
                         <div class="absolute top-3 right-3 z-10">
                             ${checkBoxHtml}
                         </div>
                         <div class="flex justify-between items-start mb-2">
                             <i class="fa-solid fa-folder text-indigo-500 text-3xl"></i>
-                            <div class="flex gap-1" onclick="event.stopPropagation()">
+                            <div class="flex gap-1 ${isSelectMode ? 'hidden' : ''}" onclick="event.stopPropagation()">
                                 ${renameBtn}
                                 ${deleteBtn}
                             </div>
@@ -2967,10 +3161,10 @@
 
             currentFilesList.forEach(f => {
                 let iconClass = 'fa-file text-gray-400';
-                let isImage = false;
+                let isImageOrVideo = false;
                 
-                if(f.type.startsWith('image/')) { iconClass = 'fa-file-image text-blue-400'; isImage = true; }
-                else if(f.type.startsWith('video/')) iconClass = 'fa-file-video text-purple-400';
+                if(f.type.startsWith('image/')) { iconClass = 'fa-file-image text-blue-400'; isImageOrVideo = true; }
+                else if(f.type.startsWith('video/')) { iconClass = 'fa-file-video text-purple-400'; isImageOrVideo = true; }
                 else if(f.type.includes('pdf')) iconClass = 'fa-file-pdf text-red-400';
                 else if(f.type.includes('excel')) iconClass = 'fa-file-excel text-green-500';
                 else if(f.type.includes('word')) iconClass = 'fa-file-word text-blue-600';
@@ -2979,29 +3173,31 @@
                 const canManage = isOwner || isCEO;
                 const encodedName = encodeURIComponent(f.name);
                 
-                const deleteBtn = canManage ? `<button onclick="window.deleteDriveItem('${f.id}', false, '${encodedName}')" class="text-red-400 hover:text-red-600 p-1.5 bg-red-50 dark:bg-gray-700 rounded transition" title="حذف"><i class="fa-solid fa-trash"></i></button>` : '';
-                const renameBtn = canManage ? `<button onclick="window.openRenameModal('${f.id}', false, '${encodedName}')" class="text-indigo-400 hover:text-indigo-600 p-1.5 bg-indigo-50 dark:bg-gray-700 rounded transition" title="تعديل الاسم"><i class="fa-solid fa-pen"></i></button>` : '';
-                const viewBtn = isImage ? `<button onclick="window.openImageViewer('${f.id}')" class="text-teal-500 hover:text-teal-700 p-1.5 bg-teal-50 dark:bg-gray-700 rounded transition" title="عرض الصورة"><i class="fa-solid fa-eye"></i></button>` : '';
-                const checkBoxHtml = canManage ? `<input type="checkbox" data-id="${f.id}" data-isfolder="false" class="drive-item-cb w-4 h-4 text-indigo-600 rounded cursor-pointer absolute top-3 right-3 z-10" onchange="window.updateBulkDeleteBtnVisibility()">` : '';
+                const deleteBtn = canManage ? `<button onclick="event.stopPropagation(); window.deleteDriveItem('${f.id}', false, '${encodedName}')" class="text-red-400 hover:text-red-600 p-1.5 bg-red-50 dark:bg-gray-700 rounded transition" title="حذف"><i class="fa-solid fa-trash"></i></button>` : '';
+                const renameBtn = canManage ? `<button onclick="event.stopPropagation(); window.openRenameModal('${f.id}', false, '${encodedName}')" class="text-indigo-400 hover:text-indigo-600 p-1.5 bg-indigo-50 dark:bg-gray-700 rounded transition" title="تعديل الاسم"><i class="fa-solid fa-pen"></i></button>` : '';
+                const viewBtn = isImageOrVideo ? `<button onclick="event.stopPropagation(); window.openImageViewer('${f.id}')" class="text-teal-500 hover:text-teal-700 p-1.5 bg-teal-50 dark:bg-gray-700 rounded transition" title="عرض الملف"><i class="fa-solid fa-eye"></i></button>` : '';
+                const checkBoxHtml = (canManage && isSelectMode) ? `<input type="checkbox" data-id="${f.id}" data-isfolder="false" class="drive-item-cb w-5 h-5 text-indigo-600 rounded cursor-pointer absolute top-3 right-3 z-10" onclick="event.stopPropagation()" onchange="window.updateBulkActionBtnsVisibility()">` : '';
 
                 const pinBtnClass = canManage ? 'cursor-pointer hover:text-primary' : 'cursor-not-allowed opacity-50';
-                const pinBtnAction = canManage ? `onclick="window.togglePinFile('${f.id}', ${f.pinned})"` : '';
+                const pinBtnAction = canManage ? `onclick="event.stopPropagation(); window.togglePinFile('${f.id}', ${f.pinned})"` : '';
 
                 const downloadLinkHtml = f.data !== "#" ? 
-                    `<a href="${f.data}" target="_blank" download="${escapeHTML(f.name)}" class="text-secondary hover:text-primary text-sm font-bold flex items-center gap-1"><i class="fa-solid fa-download"></i> تحميل</a>` : 
+                    `<a href="${f.data}" target="_blank" download="${escapeHTML(f.name)}" onclick="event.stopPropagation()" class="text-secondary hover:text-primary text-sm font-bold flex items-center gap-1"><i class="fa-solid fa-download"></i> تحميل</a>` : 
                     `<span class="text-gray-400 text-sm font-bold flex items-center gap-1"><i class="fa-solid fa-ban"></i> غير متاح</span>`;
 
+                const clickAction = isSelectMode ? `window.toggleCheckbox('${f.id}')` : `window.openImageViewer('${f.id}')`;
+
                 const cardHtml = `
-                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm hover:shadow-md transition group flex flex-col h-full relative">
+                    <div onclick="${clickAction}" class="bg-white dark:bg-gray-800 border ${isSelectMode ? 'border-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer' : 'border-gray-200 dark:border-gray-700 hover:shadow-md cursor-pointer'} rounded-xl p-4 shadow-sm transition group flex flex-col h-full relative">
                         ${checkBoxHtml}
                         <div class="flex justify-between items-start mb-2 pt-2">
                             <i class="fa-solid ${iconClass} text-2xl"></i>
-                            <button ${pinBtnAction} class="text-xl ${pinBtnClass} ${f.pinned ? 'text-primary dark:text-secondary' : 'text-gray-300 dark:text-gray-600'}"><i class="fa-solid fa-thumbtack"></i></button>
+                            <button ${pinBtnAction} class="text-xl ${pinBtnClass} ${f.pinned ? 'text-primary dark:text-secondary' : 'text-gray-300 dark:text-gray-600'} ${isSelectMode ? 'hidden' : ''}"><i class="fa-solid fa-thumbtack"></i></button>
                         </div>
                         <h4 class="font-bold text-sm text-gray-800 dark:text-gray-200 truncate mb-1" title="${escapeHTML(f.name)}">${escapeHTML(f.name)}</h4>
                         <p class="text-[10px] text-gray-400 mb-3">${f.sizeStr} • بواسطة ${escapeHTML(f.uploaderName)}</p>
                         
-                        <div class="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center gap-2">
+                        <div class="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center gap-2 ${isSelectMode ? 'hidden' : ''}">
                             ${downloadLinkHtml}
                             <div class="flex gap-1 items-center">
                                 ${viewBtn}
@@ -3011,23 +3207,24 @@
                         </div>
                     </div>
                 `;
-                if(f.pinned) pinnedContainer.innerHTML += cardHtml;
+                if(f.pinned && !isSelectMode) pinnedContainer.innerHTML += cardHtml;
                 allContainer.innerHTML += cardHtml;
             });
             
-            document.getElementById('pinnedFilesTitle').classList.toggle('hidden', pinnedContainer.innerHTML === '');
+            document.getElementById('pinnedFilesTitle').classList.toggle('hidden', pinnedContainer.innerHTML === '' || isSelectMode);
+            document.getElementById('pinnedFilesContainer').classList.toggle('hidden', isSelectMode);
         };
 
         function updateStorageProgress() {
             const currentStorage = globalFiles.reduce((acc, f) => acc + (f.size || 0), 0);
-            const percentage = (currentStorage / MAX_GLOBAL_STORAGE) * 100;
+            const percentage = (currentStorage / MAX_GLOBAL_STORAGE) * 100;updateStorageProgress
             document.getElementById('storageText').innerText = `${formatBytes(currentStorage)} / 5 TB`;
             const bar = document.getElementById('storageBar');
             bar.style.width = `${percentage}%`;
             
-            if(percentage > 90) { bar.className = "bg-red-500 h-full"; document.getElementById('storageWarning').classList.remove('hidden'); } 
-            else if(percentage > 70) { bar.className = "bg-yellow-500 h-full"; document.getElementById('storageWarning').classList.add('hidden'); } 
-            else { bar.className = "bg-green-500 h-full"; document.getElementById('storageWarning').classList.add('hidden'); }
+            if(percentage > 90) { bar.className = "bg-red-500 h-full bg-striped animate-stripes"; document.getElementById('storageWarning').classList.remove('hidden'); } 
+            else if(percentage > 70) { bar.className = "bg-yellow-500 h-full bg-striped animate-stripes"; document.getElementById('storageWarning').classList.add('hidden'); } 
+            else { bar.className = "bg-green-500 h-full bg-striped animate-stripes"; document.getElementById('storageWarning').classList.add('hidden'); }
         }
 
         // الحضور والانصراف
@@ -4770,6 +4967,6 @@
             window.dispatchEvent(new Event('hashchange'));
         }
 
-</script>
+    </script>
 </body>
 </html>
