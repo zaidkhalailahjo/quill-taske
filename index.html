@@ -45,6 +45,10 @@
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #00839b; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+        .bg-striped { background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent); background-size: 1rem 1rem; }
+        .animate-stripes { animation: slideStripes 1s linear infinite; }
+        @keyframes slideStripes { from { background-position: 1rem 0; } to { background-position: 0 0; } }
+
         .app-card {
             display: flex;
             flex-direction: column;
@@ -715,7 +719,7 @@
                         <span id="storageText">0 MB / 5 TB</span>
                     </div>
                     <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-3 border border-gray-200 dark:border-gray-600 overflow-hidden">
-                        <div id="storageBar" class="bg-green-500 h-full transition-all duration-500 w-0"></div>
+                        <div id="storageBar" class="bg-green-500 h-full transition-all duration-500 w-0 bg-striped animate-stripes"></div>
                     </div>
                     <p id="storageWarning" class="text-xs text-red-500 mt-2 font-bold hidden"><i class="fa-solid fa-triangle-exclamation"></i> لا يمكن رفع ملفات جديدة، المساحة ممتلئة!</p>
                 </div>
@@ -723,6 +727,9 @@
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
                     <p class="text-sm md:text-base text-gray-600 dark:text-gray-300" data-i18n="مشاركة الملفات">إدارة المستندات (الحد الأقصى للملف: 50MB)</p>
                     <div class="flex flex-wrap gap-2 w-full md:w-auto">
+                        <button id="bulkDeleteDriveBtn" onclick="window.deleteSelectedDriveItems()" class="hidden bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm font-bold shadow flex-1 md:flex-none justify-center">
+                            <i class="fa-solid fa-trash-can mx-2"></i> حذف المحدد
+                        </button>
                         <div class="search-wrapper flex-1 md:flex-none w-full md:w-auto">
                             <i class="fa-solid fa-search search-icon"></i>
                             <input type="text" id="searchDrive" oninput="renderDriveFiles()" placeholder="بحث في المجلد..." class="search-input">
@@ -1365,6 +1372,42 @@
                     </button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- نافذة عرض الصور (المستندات) -->
+    <div id="imageViewerModal" class="fixed inset-0 bg-black/90 hidden flex flex-col items-center justify-center z-[70] p-4">
+        <button onclick="window.closeImageViewer()" class="absolute top-4 right-4 text-white hover:text-gray-300 text-3xl"><i class="fa-solid fa-xmark"></i></button>
+        <h3 id="imageViewerTitle" class="text-white font-bold text-lg mb-4 text-center"></h3>
+        <div class="w-full max-w-4xl h-auto max-h-[80vh] flex items-center justify-center">
+            <img id="imageViewerImg" src="" class="max-w-full max-h-full object-contain rounded shadow-2xl">
+        </div>
+        <div class="mt-4 flex gap-4">
+            <a id="imageViewerDownloadBtn" href="#" download class="bg-secondary hover:bg-primary text-white px-6 py-2 rounded-lg font-bold transition flex items-center gap-2">
+                <i class="fa-solid fa-download"></i> تحميل
+            </a>
+        </div>
+    </div>
+
+    <!-- نافذة إعادة تسمية الملف/المجلد -->
+    <div id="renameModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[60] p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-sm overflow-hidden">
+            <div class="bg-indigo-600 text-white p-4 flex justify-between items-center">
+                <h3 class="font-bold text-base" id="renameModalTitle">إعادة التسمية</h3>
+                <button onclick="window.closeModal('renameModal')" class="hover:text-indigo-200"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <form id="renameForm" class="p-4 md:p-6 space-y-4" onsubmit="window.handleRenameSubmit(event)">
+                <input type="hidden" id="renameItemId">
+                <input type="hidden" id="renameItemType"> <!-- 'file' or 'folder' -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">الاسم الجديد</label>
+                    <input type="text" id="renameItemName" required class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:border-indigo-500 outline-none">
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="window.closeModal('renameModal')" class="px-4 py-2 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-bold text-sm">إلغاء</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-bold text-sm shadow">حفظ</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -2651,10 +2694,22 @@
             renderDriveFiles();
         };
 
+        window.navigateBackFolder = () => {
+            if (folderHistory.length > 1) {
+                folderHistory.pop();
+                const prevFolder = folderHistory[folderHistory.length - 1];
+                currentFolderId = prevFolder.id;
+                renderDriveFiles();
+            }
+        };
+
         // الرفع المتعدد وتفعيل Google Drive API
         window.handleDriveFileSelect = async (e) => {
             const files = e.target.files;
             if(!files || files.length === 0) return;
+
+            // نلتقط المعرف الحالي للمجلد حتى لا يتغير أثناء عملية الرفع في حال تصفح المستخدم لمجلد آخر
+            const targetFolderId = currentFolderId;
 
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
@@ -2716,7 +2771,7 @@
                             data: fileUrl, 
                             uploaderName: currentUserData.name,
                             uploaderId: currentUserData.uid,
-                            folderId: currentFolderId,
+                            folderId: targetFolderId,
                             pinned: false,
                             timestamp: Date.now()
                         });
@@ -2765,6 +2820,86 @@
             await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'folders', folderId));
         }
 
+        window.updateBulkDeleteBtnVisibility = () => {
+            const checkedCount = document.querySelectorAll('.drive-item-cb:checked').length;
+            const btn = document.getElementById('bulkDeleteDriveBtn');
+            if(checkedCount > 0) {
+                btn.classList.remove('hidden');
+                btn.innerHTML = `<i class="fa-solid fa-trash-can mx-2"></i> حذف المحدد (${checkedCount})`;
+            } else {
+                btn.classList.add('hidden');
+            }
+        };
+
+        window.deleteSelectedDriveItems = async () => {
+            const checkedBoxes = document.querySelectorAll('.drive-item-cb:checked');
+            if(checkedBoxes.length === 0) return;
+            
+            if(confirm(`هل أنت متأكد من حذف ${checkedBoxes.length} عنصر/عناصر؟ (سيتم حذف المجلدات ومحتوياتها بالكامل)`)) {
+                showToast('جاري الحذف...', 'info');
+                try {
+                    for(let cb of checkedBoxes) {
+                        const id = cb.getAttribute('data-id');
+                        const isFolder = cb.getAttribute('data-isfolder') === 'true';
+                        if(isFolder) {
+                            await recursivelyDeleteFolder(id);
+                        } else {
+                            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'files', id));
+                        }
+                    }
+                    showToast('تم حذف العناصر المحددة بنجاح', 'success');
+                    document.getElementById('bulkDeleteDriveBtn').classList.add('hidden');
+                } catch(e) {
+                    console.error(e);
+                    showToast('حدث خطأ أثناء الحذف', 'error');
+                }
+            }
+        };
+
+        window.openImageViewer = (fileId) => {
+            const file = globalFiles.find(f => f.id === fileId);
+            if(!file || !file.data || file.data === '#') {
+                showToast('عذراً، لا يمكن عرض هذا الملف حالياً.', 'warning');
+                return;
+            }
+            document.getElementById('imageViewerImg').src = file.data;
+            document.getElementById('imageViewerTitle').innerText = file.name;
+            document.getElementById('imageViewerDownloadBtn').href = file.data;
+            document.getElementById('imageViewerDownloadBtn').download = file.name;
+            document.getElementById('imageViewerModal').classList.remove('hidden');
+        };
+
+        window.closeImageViewer = () => {
+            document.getElementById('imageViewerModal').classList.add('hidden');
+            document.getElementById('imageViewerImg').src = '';
+        };
+
+        window.openRenameModal = (id, isFolder, encodedName) => {
+            document.getElementById('renameItemId').value = id;
+            document.getElementById('renameItemType').value = isFolder ? 'folder' : 'file';
+            document.getElementById('renameItemName').value = decodeURIComponent(encodedName);
+            window.openModal('renameModal');
+        };
+
+        window.handleRenameSubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('renameItemId').value;
+            const type = document.getElementById('renameItemType').value;
+            const newName = document.getElementById('renameItemName').value.trim();
+            
+            if(!newName) return;
+
+            try {
+                const collectionName = type === 'folder' ? 'folders' : 'files';
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', collectionName, id), { name: newName });
+                showToast('تمت إعادة التسمية بنجاح', 'success');
+                window.closeModal('renameModal');
+            } catch(err) {
+                console.error(err);
+                showToast('حدث خطأ أثناء إعادة التسمية', 'error');
+            }
+        };
+
         window.renderDriveFiles = () => {
             const allContainer = document.getElementById('allFilesContainer');
             const pinnedContainer = document.getElementById('pinnedFilesContainer');
@@ -2774,8 +2909,13 @@
             allContainer.innerHTML = '';
             pinnedContainer.innerHTML = '';
             breadcrumbs.innerHTML = '';
+            document.getElementById('bulkDeleteDriveBtn').classList.add('hidden');
             
             const isCEO = currentUserData && currentUserData.role === 'CEO';
+
+            if (folderHistory.length > 1) {
+                breadcrumbs.innerHTML += `<button onclick="window.navigateBackFolder()" class="text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 px-3 py-1 rounded-lg hover:bg-indigo-200 transition flex items-center gap-1 font-bold ml-2 shadow-sm"><i class="fa-solid fa-arrow-right"></i> رجوع للخلف</button>`;
+            }
 
             folderHistory.forEach((h, index) => {
                 const isLast = index === folderHistory.length - 1;
@@ -2804,22 +2944,32 @@
                 const isOwner = f.creatorId === currentUserData.uid;
                 const canManage = isOwner || isCEO;
                 const encodedName = encodeURIComponent(f.name);
-                const deleteBtn = canManage ? `<button onclick="event.stopPropagation(); window.deleteDriveItem('${f.id}', true, '${encodedName}')" class="text-red-400 hover:text-red-600 p-1"><i class="fa-solid fa-trash"></i></button>` : '';
+                const deleteBtn = canManage ? `<button onclick="event.stopPropagation(); window.deleteDriveItem('${f.id}', true, '${encodedName}')" class="text-red-400 hover:text-red-600 p-1 bg-red-50 dark:bg-gray-700 rounded transition"><i class="fa-solid fa-trash"></i></button>` : '';
+                const renameBtn = canManage ? `<button onclick="event.stopPropagation(); window.openRenameModal('${f.id}', true, '${encodedName}')" class="text-indigo-400 hover:text-indigo-600 p-1 bg-indigo-50 dark:bg-gray-700 rounded transition"><i class="fa-solid fa-pen"></i></button>` : '';
+                const checkBoxHtml = canManage ? `<input type="checkbox" data-id="${f.id}" data-isfolder="true" class="drive-item-cb w-4 h-4 text-indigo-600 rounded cursor-pointer" onclick="event.stopPropagation()" onchange="window.updateBulkDeleteBtnVisibility()">` : '';
 
                 allContainer.innerHTML += `
-                    <div onclick="window.navigateToFolder('${f.id}')" class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-xl p-4 shadow-sm hover:shadow-md transition cursor-pointer group flex flex-col h-full">
+                    <div onclick="window.navigateToFolder('${f.id}')" class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-xl p-4 shadow-sm hover:shadow-md transition cursor-pointer group flex flex-col h-full relative">
+                        <div class="absolute top-3 right-3 z-10">
+                            ${checkBoxHtml}
+                        </div>
                         <div class="flex justify-between items-start mb-2">
                             <i class="fa-solid fa-folder text-indigo-500 text-3xl"></i>
-                            ${deleteBtn}
+                            <div class="flex gap-1" onclick="event.stopPropagation()">
+                                ${renameBtn}
+                                ${deleteBtn}
+                            </div>
                         </div>
-                        <h4 class="font-bold text-sm text-indigo-800 dark:text-indigo-200 truncate" title="${escapeHTML(f.name)}">${escapeHTML(f.name)}</h4>
+                        <h4 class="font-bold text-sm text-indigo-800 dark:text-indigo-200 truncate mt-2" title="${escapeHTML(f.name)}">${escapeHTML(f.name)}</h4>
                     </div>
                 `;
             });
 
             currentFilesList.forEach(f => {
                 let iconClass = 'fa-file text-gray-400';
-                if(f.type.startsWith('image/')) iconClass = 'fa-file-image text-blue-400';
+                let isImage = false;
+                
+                if(f.type.startsWith('image/')) { iconClass = 'fa-file-image text-blue-400'; isImage = true; }
                 else if(f.type.startsWith('video/')) iconClass = 'fa-file-video text-purple-400';
                 else if(f.type.includes('pdf')) iconClass = 'fa-file-pdf text-red-400';
                 else if(f.type.includes('excel')) iconClass = 'fa-file-excel text-green-500';
@@ -2828,26 +2978,36 @@
                 const isOwner = f.uploaderId === currentUserData.uid;
                 const canManage = isOwner || isCEO;
                 const encodedName = encodeURIComponent(f.name);
-                const deleteBtn = canManage ? `<button onclick="window.deleteDriveItem('${f.id}', false, '${encodedName}')" class="text-red-400 hover:text-red-600 p-1" title="حذف"><i class="fa-solid fa-trash"></i></button>` : '';
+                
+                const deleteBtn = canManage ? `<button onclick="window.deleteDriveItem('${f.id}', false, '${encodedName}')" class="text-red-400 hover:text-red-600 p-1.5 bg-red-50 dark:bg-gray-700 rounded transition" title="حذف"><i class="fa-solid fa-trash"></i></button>` : '';
+                const renameBtn = canManage ? `<button onclick="window.openRenameModal('${f.id}', false, '${encodedName}')" class="text-indigo-400 hover:text-indigo-600 p-1.5 bg-indigo-50 dark:bg-gray-700 rounded transition" title="تعديل الاسم"><i class="fa-solid fa-pen"></i></button>` : '';
+                const viewBtn = isImage ? `<button onclick="window.openImageViewer('${f.id}')" class="text-teal-500 hover:text-teal-700 p-1.5 bg-teal-50 dark:bg-gray-700 rounded transition" title="عرض الصورة"><i class="fa-solid fa-eye"></i></button>` : '';
+                const checkBoxHtml = canManage ? `<input type="checkbox" data-id="${f.id}" data-isfolder="false" class="drive-item-cb w-4 h-4 text-indigo-600 rounded cursor-pointer absolute top-3 right-3 z-10" onchange="window.updateBulkDeleteBtnVisibility()">` : '';
+
                 const pinBtnClass = canManage ? 'cursor-pointer hover:text-primary' : 'cursor-not-allowed opacity-50';
                 const pinBtnAction = canManage ? `onclick="window.togglePinFile('${f.id}', ${f.pinned})"` : '';
 
                 const downloadLinkHtml = f.data !== "#" ? 
                     `<a href="${f.data}" target="_blank" download="${escapeHTML(f.name)}" class="text-secondary hover:text-primary text-sm font-bold flex items-center gap-1"><i class="fa-solid fa-download"></i> تحميل</a>` : 
-                    `<span class="text-gray-400 text-sm font-bold flex items-center gap-1"><i class="fa-solid fa-ban"></i> غير متاح للتحميل المباشر</span>`;
+                    `<span class="text-gray-400 text-sm font-bold flex items-center gap-1"><i class="fa-solid fa-ban"></i> غير متاح</span>`;
 
                 const cardHtml = `
-                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm hover:shadow-md transition group flex flex-col h-full">
-                        <div class="flex justify-between items-start mb-2">
+                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm hover:shadow-md transition group flex flex-col h-full relative">
+                        ${checkBoxHtml}
+                        <div class="flex justify-between items-start mb-2 pt-2">
                             <i class="fa-solid ${iconClass} text-2xl"></i>
                             <button ${pinBtnAction} class="text-xl ${pinBtnClass} ${f.pinned ? 'text-primary dark:text-secondary' : 'text-gray-300 dark:text-gray-600'}"><i class="fa-solid fa-thumbtack"></i></button>
                         </div>
                         <h4 class="font-bold text-sm text-gray-800 dark:text-gray-200 truncate mb-1" title="${escapeHTML(f.name)}">${escapeHTML(f.name)}</h4>
                         <p class="text-[10px] text-gray-400 mb-3">${f.sizeStr} • بواسطة ${escapeHTML(f.uploaderName)}</p>
                         
-                        <div class="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                        <div class="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center gap-2">
                             ${downloadLinkHtml}
-                            ${deleteBtn}
+                            <div class="flex gap-1 items-center">
+                                ${viewBtn}
+                                ${renameBtn}
+                                ${deleteBtn}
+                            </div>
                         </div>
                     </div>
                 `;
@@ -4258,6 +4418,7 @@
             document.getElementById(id).classList.add('hidden');
             if(id === 'createMeetingModal') document.getElementById('createMeetingForm').reset();
             if(id === 'createFolderModal') document.getElementById('createFolderForm').reset();
+            if(id === 'renameModal') document.getElementById('renameForm').reset();
             if(id === 'leaveModal') {
                 document.getElementById('leaveForm').reset();
                 window.handleLeaveTypeChange(); 
