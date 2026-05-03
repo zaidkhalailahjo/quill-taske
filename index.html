@@ -709,17 +709,6 @@
 
             <!-- المستندات -->
             <section id="drive" class="section-content hidden animate-fade-in p-4 md:p-0">
-                <!-- شرح ربط جوجل درايف للعميل -->
-                <div class="mb-4 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-200 dark:border-blue-800 text-sm">
-                    <h4 class="font-bold text-blue-800 dark:text-blue-300 mb-2"><i class="fa-brands fa-google-drive mx-1"></i> معلومات التخزين السحابي الجديد</h4>
-                    <p class="text-blue-700 dark:text-blue-400 mb-2">تم ربط النظام بشكل مباشر مع Google Drive وتخطي مساحة قاعدة البيانات. تم تفعيل الميزات التالية:</p>
-                    <ol class="list-decimal list-inside text-blue-600 dark:text-blue-400 space-y-1 pr-2">
-                        <li>المساحة الإجمالية المتاحة أصبحت <strong dir="ltr">5 TB (5000 GB)</strong>.</li>
-                        <li>الحد الأقصى لرفع الملف الواحد أصبح <strong dir="ltr">50 MB</strong>.</li>
-                        <li>إمكانية تحديد ورفع أكثر من ملف في نفس الوقت (Multiple Files).</li>
-                    </ol>
-                </div>
-
                 <div class="mb-6 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
                     <div class="flex justify-between text-sm mb-2 font-bold text-gray-700 dark:text-gray-300">
                         <span data-i18n="المساحة المستخدمة">المساحة المستخدمة</span>
@@ -2732,7 +2721,7 @@
                             timestamp: Date.now()
                         });
 
-                        if(fileUrl !== "#") showToast(`تم رفع ملف ${file.name} بنجاح!`, 'success');
+                        if(fileUrl !== "#") showToast(`تم رفع ملف ${file.name} على Google Drive بنجاح!`, 'success');
                         window.logAction('رفع ملف', `تم رفع ملف جديد: ${file.name} إلى المستندات`);
 
                     } catch (err) {
@@ -3203,7 +3192,8 @@
                 
                 const ceoUsers = globalUsers.filter(u => u.role === 'CEO');
                 ceoUsers.forEach(ceo => {
-                    window.sendSystemNotification(ceo.uid, 'طلب إجازة جديد', `طلب جديد من: ${currentUserData.name}`, 'leaves', 'leaves');
+                    const msgText = attachmentBase64 ? `طلب إجازة جديد (مرفق) من: ${currentUserData.name}` : `طلب جديد من: ${currentUserData.name}`;
+                    window.sendSystemNotification(ceo.uid, 'طلب إجازة جديد', msgText, 'leaves', 'leaves');
                 });
 
                 showToast('تم إرسال طلبك', 'success');
@@ -3240,6 +3230,13 @@
             const leave = globalLeaves.find(l => l.id === id);
             if(!leave) return;
 
+            groupReadTimestamps[id] = Date.now();
+            if(currentUserData) {
+                updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUserData.uid), {
+                    readReceipts: groupReadTimestamps
+                }).catch(e => console.error(e));
+            }
+
             document.getElementById('currentLeaveIdForChat').value = leave.id;
             document.getElementById('leaveDetailsName').innerText = `الموظف: ${leave.name}`;
             document.getElementById('leaveDetailsText').innerText = leave.reason ? leave.reason : 'لا توجد تفاصيل إضافية';
@@ -3254,6 +3251,13 @@
 
             renderLeaveComments(leave.comments || []);
             window.openModal('leaveDetailsModal');
+            
+            setTimeout(() => {
+                const chatBox = document.getElementById('leaveChatHistory');
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 100);
+            
+            renderLeaves();
         };
 
         function renderLeaveComments(comments) {
@@ -3301,6 +3305,11 @@
                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'leaves', leaveId), { comments: currentComments });
                 input.value = '';
                 
+                setTimeout(() => {
+                    const chatBox = document.getElementById('leaveChatHistory');
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }, 50);
+
                 const targetUid = (currentUserData.role === 'CEO') ? leave.uid : globalUsers.find(u => u.role === 'CEO')?.uid;
                 if(targetUid) {
                     window.sendSystemNotification(targetUid, 'رسالة جديدة في الطلب', `أرسل ${currentUserData.name} تعليقاً على طلب الإجازة.`, 'leaves', 'leaves');
@@ -3374,8 +3383,11 @@
                 if(l.type.includes('سنوية')) balInfo = `<br><span class="text-[10px] text-gray-500">متبقي: ${bal.daysLeft} من ${bal.totalDays}</span>`;
                 else if(l.type.includes('مبكرة')) balInfo = `<br><span class="text-[10px] text-gray-500">متبقي: ${bal.hoursLeft} من ${bal.totalHours}</span>`;
 
+                const lastRead = groupReadTimestamps[l.id] || 0;
+                const unreadCount = l.comments ? l.comments.filter(c => c.senderId !== currentUserData.uid && c.timestamp > lastRead).length : 0;
+
                 const attachIcon = l.attachment ? '<i class="fa-solid fa-paperclip text-blue-500 mx-1"></i>' : '';
-                const unreadComments = (l.comments && l.comments.length > 0) ? `<span class="bg-pink-500 text-white rounded-full px-1.5 text-[10px] absolute -top-2 -right-2">${l.comments.length}</span>` : '';
+                const unreadComments = unreadCount > 0 ? `<span class="bg-pink-500 text-white rounded-full px-1.5 text-[10px] absolute -top-2 -right-2">${unreadCount}</span>` : '';
                 const reasonBtn = `<button onclick="window.viewLeaveDetails('${l.id}')" class="relative text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-1.5 rounded-lg transition font-bold text-gray-700 dark:text-gray-300 shadow-sm">${attachIcon} التفاصيل / المحادثة ${unreadComments}</button>`;
 
                 let actionHtml = '';
